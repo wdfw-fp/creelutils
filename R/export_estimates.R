@@ -15,11 +15,11 @@ export_estimates <- function(params, analysis_lut, creel_estimates) {
   # Connect to database and conditionally export
   if(params$export == tolower("database")) {
 
-    estimate_reviewers <- c("holc2477", "booe1477", "bentlktb") #please don't manually modify this list :)
-
-    if (!Sys.info()["user"] %in% estimate_reviewers && params$data_grade == tolower("approved")) {
-      stop("Creel project leads may only upload estimates with a data_grade of 'provisional'.")
-    }
+    # estimate_reviewers <- c()
+    #
+    # if (!Sys.info()["user"] %in% estimate_reviewers && params$data_grade == tolower("approved")) {
+    #   stop("Creel project leads may only upload estimates with a data_grade of 'provisional'.")
+    # }
 
     #convert metadata to json. Automatically added to analysis_lut
     json_conversion(type = "script")
