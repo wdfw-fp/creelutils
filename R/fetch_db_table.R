@@ -21,10 +21,16 @@
 #' a <- fetch_db_table(con, "creel", "fishery_location_lut")
 #'
 #' # Query with a single filter condition
-#' b <- fetch_db_table(con, "creel", "fishery_location_lut", filter = "survey_type == 'Index'")
+#' b <- fetch_db_table(
+#'   con, "creel", "fishery_location_lut",
+#'   filter = "survey_type == 'Index'"
+#'   )
 #'
 #' # Query with a vector of filter conditions
-#' c <- fetch_db_table(con, "creel", "fishery_location_lut", filter = c("survey_type == 'Index'", "section_num == '1'"))
+#' c <- fetch_db_table(
+#'   con, "creel", "fishery_location_lut",
+#'   filter = c("survey_type == 'Index'", "section_num == '1'")
+#'   )
 #' }
 
 fetch_db_table <- function(con, schema, table, filter = NULL, show_query = FALSE) {
@@ -104,7 +110,7 @@ fetch_db_table <- function(con, schema, table, filter = NULL, show_query = FALSE
 
   # execute query and return results
   result <- query |> dplyr::collect() |>
-    select(-project_id) #remove unnecessary column as project_name is available
+    select(-.data$project_id) #remove unnecessary column as project_name is available
 
   return(result)
 }

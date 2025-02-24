@@ -32,9 +32,15 @@ Note: If the 'filter' argument contains a "catch_group" component, the value pro
 a <- fetch_db_table(con, "creel", "fishery_location_lut")
 
 # Query with a single filter condition
-b <- fetch_db_table(con, "creel", "fishery_location_lut", filter = "survey_type == 'Index'")
+b <- fetch_db_table(
+  con, "creel", "fishery_location_lut",
+  filter = "survey_type == 'Index'"
+  )
 
 # Query with a vector of filter conditions
-c <- fetch_db_table(con, "creel", "fishery_location_lut", filter = c("survey_type == 'Index'", "section_num == '1'"))
+c <- fetch_db_table(
+  con, "creel", "fishery_location_lut",
+  filter = c("survey_type == 'Index'", "section_num == '1'")
+  )
 }
 }
