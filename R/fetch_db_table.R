@@ -109,8 +109,7 @@ fetch_db_table <- function(con, schema, table, filter = NULL, show_query = FALSE
   }
 
   # execute query and return results
-  result <- query |> dplyr::collect() |>
-    select(-.data$project_id) #remove unnecessary column as project_name is available
+  result <- query |> dplyr::collect()
 
   return(result)
 }
