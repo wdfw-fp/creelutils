@@ -22,8 +22,8 @@ export_estimates <- function(params, analysis_lut, creel_estimates) {
     # }
 
     #convert metadata to json. Automatically added to analysis_lut
-    json_conversion(type = "script", params, analysis_lut)
-    json_conversion(type = "r_session", params, analysis_lut)
+    analysis_lut <- json_conversion(type = "script", params, analysis_lut)
+    analysis_lut <- json_conversion(type = "r_session", params, analysis_lut)
 
     #connect to database
     con <- establish_db_con()
@@ -103,8 +103,8 @@ export_estimates <- function(params, analysis_lut, creel_estimates) {
     #process for exporting ETL output tables locally for inspection prior to uploading to database
 
     #convert metadata to json. Automatically added to analysis_lut
-    json_conversion(type = "script", params, analysis_lut)
-    json_conversion(type = "r_session", params, analysis_lut)
+    analysis_lut <- json_conversion(type = "script", params, analysis_lut)
+    analysis_lut <- json_conversion(type = "r_session", params, analysis_lut)
 
     #project- and fishery-specific folder from CreelEstimates
     #could be more flexible and make folders where needed? for case of recreation of script on computer that did run analysis
