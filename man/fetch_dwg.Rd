@@ -2,16 +2,21 @@
 % Please edit documentation in R/fetch_dwg.R
 \name{fetch_dwg}
 \alias{fetch_dwg}
-\title{fetch_dwg}
+\title{Download creel datasets from data.wa.gov}
 \usage{
 fetch_dwg(fishery_name)
 }
 \arguments{
-\item{fishery_name}{Name which represents the spatiotemporal configuration for a given dataset with associated fishery closures.}
+\item{fishery_name}{Identifier which represents the spatiotemporal configuration for a given dataset with associated fishery closures.}
 }
 \value{
 dwg, a list object containing a dataframe for each database view downloaded (e.g., effort, interview, catch)
 }
 \description{
-Fetch freshwater recreational fishery creel datasets from Washington's public data warehouse data.wa.gov
+Download freshwater recreational fishery creel datasets from Washington's public data warehouse, data.wa.gov. When a valid 'fishery_name' is provided several database views are downloaded (i.e., effort, interview, catch, water bodies, closures, and a )
+}
+\examples{
+\dontrun{
+dwg <- fetch_dwg("Skagit winter steelhead 2021")
+}
 }

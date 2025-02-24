@@ -22,27 +22,14 @@ export_estimates <- function(params, analysis_lut, creel_estimates) {
     # }
 
     #convert metadata to json. Automatically added to analysis_lut
-    json_conversion(type = "script")
-    json_conversion(type = "r_session")
+    json_conversion(type = "script", params, analysis_lut)
+    json_conversion(type = "r_session", params, analysis_lut)
 
     #connect to database
     con <- establish_db_con()
 
     #query database for UUIDs and reformat
     creel_estimates_db <- prep_export(con, creel_estimates)
-
-    ask_for_confirmation <- function() { #bug: repeats prompt twice in console upon call
-      response <- ""
-      repeat {
-        if (response != "") {
-          cat("Please enter 'Y' for Yes or 'N' for No.\n")
-        }
-        response <- toupper(trimws(readline("\nWould you like to proceed with upload? [Y/N]: ")))
-        if (response %in% c("Y", "N")) {
-          return(response == "Y")
-        }
-      }
-    }
 
     ### write estimates to database ####
 
@@ -57,8 +44,9 @@ export_estimates <- function(params, analysis_lut, creel_estimates) {
       stop("\nAnalysis uuid already exists in the creel database. Review before proceeding.")
     } else { #analysis_id not already in database
 
-      #a pause, option to abort process
-      proceed <- ask_for_confirmation()
+      # a pause, option to abort process
+      # proceed <- ask_for_confirmation()
+      proceed <- TRUE #bypass this control for now
 
       if (proceed) { #Y = TRUE
         cat("Continuing with upload...\n")
@@ -115,8 +103,8 @@ export_estimates <- function(params, analysis_lut, creel_estimates) {
     #process for exporting ETL output tables locally for inspection prior to uploading to database
 
     #convert metadata to json. Automatically added to analysis_lut
-    json_conversion(type = "script")
-    json_conversion(type = "r_session")
+    json_conversion(type = "script", params, analysis_lut)
+    json_conversion(type = "r_session", params, analysis_lut)
 
     #project- and fishery-specific folder from CreelEstimates
     #could be more flexible and make folders where needed? for case of recreation of script on computer that did run analysis
