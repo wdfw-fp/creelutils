@@ -1,4 +1,32 @@
 url: https://wdfw-fp.github.io/creelutils/
 template:
   bootstrap: 5
-
+reference:
+- title: "Accessing public data"
+  desc: >
+    These functions interact with Washington’s public data warehouse, data.wa.gov, which serves as a read-only interface to the internal PostgreSQL database.
+  contents:
+    - fetch_dwg
+    - query_creel_website
+    - get_fishery_data
+- title: "Accessing internal data"
+  desc: >
+    These functions interact directly with the WDFW PostgreSQL creel database, which requires proper credentials and permissions.
+  contents:
+    - establish_db_con
+    - fetch_db_table
+- title: "Exporting creel estimates to database"
+  desc: >
+    This group of functions works with `CreelEstimates` to standardize and transform model output formatting, save analysis metadata, and write catch and effort model estimates to the creel database.
+  contents:
+    - process_estimates_bss
+    - process_estimates_pe
+    - map_data_grade
+    - transform_estimates
+    - prep_export
+    - json_conversion
+    - export_estimates
+    - write_lut
+    - write_stratum
+    - write_total
+    - confirm_db_upload
