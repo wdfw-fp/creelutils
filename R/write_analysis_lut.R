@@ -1,5 +1,6 @@
 #' Write look-up table
 #'
+#' @family ETL
 #' @param con ??
 #' @param analysis_lut ??
 #' @param max_retries maximum number of times to try to write; numeric, defaults to 5.

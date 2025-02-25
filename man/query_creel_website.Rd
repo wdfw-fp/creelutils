@@ -23,12 +23,21 @@ Queries the website storing the creel data, which uses the Socrata API (e.g., ht
 The query is focused on filtering, and is designed to be written as an R list, with any number of conditions in it. For example, to return only data in which \code{fishery_name} is "Baker summer sockeye 2022", the query list should include \code{fishery_name = "Baker summer sockeye 2022"}. And to return only data for species "Kokanee" or "Rainbow Trout", the query list should also include \code{species = c("Kokanee", "Rainbow Trout")}.
 }
 \examples{
-table_name = "catch" ## name of table
-query_list = list( ## each item in list should be named for a column in the table, and should be
-  fishery_name = "Baker summer sockeye 2022",
-  fin_mark = "UM",
-  species = c("Kokanee", "Rainbow Trout")
-)
-dat = query_creel_website(table_name, query_list)
+dat <- query_creel_website(
+  table_name = "catch",
+  query_list = list( # each item in list should be named for a column in the table
+    fishery_name = "Baker summer sockeye 2022",
+    fin_mark = "UM",
+    species = c("Kokanee", "Rainbow Trout")
+    )
+   )
 head(dat)
 }
+\seealso{
+Other public_data: 
+\code{\link{fetch_dwg}()},
+\code{\link{fetch_fishery_names}()},
+\code{\link{get_fishery_data}()},
+\code{\link{search_fishery_name}()}
+}
+\concept{public_data}

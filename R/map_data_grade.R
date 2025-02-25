@@ -1,7 +1,6 @@
 #' Map datagrade ??
 #'
-#' Dev notes: we should avoid `assign` here if at all possibles
-#'
+#' @family ETL
 #' @param params ??
 #' @param transformed_bss_data ??
 #' @param transformed_pe_data ??

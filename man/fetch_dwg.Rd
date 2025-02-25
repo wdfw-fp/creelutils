@@ -20,3 +20,11 @@ Download freshwater recreational fishery creel datasets from Washington's public
 dwg <- fetch_dwg("Skagit winter steelhead 2021")
 }
 }
+\seealso{
+Other public_data: 
+\code{\link{fetch_fishery_names}()},
+\code{\link{get_fishery_data}()},
+\code{\link{query_creel_website}()},
+\code{\link{search_fishery_name}()}
+}
+\concept{public_data}

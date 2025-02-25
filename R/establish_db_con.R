@@ -1,15 +1,11 @@
 #' Establish database connection
 #'
 #' @description Establishes a connection to the WDFW PostgreSQL database. This process requires proper credentials and a local `config.yml` file. Depending on a given user's permissions, this connection may be used to read or write data. When calling `DBI::dbConnect()`, it uses the Posit-supported `RPostgres` package rather than an OBDC driver, as initial attempts with that method led to long upload times when exporting creel model estimates.
-#'
+#' @family internal_data
 #' @param max_attempts Integer value representing the number of times to attempt a connection, default is 5
-#'
 #' @param delay_seconds Integer value representing the number of seconds to pause between each attempt, default is 3
-#'
 #' @return A `DBI` connection to a PostgreSQL database management system. Recommend that this object be named "con".
-#'
 #' @export
-
 establish_db_con<- function(max_attempts = 5, delay_seconds = 3) {
 
   #load config file

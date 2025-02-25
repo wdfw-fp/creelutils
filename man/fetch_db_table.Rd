@@ -44,3 +44,8 @@ c <- fetch_db_table(
   )
 }
 }
+\seealso{
+Other internal_data: 
+\code{\link{establish_db_con}()}
+}
+\concept{internal_data}

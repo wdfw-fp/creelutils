@@ -6,6 +6,8 @@ reference:
   desc: >
     These functions interact with Washington’s public data warehouse, data.wa.gov, which serves as a read-only interface to the internal PostgreSQL database.
   contents:
+    - fetch_fishery_names
+    - search_fishery_name
     - fetch_dwg
     - query_creel_website
     - get_fishery_data

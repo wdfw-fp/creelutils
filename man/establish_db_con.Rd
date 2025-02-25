@@ -17,3 +17,8 @@ A \code{DBI} connection to a PostgreSQL database management system. Recommend th
 \description{
 Establishes a connection to the WDFW PostgreSQL database. This process requires proper credentials and a local \code{config.yml} file. Depending on a given user's permissions, this connection may be used to read or write data. When calling \code{DBI::dbConnect()}, it uses the Posit-supported \code{RPostgres} package rather than an OBDC driver, as initial attempts with that method led to long upload times when exporting creel model estimates.
 }
+\seealso{
+Other internal_data: 
+\code{\link{fetch_db_table}()}
+}
+\concept{internal_data}

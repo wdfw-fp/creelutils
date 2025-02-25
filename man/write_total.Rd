@@ -14,3 +14,16 @@ write_total(con, creel_estimates_db)
 \description{
 Write Total
 }
+\seealso{
+Other ETL: 
+\code{\link{export_estimates}()},
+\code{\link{json_conversion}()},
+\code{\link{map_data_grade}()},
+\code{\link{prep_export}()},
+\code{\link{process_estimates_bss}()},
+\code{\link{process_estimates_pe}()},
+\code{\link{transform_estimates}()},
+\code{\link{write_lut}()},
+\code{\link{write_stratum}()}
+}
+\concept{ETL}

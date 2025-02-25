@@ -4,11 +4,8 @@ A R package for working with freshwater recreational creel data. This package co
 
 ## Installation
 
-`creelutils` can be installed from GitHub with either the `devtools` or `remotes` packages. As GitHub is a source code repository, this requires the installation of [Rtools](https://cran.r-project.org/bin/windows/Rtools/). One day it may be distributed as a binary hosted on CRAN.
+`creelutils` can be installed from GitHub with the `devtools` package. As GitHub is a source code repository, this requires the installation of [Rtools](https://cran.r-project.org/bin/windows/Rtools/). One day it may be distributed as a binary hosted on CRAN.
 
 ``` r
 devtools::install_github("wdfw-fp/creelreview")
-
-# Alternatively 
-remotes::install_github("wdfw-fp/creelreview")
 ```

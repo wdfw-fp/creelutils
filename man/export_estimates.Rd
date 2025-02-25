@@ -17,6 +17,18 @@ export_estimates(params, analysis_lut, creel_estimates)
 ??
 }
 \description{
-Primary control function of the export, transform, and load (ETL) process.
-Takes standardized model outputs and user-input parameters to export the model estimates appropriately.
+Primary control function of the export, transform, and load (ETL) process. Takes standardized model outputs and user-input parameters to export the model estimates appropriately.
 }
+\seealso{
+Other ETL: 
+\code{\link{json_conversion}()},
+\code{\link{map_data_grade}()},
+\code{\link{prep_export}()},
+\code{\link{process_estimates_bss}()},
+\code{\link{process_estimates_pe}()},
+\code{\link{transform_estimates}()},
+\code{\link{write_lut}()},
+\code{\link{write_stratum}()},
+\code{\link{write_total}()}
+}
+\concept{ETL}

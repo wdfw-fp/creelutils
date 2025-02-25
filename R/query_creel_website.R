@@ -3,7 +3,7 @@
 #' Queries the website storing the creel data, which uses the Socrata API (e.g., https://dev.socrata.com/docs/queries/where)
 #'
 #' The query is focused on filtering, and is designed to be written as an R list, with any number of conditions in it. For example, to return only data in which `fishery_name` is "Baker summer sockeye 2022", the query list should include `fishery_name = "Baker summer sockeye 2022"`. And to return only data for species "Kokanee" or "Rainbow Trout", the query list should also include `species = c("Kokanee", "Rainbow Trout")`.
-#'
+#' @family public_data
 #' @param table_name Name of table (e.g., catch, interview, effort)
 #' @param query_list Basically `filter()` statements as a list of named items. Item name matches the column name of the table, and then item should either be an atomic to be matched exactly, or a vector for matching multiple options. See details.
 #' @param limit maximum number of rows to return. Numeric, defaults to 100,000
@@ -12,13 +12,14 @@
 #' @export
 #'
 #' @examples
-#' table_name = "catch" ## name of table
-#' query_list = list( ## each item in list should be named for a column in the table, and should be
-#'   fishery_name = "Baker summer sockeye 2022",
-#'   fin_mark = "UM",
-#'   species = c("Kokanee", "Rainbow Trout")
-#' )
-#' dat = query_creel_website(table_name, query_list)
+#' dat <- query_creel_website(
+#'   table_name = "catch",
+#'   query_list = list( # each item in list should be named for a column in the table
+#'     fishery_name = "Baker summer sockeye 2022",
+#'     fin_mark = "UM",
+#'     species = c("Kokanee", "Rainbow Trout")
+#'     )
+#'    )
 #' head(dat)
 query_creel_website <- function(table_name,  #name of table to pull from: effort, interview, catch, etc.
                                 query_list,
@@ -64,13 +65,3 @@ query_creel_website <- function(table_name,  #name of table to pull from: effort
     readr::read_csv(show_col_types = F)
   return(res)
 }
-
-table_name = "catch" ## name of table
-query_list = list( ## each item in list should be named for a column in the table, and should be
-  ## either an atomic to be matched exactly, or vector to be %in%'d. Not sure how a vector of numerics will work.
-  fishery_name = "Baker summer sockeye 2022",
-  fin_mark = "UM",
-  species = c("Kokanee", "Rainbow Trout")
-)
-
-query_creel_website(table_name, query_list)

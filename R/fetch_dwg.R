@@ -1,7 +1,7 @@
 #' Download creel datasets from data.wa.gov
 #'
 #' Download freshwater recreational fishery creel datasets from Washington's public data warehouse, data.wa.gov. When a valid 'fishery_name' is provided several database views are downloaded (i.e., effort, interview, catch, water bodies, closures, and a )
-#'
+#' @family public_data
 #' @param fishery_name Identifier which represents the spatiotemporal configuration for a given dataset with associated fishery closures.
 #'
 #' @importFrom rlang .data

@@ -1,6 +1,6 @@
 #' Convert model estimate metadata objects to json format
 #'
-#'
+#' @family ETL
 #' @param type Character string; one of "script", "regulations", or "r_session". Evan or Colt: help!
 #' @param params ??
 #' @param analysis_lut ??

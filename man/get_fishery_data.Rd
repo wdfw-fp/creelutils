@@ -30,3 +30,11 @@ temp <- get_fishery_data(
   temp = get_fishery_data(fishery_names = search_fishery_name("cascade winter"))
 }
 }
+\seealso{
+Other public_data: 
+\code{\link{fetch_dwg}()},
+\code{\link{fetch_fishery_names}()},
+\code{\link{query_creel_website}()},
+\code{\link{search_fishery_name}()}
+}
+\concept{public_data}

@@ -1,8 +1,8 @@
 #' Export creel model estimates
 #'
-#' Primary control function of the export, transform, and load (ETL) process.
-#' Takes standardized model outputs and user-input parameters to export the model estimates appropriately.
+#' Primary control function of the export, transform, and load (ETL) process. Takes standardized model outputs and user-input parameters to export the model estimates appropriately.
 #'
+#' @family ETL
 #' @param params ??
 #' @param analysis_lut ??
 #' @param creel_estimates ??

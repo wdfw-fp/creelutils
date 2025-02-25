@@ -4,6 +4,7 @@
 #'
 #' Note: If the 'filter' argument contains a "catch_group" component, the value provided will be parsed into component fields. For example, "Chinook_Adult_AD_Released" is translated to "species_name = 'Chinook', life_stage_name = 'Adult', fin_mark_desc = 'Adclip clip + No other external marks', fate_name = 'Released'".
 #'
+#' @family internal_data
 #' @param con A valid connection to the WDFW PostgreSQL database. @seealso [establish_db_con()]
 #' @param schema The database schema of interest. Most freshwater creel tasks use the "creel" schema.
 #' @param table The table or view within the database schema that is to be queried.

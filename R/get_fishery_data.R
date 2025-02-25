@@ -2,7 +2,7 @@
 #'
 #' Based on code written for descriptive_statistics.R in the `creelreview` package. Streamlines
 #' the process of getting creel data in useful format.
-#'
+#' @family public_data
 #' @param fishery_names Character string of fishery name or vector of character strings. If `years` is provided, `fishery_names` is combined with `year` to create fishery names (see example). If `years` is not provided, uses this character string or vector of character strings as the exact fishery names. Try `search_fishery_name()` to see available options.
 #' @param years Integer or vector of integers identifying years of data to pull. Optional argument, defaults to NULL.
 #'
