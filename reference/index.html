@@ -30,9 +30,9 @@
     </div>
 
     <div class="section level2">
-      <h2 id="all-functions">All functions<a class="anchor" aria-label="anchor" href="#all-functions"></a></h2>
+      <h2 id="accessing-public-data">Accessing public data<a class="anchor" aria-label="anchor" href="#accessing-public-data"></a></h2>
 
-
+      <div class="section-desc"><p>These functions interact with Washington’s public data warehouse, data.wa.gov, which serves as a read-only interface to the internal PostgreSQL database.</p></div>
 
 
     </div><div class="section level2">
@@ -42,11 +42,34 @@
 
       <dl><dt>
 
-          <code><a href="confirm_db_upload.html">confirm_db_upload()</a></code>
+          <code><a href="fetch_dwg.html">fetch_dwg()</a></code>
 
         </dt>
-        <dd>Confirm database upload</dd>
+        <dd>Download creel datasets from data.wa.gov</dd>
       </dl><dl><dt>
+
+          <code><a href="query_creel_website.html">query_creel_website()</a></code>
+
+        </dt>
+        <dd>Query the creel website for specific combinations of data</dd>
+      </dl><dl><dt>
+
+          <code><a href="get_fishery_data.html">get_fishery_data()</a></code>
+
+        </dt>
+        <dd>Obtain and format interview, catch, and effort data for sets of fishery-years</dd>
+      </dl></div><div class="section level2">
+      <h2 id="accessing-internal-data">Accessing internal data<a class="anchor" aria-label="anchor" href="#accessing-internal-data"></a></h2>
+
+      <div class="section-desc"><p>These functions interact directly with the WDFW PostgreSQL creel database, which requires proper credentials and permissions.</p></div>
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
 
           <code><a href="establish_db_con.html">establish_db_con()</a></code>
 
@@ -54,47 +77,22 @@
         <dd>Establish database connection</dd>
       </dl><dl><dt>
 
-          <code><a href="export_estimates.html">export_estimates()</a></code>
-
-        </dt>
-        <dd>Export creel model estimates</dd>
-      </dl><dl><dt>
-
           <code><a href="fetch_db_table.html">fetch_db_table()</a></code>
 
         </dt>
         <dd>Query database tables</dd>
-      </dl><dl><dt>
+      </dl></div><div class="section level2">
+      <h2 id="exporting-creel-estimates-to-database">Exporting creel estimates to database<a class="anchor" aria-label="anchor" href="#exporting-creel-estimates-to-database"></a></h2>
 
-          <code><a href="fetch_dwg.html">fetch_dwg()</a></code>
+      <div class="section-desc"><p>This group of functions works with <code>CreelEstimates</code> to standardize and transform model output formatting, save analysis metadata, and write catch and effort model estimates to the creel database.</p></div>
 
-        </dt>
-        <dd>Download creel datasets from data.wa.gov</dd>
-      </dl><dl><dt>
 
-          <code><a href="get_fishery_data.html">get_fishery_data()</a></code>
+    </div><div class="section level2">
 
-        </dt>
-        <dd>Obtain and format interview, catch, and effort data for sets of fishery-years</dd>
-      </dl><dl><dt>
 
-          <code><a href="json_conversion.html">json_conversion()</a></code>
 
-        </dt>
-        <dd>Convert model estimate metadata objects to json format</dd>
-      </dl><dl><dt>
 
-          <code><a href="map_data_grade.html">map_data_grade()</a></code>
-
-        </dt>
-        <dd>Map datagrade ??</dd>
-      </dl><dl><dt>
-
-          <code><a href="prep_export.html">prep_export()</a></code>
-
-        </dt>
-        <dd>Prep export</dd>
-      </dl><dl><dt>
+      <dl><dt>
 
           <code><a href="process_estimates_bss.html">process_estimates_bss()</a></code>
 
@@ -108,16 +106,34 @@
         <dd>Title</dd>
       </dl><dl><dt>
 
-          <code><a href="query_creel_website.html">query_creel_website()</a></code>
+          <code><a href="map_data_grade.html">map_data_grade()</a></code>
 
         </dt>
-        <dd>Query the creel website for specific combinations of data</dd>
+        <dd>Map datagrade ??</dd>
       </dl><dl><dt>
 
           <code><a href="transform_estimates.html">transform_estimates()</a></code>
 
         </dt>
         <dd>Title</dd>
+      </dl><dl><dt>
+
+          <code><a href="prep_export.html">prep_export()</a></code>
+
+        </dt>
+        <dd>Prep export</dd>
+      </dl><dl><dt>
+
+          <code><a href="json_conversion.html">json_conversion()</a></code>
+
+        </dt>
+        <dd>Convert model estimate metadata objects to json format</dd>
+      </dl><dl><dt>
+
+          <code><a href="export_estimates.html">export_estimates()</a></code>
+
+        </dt>
+        <dd>Export creel model estimates</dd>
       </dl><dl><dt>
 
           <code><a href="write_lut.html">write_lut()</a></code>
@@ -136,12 +152,19 @@
 
         </dt>
         <dd>Write Total</dd>
+      </dl><dl><dt>
+
+          <code><a href="confirm_db_upload.html">confirm_db_upload()</a></code>
+
+        </dt>
+        <dd>Confirm database upload</dd>
       </dl></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Colt Holley, Evan Booher.</p>
+  <p>Developed by Colt Holley, Evan Booher, Collin Edwards.</p>
 </div>
 
 <div class="pkgdown-footer-right">
