@@ -64,16 +64,25 @@
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The query is focused on filtering, and is designed to be written as an R list, with any number of conditions in it. For example, to return only data in which <code>fishery_name</code> is "Baker summer sockeye 2022", the query list should include <code>fishery_name = "Baker summer sockeye 2022"</code>. And to return only data for species "Kokanee" or "Rainbow Trout", the query list should also include <code>species = c("Kokanee", "Rainbow Trout")</code>.</p>
     </div>
+    <div class="section level2">
+    <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
+    <div class="dont-index"><p>Other public_data:
+<code><a href="fetch_dwg.html">fetch_dwg</a>()</code>,
+<code><a href="fetch_fishery_names.html">fetch_fishery_names</a>()</code>,
+<code><a href="get_fishery_data.html">get_fishery_data</a>()</code>,
+<code><a href="search_fishery_name.html">search_fishery_name</a>()</code></p></div>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">table_name</span> <span class="op">=</span> <span class="st">"catch"</span> <span class="co">## name of table</span></span></span>
-<span class="r-in"><span><span class="va">query_list</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span> <span class="co">## each item in list should be named for a column in the table, and should be</span></span></span>
-<span class="r-in"><span>  fishery_name <span class="op">=</span> <span class="st">"Baker summer sockeye 2022"</span>,</span></span>
-<span class="r-in"><span>  fin_mark <span class="op">=</span> <span class="st">"UM"</span>,</span></span>
-<span class="r-in"><span>  species <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Kokanee"</span>, <span class="st">"Rainbow Trout"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">dat</span> <span class="op">=</span> <span class="fu">query_creel_website</span><span class="op">(</span><span class="va">table_name</span>, <span class="va">query_list</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu">query_creel_website</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  table_name <span class="op">=</span> <span class="st">"catch"</span>,</span></span>
+<span class="r-in"><span>  query_list <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span> <span class="co"># each item in list should be named for a column in the table</span></span></span>
+<span class="r-in"><span>    fishery_name <span class="op">=</span> <span class="st">"Baker summer sockeye 2022"</span>,</span></span>
+<span class="r-in"><span>    fin_mark <span class="op">=</span> <span class="st">"UM"</span>,</span></span>
+<span class="r-in"><span>    species <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Kokanee"</span>, <span class="st">"Rainbow Trout"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
+<span class="r-in"><span>   <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dat</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 42</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   creel_event_id        event_date          water_body project_name fishery_name</span>
