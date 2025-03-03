@@ -87,9 +87,13 @@ transform_estimates <- function(dwg,
                     dplyr::mutate(
                       #Make BSS outputs match PE
                       estimate_category = dplyr::case_when(
+                        #stratum
                         .data$estimate_category == "C_daily" ~ "catch",
                         .data$estimate_category == "E_daily" ~ "effort",
                         .data$estimate_category == "CPUE_daily" ~ "CPUE",
+                        #total
+                        .data$estimate_category == "C_sum" ~ "catch",
+                        .data$estimate_category == "E_sum" ~ "effort",
                         TRUE ~ .data$estimate_category
                       ),
                       #apply snake_case to estimate_type values
