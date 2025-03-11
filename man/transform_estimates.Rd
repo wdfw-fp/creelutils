@@ -2,22 +2,22 @@
 % Please edit documentation in R/transform_estimates.R
 \name{transform_estimates}
 \alias{transform_estimates}
-\title{Title}
+\title{Transform individual model outputs into a single object}
 \usage{
 transform_estimates(dwg, transformed_pe_data, transformed_bss_data)
 }
 \arguments{
-\item{dwg}{??}
+\item{dwg}{list object containing freshwater creel dataset, returned by \code{fetch_dwg()}}
 
-\item{transformed_pe_data}{??}
+\item{transformed_pe_data}{standardized outputs from the PE model, returned by \code{process_pe_estimates()}}
 
-\item{transformed_bss_data}{??}
+\item{transformed_bss_data}{standardized outputs from the BSS model, returned by \code{process_bss_estimates()}}
 }
 \value{
-??
+list object containing standardized model estimates
 }
 \description{
-Title
+Transform individual model outputs into a single object
 }
 \seealso{
 Other ETL: 

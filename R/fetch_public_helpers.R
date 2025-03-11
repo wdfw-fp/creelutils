@@ -1,18 +1,24 @@
 #' List all available 'fishery name' values
 #'
 #' @family public_data
+#' @param ... .
 #' @return Character vector of "fishery_name" values which represent identifiers for a given dataset, which is comprised of multiple elements (e.g., effort, interview, catch, etc.).
 #' @export
 #'
 #' @examples
 #' head(fetch_fishery_names(), n = 10)
-fetch_fishery_names = function(){
+fetch_fishery_names = function(...){
+  if (length(list(...)) > 0) {
+    cli::cli_abort("The function {.fn fetch_fishery_names} does not take any arguments. Call it as {.code fetch_fishery_names()} with empty parentheses.")
+  }
+
   dat <- readr::read_csv(utils::URLencode("https://data.wa.gov/resource/vkjc-s5u8.csv?$limit=200000"),
                          show_col_types = F)
   fisheries <- unique(dat[["fishery_name"]]) |>
     as.character() |>
     stats::na.omit() |>
     sort()
+
   return(fisheries)
 }
 

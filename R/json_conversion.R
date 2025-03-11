@@ -1,11 +1,11 @@
 #' Convert model estimate metadata objects to json format
 #'
 #' @family ETL
-#' @param type Character string; one of "script", "regulations", or "r_session". Evan or Colt: help!
-#' @param params ??
-#' @param analysis_lut ??
+#' @param type type of metadata to convert to JSON format for storage in the analysis_lut
+#' @param params user-input parameters defined during the model estimation process
+#' @param analysis_lut lookup table created during the model estimation process which stores a session-specific analysis_id key and metadata about the analysis.
 #'
-#' @return Evan or colt: help!
+#' @return Returns the analysis_lut with a new field containing a JSON string of the `type`
 #' @export
 #'
 #' @examples

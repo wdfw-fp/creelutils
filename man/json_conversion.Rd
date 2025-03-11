@@ -7,14 +7,14 @@
 json_conversion(type, params, analysis_lut)
 }
 \arguments{
-\item{type}{Character string; one of "script", "regulations", or "r_session". Evan or Colt: help!}
+\item{type}{type of metadata to convert to JSON format for storage in the analysis_lut}
 
-\item{params}{??}
+\item{params}{user-input parameters defined during the model estimation process}
 
-\item{analysis_lut}{??}
+\item{analysis_lut}{lookup table created during the model estimation process which stores a session-specific analysis_id key and metadata about the analysis.}
 }
 \value{
-Evan or colt: help!
+Returns the analysis_lut with a new field containing a JSON string of the \code{type}
 }
 \description{
 Convert model estimate metadata objects to json format

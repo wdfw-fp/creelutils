@@ -1,8 +1,8 @@
 #' Write look-up table
 #'
 #' @family ETL
-#' @param con ??
-#' @param analysis_lut ??
+#' @param con a valid `DBI` connection. @seealso [establish_db_con()]
+#' @param analysis_lut lookup table created during the model estimation process which stores a session-specific analysis_id key and metadata about the analysis.
 #' @param max_retries maximum number of times to try to write; numeric, defaults to 5.
 #'
 #' @export
@@ -50,4 +50,40 @@ write_lut <- function(con, analysis_lut, max_retries = 5) {
       }
     })
   }
+}
+
+#' Write Total
+#'
+#' @family ETL
+#' @param con a valid DBI connection. @seealso [establish_db_con()]
+#' @param creel_estimates_db a list object containing the standardized model outputs that have been processed by `prep_export()` to join certain fields with database lookup tables prior to exportation.
+#'
+#' @export
+#'
+write_total <- function(con, creel_estimates_db) {
+  DBI::dbWriteTable(
+    conn = con,
+    name = DBI::Id(schema = "creel", table = "model_estimates_total"),
+    value = creel_estimates_db$total,
+    row.names = FALSE,
+    overwrite = FALSE,
+    append = TRUE)
+}
+
+#' Write stratum
+#'
+#' @family ETL
+#' @param con a valid DBI connection. @seealso [establish_db_con()]
+#' @param creel_estimates_db a list object containing the standardized model outputs that have been processed by `prep_export()` to join certain fields with database lookup tables prior to exportation.
+#'
+#' @export
+#'
+write_stratum <- function(con, creel_estimates_db) {
+  DBI::dbWriteTable(
+    conn = con,
+    name = DBI::Id(schema = "creel", table = "model_estimates_stratum"),
+    value = creel_estimates_db$stratum,
+    row.names = FALSE,
+    overwrite = FALSE,
+    append = TRUE)
 }
