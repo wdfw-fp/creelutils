@@ -1,6 +1,9 @@
 url: https://wdfw-fp.github.io/creelutils/
 template:
   bootstrap: 5
+  includes:
+    before_title: '<img src="https://wdfw.widen.net/content/rodpw2fbqj/png/wdfw_logo_stacked_fullcolor.png?w=300" alt="Logo" height="50" style="padding-right: 20px;">'
+
 reference:
 - title: "Accessing public data"
   desc: >
