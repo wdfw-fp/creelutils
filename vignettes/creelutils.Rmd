@@ -1,0 +1,77 @@
+---
+title: "creelutils"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{creelutils}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+#| include: false
+#| message: false
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+#| include: false
+#| message: false
+
+library(creelutils)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(gt)
+
+```
+
+The `creelutils` package was created to...
+
+# Accessing public data
+
+Freshwater recreational creel data is made publicly available at Washington's official open data portal, [data.wa.gov](https:://data.wa.gov). Creel datasets are comprised of multiple elements (e.g., effort, interview, and catch data) that are grouped in space and time by a "Fishery Name" identifier. This identifier is an easy way to view a given creel's full dataset. For example, the *Skagit winter steelhead 2021* dataset contains effort counts, angler interviews, etc. conducted on sections of the Skagit and Sauk rivers from 2021-02-01 to 2021-04-15.
+
+**By Fishery Name**
+
+The function `fetch_dwg` downloads creel data from data.wa.gov by Fishery Name.
+
+```{r}
+library(creelutils)
+
+fishery_name <- "Skagit winter steelhead 2021"
+dat <- fetch_dwg(fishery_name)
+
+#ll stands for latitude and longitude
+names(dat)
+
+colnames(dat$effort)
+```
+
+**What if I don't know the Fishery Name?**
+
+The function `fetch_fishery_names()`, which has no arguments, returns a list of all fishery names in the creel database.
+
+```{r}
+fetch_fishery_names() |> head(n = 10)
+```
+
+**What if I know part of the Fishery Name but not the specific syntax?**
+
+The function `search_fishery_name()` can accept a vector of characters or numbers and returns the fishery names with those values.
+
+```{r}
+# by water body
+search_fishery_name("Humptulips") |> head(n = 5)
+
+# by run / species
+search_fishery_name("winter steelhead") |> head(n = 5)
+
+# by year
+search_fishery_name("2025") |> head(n = 5)
+```

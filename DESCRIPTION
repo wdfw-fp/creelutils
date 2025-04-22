@@ -3,13 +3,13 @@ Title: Utility Functions for Interacting with Freshwater Creel Data
 Version: 0.1.0
 Authors@R: c(
     person("Colt", "Holley", email = "colt.holley@dfw.wa.gov", role = c("aut", "cre"), comment = c(ORCID = "0000-0003-4172-4331")),
+    person("Kale", "Bentley", role = "aut"),
     person("Evan", "Booher", role = "aut", comment = c(ORCID = "0000-0003-4353-9113")),
     person("Collin", "Edwards", role = "aut", comment = c(ORCID = "0000-0002-4937-5159")),    
     person("Dan", "Auerbach", role = "ctb"),
-    person("Kale", "Bentley", role = "ctb"),
     person("Thomas", "Buehrens", role = "ctb")
   )
-Description: placeholder text.
+Description: R package for working with freshwater recreational creel data. This package contains a variety of utility functions which are considered general use and might be applicable in various places of a workflow. It also contains functions which perform a utility process; for example, the group of functions relating to the extract, transform, and load (ETL) process for uploading model estimates to the creel database.
 License: GPL-3 + file LICENSE
 Depends: R (>= 4.1)
 Imports:
@@ -26,3 +26,5 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 URL: https://wdfw-fp.github.io/creelutils
 BugReports: https://github.com/wdfw-fp/creelutils/issues
+Suggests: 
+    knitr

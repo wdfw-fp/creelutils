@@ -37,3 +37,4 @@ rsconnect/
 # Local database configuration file
 config.yml
 docs
+inst/doc
