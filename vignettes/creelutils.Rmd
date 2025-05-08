@@ -1,8 +1,8 @@
 ---
-title: "creelutils"
+title: "creelutils User Guide"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{creelutils}
+  %\VignetteIndexEntry{creelutils User Guide}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 editor_options: 

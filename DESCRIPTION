@@ -12,6 +12,7 @@ Authors@R: c(
 Description: R package for working with freshwater recreational creel data. This package contains a variety of utility functions which are considered general use and might be applicable in various places of a workflow. It also contains functions which perform a utility process; for example, the group of functions relating to the extract, transform, and load (ETL) process for uploading model estimates to the creel database.
 License: GPL-3 + file LICENSE
 Depends: R (>= 4.1)
+VignetteBuilder: knitr
 Imports:
     rlang,
     utils,
@@ -20,11 +21,27 @@ Imports:
     tibble,
     purrr,
     readr,
-    tidyr
+    tidyr,
+    DBI,
+    RPostgres,
+    crayon,
+    dbplyr,
+    glue,
+    here,
+    jsonlite,
+    lubridate,
+    rstudioapi,
+    sessioninfo,
+    stringr,
+    yaml
+Suggests:
+    ggplot2,
+    knitr,
+    rmarkdown,
+    gt
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 URL: https://wdfw-fp.github.io/creelutils
 BugReports: https://github.com/wdfw-fp/creelutils/issues
-Suggests: 
-    knitr
+

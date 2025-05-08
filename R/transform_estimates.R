@@ -126,10 +126,10 @@ transform_estimates <- function(dwg,
 
   #Modify fields
   creel_estimates$stratum <- creel_estimates$stratum |>
-    dplyr::rename(estimate_time_period = period_timestep)
+    dplyr::rename(estimate_time_period = .data$period_timestep)
 
   creel_estimates$total <- creel_estimates$total |>
-    dplyr::rename(estimate_time_period = period_timestep)
+    dplyr::rename(estimate_time_period = .data$period_timestep)
 
 
   ####################################################################################

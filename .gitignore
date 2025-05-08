@@ -38,3 +38,5 @@ rsconnect/
 config.yml
 docs
 inst/doc
+/doc/
+/Meta/
