@@ -35,3 +35,10 @@ reference:
     - write_stratum
     - write_total
     - confirm_db_upload
+
+- title: "Stan tools"
+  desc: >
+    Tools for working with a 'stanfit' class object created from the `rstan` R package.
+  contents:
+    - get_bss_settings
+    - get_bss_runtime

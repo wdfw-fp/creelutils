@@ -31,15 +31,17 @@ library(gt)
 
 ```
 
-The `creelutils` package was created to...
+The `creelutils` package facilitates working with freshwater creel data by providing a toolkit that streamlines accessing data and performing common tasks in R.
 
 # Accessing public data
 
-Freshwater recreational creel data is made publicly available at Washington's official open data portal, [data.wa.gov](https:://data.wa.gov). Creel datasets are comprised of multiple elements (e.g., effort, interview, and catch data) that are grouped in space and time by a "Fishery Name" identifier. This identifier is an easy way to view a given creel's full dataset. For example, the *Skagit winter steelhead 2021* dataset contains effort counts, angler interviews, etc. conducted on sections of the Skagit and Sauk rivers from 2021-02-01 to 2021-04-15.
+Freshwater recreational creel data is made publicly available at Washington's official open data portal, [data.wa.gov](https:://data.wa.gov). Creel datasets are comprised of multiple elements (e.g., effort, interview, and catch data) that are grouped in space and time by a "Fishery Name" identifier. This identifier is an easy way to view a given creel's full dataset. 
+
+For example, the *Skagit winter steelhead 2021* dataset contains effort counts, angler interviews, etc. conducted on sections of the Skagit and Sauk rivers from 2021-02-01 to 2021-04-15.
 
 **By Fishery Name**
 
-The function `fetch_dwg` downloads creel data from data.wa.gov by Fishery Name.
+The function `fetch_dwg` downloads creel data from data.wa.gov by Fishery Name and is the primary route for accessing a complete dataset from a fishery.
 
 ```{r}
 library(creelutils)
@@ -75,3 +77,16 @@ search_fishery_name("winter steelhead") |> head(n = 5)
 # by year
 search_fishery_name("2025") |> head(n = 5)
 ```
+
+## Accessing internal data
+
+This section covers operations that require the appropriate credentials and permissions for WDFW's Postgres creel database. Selected 'views' from the relational database are mirrored on Washington's official open data portal, [data.wa.gov](https:://data.wa.gov), for public access.
+
+### Connecting to database
+
+An internal connection to the Postgres creel database can be made using the `establish_db_con` function. When called a RStudio UI prompt will open for the user to enter their password. This requires the proper user credentials and setup on local computer. If this is your first time using this method, contact the package maintainer for assistance. 
+
+```{r}
+# con <- establish_db_con()
+```
+

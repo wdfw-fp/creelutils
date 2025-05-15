@@ -38,10 +38,11 @@ Suggests:
     ggplot2,
     knitr,
     rmarkdown,
-    gt
+    gt,
+    rstan,
+    posterior
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 URL: https://wdfw-fp.github.io/creelutils
 BugReports: https://github.com/wdfw-fp/creelutils/issues
-
