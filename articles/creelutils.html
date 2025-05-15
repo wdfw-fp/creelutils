@@ -5,12 +5,17 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>creelutils User Guide • creelutils</title>
+<title>User Guide • creelutils</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
+<link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="icon" sizes="any" href="../favicon.ico">
+<link rel="manifest" href="../site.webmanifest">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="creelutils User Guide">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="User Guide">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -30,6 +35,7 @@
       <ul class="navbar-nav me-auto">
 <li class="active nav-item"><a class="nav-link" href="../articles/creelutils.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -48,7 +54,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>creelutils User Guide</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>User Guide</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/wdfw-fp/creelutils/blob/main/vignettes/creelutils.Rmd" class="external-link"><code>vignettes/creelutils.Rmd</code></a></small>
@@ -57,7 +63,9 @@
 
     
     
-<p>The <code>creelutils</code> package was created to…</p>
+<p>The <code>creelutils</code> package facilitates working with
+freshwater creel data by providing a toolkit that streamlines accessing
+data and performing common tasks in R.</p>
 <div class="section level2">
 <h2 id="accessing-public-data">Accessing public data<a class="anchor" aria-label="anchor" href="#accessing-public-data"></a>
 </h2>
@@ -65,13 +73,14 @@
 Washington’s official open data portal, <a href="https:://data.wa.gov">data.wa.gov</a>. Creel datasets are
 comprised of multiple elements (e.g., effort, interview, and catch data)
 that are grouped in space and time by a “Fishery Name” identifier. This
-identifier is an easy way to view a given creel’s full dataset. For
-example, the <em>Skagit winter steelhead 2021</em> dataset contains
-effort counts, angler interviews, etc. conducted on sections of the
-Skagit and Sauk rivers from 2021-02-01 to 2021-04-15.</p>
+identifier is an easy way to view a given creel’s full dataset.</p>
+<p>For example, the <em>Skagit winter steelhead 2021</em> dataset
+contains effort counts, angler interviews, etc. conducted on sections of
+the Skagit and Sauk rivers from 2021-02-01 to 2021-04-15.</p>
 <p><strong>By Fishery Name</strong></p>
 <p>The function <code>fetch_dwg</code> downloads creel data from
-data.wa.gov by Fishery Name.</p>
+data.wa.gov by Fishery Name and is the primary route for accessing a
+complete dataset from a fishery.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://wdfw-fp.github.io/creelutils">creelutils</a></span><span class="op">)</span></span>
 <span></span>
@@ -135,8 +144,29 @@ values.</p>
 <span><span class="co">#&gt; [1] "Quillayute spring chinook 2025"   "Skagit spring Chinook 2025 lower"</span></span>
 <span><span class="co">#&gt; [3] "Skagit spring gamefish 2025"      "Skagit winter gamefish 2025"     </span></span>
 <span><span class="co">#&gt; [5] "Skagit winter steelhead 2025"</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="accessing-internal-data">Accessing internal data<a class="anchor" aria-label="anchor" href="#accessing-internal-data"></a>
+</h3>
+<p>This section covers operations that require the appropriate
+credentials and permissions for WDFW’s Postgres creel database. Selected
+‘views’ from the relational database are mirrored on Washington’s
+official open data portal, <a href="https:://data.wa.gov">data.wa.gov</a>, for public access.</p>
+<div class="section level4">
+<h4 id="connecting-to-database">Connecting to database<a class="anchor" aria-label="anchor" href="#connecting-to-database"></a>
+</h4>
+<p>An internal connection to the Postgres creel database can be made
+using the <code>establish_db_con</code> function. When called a RStudio
+UI prompt will open for the user to enter their password. This requires
+the proper user credentials and setup on local computer. If this is your
+first time using this method, contact the package maintainer for
+assistance.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># con &lt;- establish_db_con()</span></span></code></pre></div>
 </div>
-  </main>
+</div>
+</div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 
