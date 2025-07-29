@@ -22,25 +22,29 @@ Imports:
     purrr,
     readr,
     tidyr,
-    DBI,
-    RPostgres,
-    crayon,
-    dbplyr,
     glue,
-    here,
-    jsonlite,
-    lubridate,
-    rstudioapi,
-    sessioninfo,
-    stringr,
-    yaml
+    rstan,
+    odbc,
+    withr
 Suggests:
     ggplot2,
     knitr,
     rmarkdown,
     gt,
-    rstan,
-    posterior
+    quarto,
+    DBI,
+    RPostgres,
+    crayon,
+    dbplyr,
+    jsonlite,
+    lubridate,
+    rstudioapi,
+    sessioninfo,
+    stringr,
+    yaml,
+    dataRetrieval,
+    here,
+    rprojroot
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2

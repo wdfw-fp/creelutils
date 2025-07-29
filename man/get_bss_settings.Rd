@@ -12,6 +12,8 @@ get_bss_settings(ecg, ecg_fit, inputs_bss, print = FALSE)
 \item{ecg_fit}{A fitted model (stanfit object)}
 
 \item{inputs_bss}{Inputs of the stan model}
+
+\item{print}{Logical. Return summary to Console}
 }
 \value{
 List with model priors, sampler settings, and metadata

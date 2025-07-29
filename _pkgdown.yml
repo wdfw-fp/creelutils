@@ -7,22 +7,32 @@ template:
 reference:
 - title: "Accessing public data"
   desc: >
-    These functions interact with Washington’s public data warehouse, data.wa.gov, which serves as a read-only interface to the internal PostgreSQL database.
+    These functions interact with publicly available data. The current sources include USGS and Washington DOE for streamflow data and Washington's open data portal (data.wa.gov) for creel data.
   contents:
+    - fetch_dwg
     - fetch_fishery_names
     - search_fishery_name
-    - fetch_dwg
     - query_creel_website
     - get_fishery_data
+
 - title: "Accessing internal data"
   desc: >
     These functions interact directly with the WDFW PostgreSQL creel database, which requires proper credentials and permissions.
   contents:
     - establish_db_con
     - fetch_db_table
-- title: "Exporting creel estimates to database"
+
+- title: "BSS tools"
   desc: >
-    This group of functions works with `CreelEstimates` to standardize and transform model output formatting, save analysis metadata, and write catch and effort model estimates to the creel database.
+    Functions for working with a 'stanfit' class object created from the `rstan` R package.
+  contents:
+    - get_bss_settings
+    - get_bss_runtime
+    - get_hmc_diagnostics
+
+- title: "Uploading model estimates"
+  desc: >
+    Also know as the extract, transform, and load (ETL) process. This group of functions works with `CreelEstimates` to standardize and transform model output formatting, save analysis metadata, and write catch and effort model estimates to the creel database.
   contents:
     - process_estimates_bss
     - process_estimates_pe
@@ -36,9 +46,8 @@ reference:
     - write_total
     - confirm_db_upload
 
-- title: "Stan tools"
+- title: "Reporting"
   desc: >
-    Tools for working with a 'stanfit' class object created from the `rstan` R package.
+    These functions produce standardized reports for a given fishery.
   contents:
-    - get_bss_settings
-    - get_bss_runtime
+    - render_progress_report

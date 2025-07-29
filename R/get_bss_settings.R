@@ -1,6 +1,6 @@
 #' Summarize priors, sampler settings, and metadata from a stanfit object
 #'
-#' @param ecg Estimate catch group (e.g., Steelhead_Adult_UM_Released).
+#' @param ecg Estimate catch group (e.g., Steelhead_Adult_UM_Released)
 #' @param ecg_fit A fitted model (stanfit object)
 #' @param inputs_bss Inputs of the stan model
 #' @param print Logical. Return summary to Console
