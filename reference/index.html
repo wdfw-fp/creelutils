@@ -33,7 +33,7 @@
     <div class="section level2">
       <h2 id="accessing-public-data">Accessing public data<a class="anchor" aria-label="anchor" href="#accessing-public-data"></a></h2>
 
-      <div class="section-desc"><p>These functions interact with Washington’s public data warehouse, data.wa.gov, which serves as a read-only interface to the internal PostgreSQL database.</p></div>
+      <div class="section-desc"><p>These functions interact with publicly available data. The current sources include USGS and Washington DOE for streamflow data and Washington’s open data portal (data.wa.gov) for creel data.</p></div>
 
 
     </div><div class="section level2">
@@ -42,6 +42,12 @@
 
 
       <dl><dt>
+
+          <code><a href="fetch_dwg.html">fetch_dwg()</a></code>
+
+        </dt>
+        <dd>Download creel datasets from data.wa.gov</dd>
+      </dl><dl><dt>
 
           <code><a href="fetch_fishery_names.html">fetch_fishery_names()</a></code>
 
@@ -53,12 +59,6 @@
 
         </dt>
         <dd>Find fishery names from a partial names</dd>
-      </dl><dl><dt>
-
-          <code><a href="fetch_dwg.html">fetch_dwg()</a></code>
-
-        </dt>
-        <dd>Download creel datasets from data.wa.gov</dd>
       </dl><dl><dt>
 
           <code><a href="query_creel_website.html">query_creel_website()</a></code>
@@ -95,9 +95,38 @@
         </dt>
         <dd>Query database tables</dd>
       </dl></div><div class="section level2">
-      <h2 id="exporting-creel-estimates-to-database">Exporting creel estimates to database<a class="anchor" aria-label="anchor" href="#exporting-creel-estimates-to-database"></a></h2>
+      <h2 id="bss-tools">BSS tools<a class="anchor" aria-label="anchor" href="#bss-tools"></a></h2>
 
-      <div class="section-desc"><p>This group of functions works with <code>CreelEstimates</code> to standardize and transform model output formatting, save analysis metadata, and write catch and effort model estimates to the creel database.</p></div>
+      <div class="section-desc"><p>Functions for working with a ‘stanfit’ class object created from the <code>rstan</code> R package.</p></div>
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="get_bss_settings.html">get_bss_settings()</a></code>
+
+        </dt>
+        <dd>Summarize priors, sampler settings, and metadata from a stanfit object</dd>
+      </dl><dl><dt>
+
+          <code><a href="get_bss_runtime.html">get_bss_runtime()</a></code>
+
+        </dt>
+        <dd>Summarize BSS model runtime</dd>
+      </dl><dl><dt>
+
+          <code><a href="get_hmc_diagnostics.html">get_hmc_diagnostics()</a></code>
+
+        </dt>
+        <dd>Summarize HMC Diagnostics from a Stan Fit</dd>
+      </dl></div><div class="section level2">
+      <h2 id="uploading-model-estimates">Uploading model estimates<a class="anchor" aria-label="anchor" href="#uploading-model-estimates"></a></h2>
+
+      <div class="section-desc"><p>Also know as the extract, transform, and load (ETL) process. This group of functions works with <code>CreelEstimates</code> to standardize and transform model output formatting, save analysis metadata, and write catch and effort model estimates to the creel database.</p></div>
 
 
     </div><div class="section level2">
@@ -172,9 +201,9 @@
         </dt>
         <dd>Confirm database upload</dd>
       </dl></div><div class="section level2">
-      <h2 id="stan-tools">Stan tools<a class="anchor" aria-label="anchor" href="#stan-tools"></a></h2>
+      <h2 id="reporting">Reporting<a class="anchor" aria-label="anchor" href="#reporting"></a></h2>
 
-      <div class="section-desc"><p>Tools for working with a ‘stanfit’ class object created from the <code>rstan</code> R package.</p></div>
+      <div class="section-desc"><p>These functions produce standardized reports for a given fishery.</p></div>
 
 
     </div><div class="section level2">
@@ -184,16 +213,10 @@
 
       <dl><dt>
 
-          <code><a href="get_bss_settings.html">get_bss_settings()</a></code>
+          <code><a href="render_progress_report.html">render_progress_report()</a></code>
 
         </dt>
-        <dd>Summarize priors, sampler settings, and metadata from a stanfit object</dd>
-      </dl><dl><dt>
-
-          <code><a href="get_bss_runtime.html">get_bss_runtime()</a></code>
-
-        </dt>
-        <dd>Summarize BSS model runtime</dd>
+        <dd>Produce a creel progress report and summaries</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
