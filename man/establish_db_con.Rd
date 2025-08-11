@@ -4,18 +4,24 @@
 \alias{establish_db_con}
 \title{Establish database connection}
 \usage{
-establish_db_con(max_attempts = 5, delay_seconds = 3)
+establish_db_con(
+  conn_type = c("odbc", "config"),
+  dsn = "creel_estimates",
+  config_path = "config.yml"
+)
 }
 \arguments{
-\item{max_attempts}{Integer value representing the number of times to attempt a connection, default is 5}
+\item{dsn}{Character string denoting the ODBC domain service name (DSN) to connect to.}
 
-\item{delay_seconds}{Integer value representing the number of seconds to pause between each attempt, default is 3}
+\item{config_path}{File path location of the local 'config.yml' file.}
+
+\item{type}{Character input denoting either "odbc" or "config" connection type.}
 }
 \value{
 A \code{DBI} connection to a PostgreSQL database management system. Recommend that this object be named "con".
 }
 \description{
-Establishes a connection to the WDFW PostgreSQL database. This process requires proper credentials and a local \code{config.yml} file. Depending on a given user's permissions, this connection may be used to read or write data. When calling \code{DBI::dbConnect()}, it uses the Posit-supported \code{RPostgres} package rather than an OBDC driver, as initial attempts with that method led to long upload times when exporting creel model estimates.
+Establishes a connection to the WDFW PostgreSQL database. This process requires either a configured ODBC DSN or a local \code{config.yml} file.
 }
 \seealso{
 Other internal_data: 
