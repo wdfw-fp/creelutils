@@ -11,11 +11,11 @@ establish_db_con(
 )
 }
 \arguments{
+\item{conn_type}{Character input denoting either "odbc" or "config" connection type.}
+
 \item{dsn}{Character string denoting the ODBC domain service name (DSN) to connect to.}
 
 \item{config_path}{File path location of the local 'config.yml' file.}
-
-\item{type}{Character input denoting either "odbc" or "config" connection type.}
 }
 \value{
 A \code{DBI} connection to a PostgreSQL database management system. Recommend that this object be named "con".

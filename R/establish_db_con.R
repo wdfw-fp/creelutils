@@ -1,7 +1,7 @@
 #' Establish database connection
 #'
 #' @description Establishes a connection to the WDFW PostgreSQL database. This process requires either a configured ODBC DSN or a local `config.yml` file.
-#' @param type Character input denoting either "odbc" or "config" connection type.
+#' @param conn_type Character input denoting either "odbc" or "config" connection type.
 #' @param dsn Character string denoting the ODBC domain service name (DSN) to connect to.
 #' @param config_path File path location of the local 'config.yml' file.
 #' @family internal_data
@@ -15,7 +15,7 @@ establish_db_con<- function(
 
   conn_type <- match.arg(conn_type, choices = c("odbc", "config"))
 
-  # try odbc connection as default or if requested
+  # try odbc connection as default or if requested ####
   if (conn_type == "odbc") {
     odbc_available <- requireNamespace("odbc", quietly = TRUE)
     if (!odbc_available) cli::cli_abort("the 'odbc' package is required for ODBC connections.")
@@ -26,17 +26,16 @@ establish_db_con<- function(
       NULL
     })
 
-    # connection success
-    if (!is.null(con) && DBI::dbIsValid(con)) {
+    # report connection
+    if (!is.null(con) && DBI::dbIsValid(con)) { # success
       cli::cli_alert_success(glue::glue("Successfully connected to database via DSN {dsn}."))
       return(invisible(con))
-    } else {
-      # fail
+    } else { # fail
       cli::cli_alert_warning("ODBC connnection failed. Will attempt config file fallback.")
     }
   }
 
-  # use local 'config.yml' file as fallback or if requested
+  # use local 'config.yml' file as fallback or if requested ####
   if (!file.exists(config_path)) {
     cli::cli_abort(glue::glue("Config file not found at path:"))
   }
@@ -60,7 +59,7 @@ establish_db_con<- function(
     }
   }
 
-  #
+  # get username
   sys_user <- unname(Sys.info()["user"])
   if (sys_user %in% config$users) {
     username <- sys_user
@@ -68,9 +67,10 @@ establish_db_con<- function(
     cli::cli_alert_warning("System username not found in config users list. Manual entry required.")
     username <- rstudioapi::askForPassword("Please enter your database username:")
   }
-
+  # get password
   password <- rstudioapi::askForPassword("Please enter your database password:")
 
+  # connect to database
   con <- tryCatch({
     DBI::dbConnect(
       RPostgres::Postgres(),
@@ -84,6 +84,7 @@ establish_db_con<- function(
     NULL
   })
 
+  # report connection
   if (!is.null(con) && DBI::dbIsValid(con)) {
     cli::cli_alert_success("Database connection established using config file.")
     return(invisible(con))
