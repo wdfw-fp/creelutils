@@ -24,8 +24,7 @@ Imports:
     tidyr,
     glue,
     rstan,
-    odbc,
-    withr
+    odbc
 Suggests:
     ggplot2,
     knitr,
