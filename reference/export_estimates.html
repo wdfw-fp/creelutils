@@ -38,7 +38,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">export_estimates</span><span class="op">(</span><span class="va">params</span>, <span class="va">analysis_lut</span>, <span class="va">creel_estimates</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">export_estimates</span><span class="op">(</span><span class="va">params</span>, <span class="va">analysis_lut</span>, <span class="va">creel_estimates</span>, conn <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -46,15 +46,19 @@
 
 
 <dl><dt id="arg-params">params<a class="anchor" aria-label="anchor" href="#arg-params"></a></dt>
-<dd><p>??</p></dd>
+<dd><p>User-input parameters defined during the model estimation process.</p></dd>
 
 
 <dt id="arg-analysis-lut">analysis_lut<a class="anchor" aria-label="anchor" href="#arg-analysis-lut"></a></dt>
-<dd><p>??</p></dd>
+<dd><p>Lookup table created during the model estimation process which stores a session-specific analysis_id key and metadata about the analysis.</p></dd>
 
 
 <dt id="arg-creel-estimates">creel_estimates<a class="anchor" aria-label="anchor" href="#arg-creel-estimates"></a></dt>
-<dd><p>??</p></dd>
+<dd><p>List object containing model estimates in a standardized format. Typically passed from 'transform_estimates' function.</p></dd>
+
+
+<dt id="arg-conn">conn<a class="anchor" aria-label="anchor" href="#arg-conn"></a></dt>
+<dd><p>Database connection object. If NULL (default), a new connection will be established.</p></dd>
 
 </dl></div>
     <div class="section level2">
