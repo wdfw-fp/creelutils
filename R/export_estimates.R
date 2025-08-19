@@ -3,14 +3,15 @@
 #' Primary control function of the export, transform, and load (ETL) process. Takes standardized model outputs and user-input parameters to export the model estimates appropriately.
 #'
 #' @family ETL
-#' @param params ??
-#' @param analysis_lut ??
-#' @param creel_estimates ??
+#' @param params User-input parameters defined during the model estimation process.
+#' @param analysis_lut Lookup table created during the model estimation process which stores a session-specific analysis_id key and metadata about the analysis.
+#' @param creel_estimates List object containing model estimates in a standardized format. Typically passed from 'transform_estimates' function.
+#' @param conn Database connection object. If NULL (default), a new connection will be established.
 #'
 #' @return ??
 #' @export
 #'
-export_estimates <- function(params, analysis_lut, creel_estimates) {
+export_estimates <- function(params, analysis_lut, creel_estimates, conn = NULL) {
 
   # Connect to database and conditionally export
   if(params$export == tolower("database")) {
@@ -25,8 +26,12 @@ export_estimates <- function(params, analysis_lut, creel_estimates) {
     analysis_lut <- json_conversion(type = "script", params, analysis_lut)
     analysis_lut <- json_conversion(type = "r_session", params, analysis_lut)
 
-    #connect to database
+    # Connect to database if connection not supplied in argument
+    if (is.null(conn)) {
     con <- establish_db_con()
+    } else {
+      con <- conn # Use connection provided
+    }
 
     #query database for UUIDs and reformat
     creel_estimates_db <- prep_export(con, creel_estimates)
