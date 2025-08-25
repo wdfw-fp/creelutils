@@ -25,9 +25,18 @@ json_conversion <- function(type, params, analysis_lut) {
   if (type == "script") {
 
     #save local script to archive any alterations from template script
-    rstudioapi::documentSave()
-
-    cat("\nLocal analysis script saved.")
+    # Only save document if running interactively in RStudio
+    if (interactive() && rstudioapi::isAvailable()) {
+      tryCatch({
+        rstudioapi::documentSave()
+        cat("\nLocal analysis script saved.")
+      }, error = function(e) {
+        warning("Could not save document via RStudio API: ", e$message)
+        cat("\nSkipping document save (not in RStudio environment).")
+      })
+    } else {
+      cat("\nSkipping document save (not in interactive RStudio session).")
+    }
 
     #locate script location on CreelEstimates local repository clone
     analysis_script <- readLines(paste0(
