@@ -23,37 +23,46 @@ json_conversion <- function(type, params, analysis_lut) {
 
   #convert items to json format based on type
   if (type == "script") {
-
-    #save local script to archive any alterations from template script
-    rstudioapi::documentSave()
-
-    cat("\nLocal analysis script saved.")
-
-    #locate script location on CreelEstimates local repository clone
-    analysis_script <- readLines(paste0(
-      getwd(), "/fishery_analyses/", params$project_name, "/", params$fishery_name,
-      "/", "fw_creel_", params$fishery_name, ".Rmd"
-    ))
-
-    #convert to JSON format and validate
-    json_script <- jsonlite::toJSON(analysis_script, pretty = TRUE)
-
-    cat("\nLocal script read and converted to JSON format.")
-
-    valid <- jsonlite::validate(json_script)
-
-    if(valid) { #if TRUE
-
-      cat("\nJSON valid... adding `analysis_json` to analysis_lut.")
-
-      #add to analysis look up table
-      analysis_lut <- analysis_lut |>  dplyr::mutate(analysis_json = json_script)
-
-      return(analysis_lut)
-
-    } else {
-      warning("\nJSON format not valid! JSON representation of local script not added to analysis_lut.")
-    }
+#
+#     #save local script to archive any alterations from template script
+#     # Only save document if running interactively in RStudio
+#     if (interactive() && rstudioapi::isAvailable()) {
+#       tryCatch({
+#         rstudioapi::documentSave()
+#         cat("\nLocal analysis script saved.")
+#       }, error = function(e) {
+#         warning("Could not save document via RStudio API: ", e$message)
+#         cat("\nSkipping document save (not in RStudio environment).")
+#       })
+#     } else {
+#       cat("\nSkipping document save (not in interactive RStudio session).")
+#     }
+#
+#     #locate script location on CreelEstimates local repository clone
+#     analysis_script <- readLines(paste0(
+#       getwd(), "/fishery_analyses/", params$project_name, "/", params$fishery_name,
+#       "/", "fw_creel_", params$fishery_name, ".Rmd"
+#     ))
+#
+#     #convert to JSON format and validate
+#     json_script <- jsonlite::toJSON(analysis_script, pretty = TRUE)
+#
+#     cat("\nLocal script read and converted to JSON format.")
+#
+#     valid <- jsonlite::validate(json_script)
+#
+#     if(valid) { #if TRUE
+#
+#       cat("\nJSON valid... adding `analysis_json` to analysis_lut.")
+#
+#       #add to analysis look up table
+#       analysis_lut <- analysis_lut |>  dplyr::mutate(analysis_json = json_script)
+#
+#       return(analysis_lut)
+#
+#     } else {
+#       warning("\nJSON format not valid! JSON representation of local script not added to analysis_lut.")
+#     }
   }
   if (type == "regulations") {
 

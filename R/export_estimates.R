@@ -23,7 +23,6 @@ export_estimates <- function(params, analysis_lut, creel_estimates, conn = NULL)
     # }
 
     #convert metadata to json. Automatically added to analysis_lut
-    analysis_lut <- json_conversion(type = "script", params, analysis_lut)
     analysis_lut <- json_conversion(type = "r_session", params, analysis_lut)
 
     # Connect to database if connection not supplied in argument
