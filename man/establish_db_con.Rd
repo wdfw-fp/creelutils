@@ -25,6 +25,7 @@ Establishes a connection to the WDFW PostgreSQL database. This process requires 
 }
 \seealso{
 Other internal_data: 
-\code{\link{fetch_db_table}()}
+\code{\link{fetch_db_table}()},
+\code{\link{get_fishery_estimates}()}
 }
 \concept{internal_data}
