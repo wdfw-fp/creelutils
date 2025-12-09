@@ -43,8 +43,8 @@ Suggests:
     yaml,
     dataRetrieval,
     here,
-    rprojroot
-    mockery
+    rprojroot,
+    mockery,
     testthat
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
