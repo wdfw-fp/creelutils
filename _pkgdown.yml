@@ -21,6 +21,11 @@ reference:
   contents:
     - establish_db_con
     - fetch_db_table
+    - fishery_lut
+    - fishery_manager
+    - fishery_catchgroups
+    - analysis_lut
+    - model_estimates
 
 - title: "BSS tools"
   desc: >
