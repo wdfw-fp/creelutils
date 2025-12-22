@@ -1,0 +1,89 @@
+# Package index
+
+## Accessing public data
+
+These functions interact with publicly available data. The current
+sources include USGS and Washington DOE for streamflow data and
+Washington’s open data portal (data.wa.gov) for creel data.
+
+- [`fetch_dwg()`](https://wdfw-fp.github.io/creelutils/reference/fetch_dwg.md)
+  : Download creel datasets from data.wa.gov
+- [`fetch_fishery_names()`](https://wdfw-fp.github.io/creelutils/reference/fetch_fishery_names.md)
+  : List all available 'fishery name' values
+- [`search_fishery_name()`](https://wdfw-fp.github.io/creelutils/reference/search_fishery_name.md)
+  : Find fishery names from a partial names
+- [`query_creel_website()`](https://wdfw-fp.github.io/creelutils/reference/query_creel_website.md)
+  : Query the creel website for specific combinations of data
+- [`get_fishery_data()`](https://wdfw-fp.github.io/creelutils/reference/get_fishery_data.md)
+  : Obtain and format interview, catch, and effort data for sets of
+  fishery-years
+
+## Accessing internal data
+
+These functions interact directly with the WDFW PostgreSQL creel
+database, which requires proper credentials and permissions.
+
+- [`establish_db_con()`](https://wdfw-fp.github.io/creelutils/reference/establish_db_con.md)
+  : Establish database connection
+- [`fetch_db_table()`](https://wdfw-fp.github.io/creelutils/reference/fetch_db_table.md)
+  : Query database tables
+- [`fishery_lut()`](https://wdfw-fp.github.io/creelutils/reference/fishery_lut.md)
+  : Get fishery lookup table
+- [`fishery_manager()`](https://wdfw-fp.github.io/creelutils/reference/fishery_manager.md)
+  : Get 'fishery manager' table
+- [`fishery_catchgroups()`](https://wdfw-fp.github.io/creelutils/reference/fishery_catchgroups.md)
+  : Get 'fishery_catch_groups' view
+- [`analysis_lut()`](https://wdfw-fp.github.io/creelutils/reference/analysis_lut.md)
+  : Get analysis lookup table
+- [`model_estimates()`](https://wdfw-fp.github.io/creelutils/reference/model_estimates.md)
+  : Get model estimates
+
+## BSS tools
+
+Functions for working with a ‘stanfit’ class object created from the
+`rstan` R package.
+
+- [`get_bss_settings()`](https://wdfw-fp.github.io/creelutils/reference/get_bss_settings.md)
+  : Summarize priors, sampler settings, and metadata from a stanfit
+  object
+- [`get_bss_runtime()`](https://wdfw-fp.github.io/creelutils/reference/get_bss_runtime.md)
+  : Summarize BSS model runtime
+- [`get_hmc_diagnostics()`](https://wdfw-fp.github.io/creelutils/reference/get_hmc_diagnostics.md)
+  : Summarize HMC Diagnostics from a Stan Fit
+
+## Uploading model estimates
+
+Also know as the extract, transform, and load (ETL) process. This group
+of functions works with `CreelEstimates` to standardize and transform
+model output formatting, save analysis metadata, and write catch and
+effort model estimates to the creel database.
+
+- [`process_estimates_bss()`](https://wdfw-fp.github.io/creelutils/reference/process_estimates_bss.md)
+  : Title
+- [`process_estimates_pe()`](https://wdfw-fp.github.io/creelutils/reference/process_estimates_pe.md)
+  : Title
+- [`map_data_grade()`](https://wdfw-fp.github.io/creelutils/reference/map_data_grade.md)
+  : Map datagrade ??
+- [`transform_estimates()`](https://wdfw-fp.github.io/creelutils/reference/transform_estimates.md)
+  : Transform individual model outputs into a single object
+- [`prep_export()`](https://wdfw-fp.github.io/creelutils/reference/prep_export.md)
+  : Prep export
+- [`json_conversion()`](https://wdfw-fp.github.io/creelutils/reference/json_conversion.md)
+  : Convert model estimate metadata objects to json format
+- [`export_estimates()`](https://wdfw-fp.github.io/creelutils/reference/export_estimates.md)
+  : Export creel model estimates
+- [`write_lut()`](https://wdfw-fp.github.io/creelutils/reference/write_lut.md)
+  : Write look-up table
+- [`write_stratum()`](https://wdfw-fp.github.io/creelutils/reference/write_stratum.md)
+  : Write stratum
+- [`write_total()`](https://wdfw-fp.github.io/creelutils/reference/write_total.md)
+  : Write Total
+- [`confirm_db_upload()`](https://wdfw-fp.github.io/creelutils/reference/confirm_db_upload.md)
+  : Confirm database upload
+
+## Reporting
+
+These functions produce standardized reports for a given fishery.
+
+- [`render_progress_report()`](https://wdfw-fp.github.io/creelutils/reference/render_progress_report.md)
+  : Produce a creel progress report and summaries
