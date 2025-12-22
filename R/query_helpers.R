@@ -74,8 +74,22 @@ fishery_catchgroups <- function(
     filter = filter
   ) |>
     dplyr::select(-dplyr::contains("_id")) |>
-    dplyr::relocate(fishery_name, species, life_stage, fin_mark, fate) |>
-    dplyr::mutate(catch_group = paste(species, life_stage, fin_mark, fate, sep = "_"))
+    dplyr::relocate(
+      .data$fishery_name,
+      .data$species,
+      .data$life_stage,
+      .data$fin_mark,
+      .data$fate
+    ) |>
+    dplyr::mutate(
+      catch_group = paste(
+        .data$species,
+        .data$life_stage,
+        .data$fin_mark,
+        .data$fate,
+        sep = "_"
+      )
+    )
 }
 
 #' Get analysis lookup table
