@@ -5,14 +5,14 @@
 \title{Get model estimates}
 \usage{
 model_estimates(
-  conn = con,
+  conn = NULL,
   analysis_id = NULL,
   scale = c("total", "stratum"),
   ...
 )
 }
 \arguments{
-\item{conn}{A valid database connection. Defaults to \code{con}.}
+\item{conn}{A valid database connection.}
 
 \item{analysis_id}{Character string for the analysis_id to retrieve estimates for}
 

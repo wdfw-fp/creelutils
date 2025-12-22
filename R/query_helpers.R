@@ -5,9 +5,7 @@
 #'
 #' @return Tibble of fishery names with year, start dates, end dates, and metadata
 #' @export
-fishery_lut <- function(
-    conn = NULL
-) {
+fishery_lut <- function(conn) {
 
   # Check database connection
   if (!DBI::dbIsValid(conn)) {
@@ -22,23 +20,63 @@ fishery_lut <- function(
 #'
 #' @description Simple wrapper to query the vw_fishery_manager table.
 #' @param conn A valid database connection from `establish_db_con()`
-#'
+#' @param fishery_name Optional character string for pattern matching in analysis_name
 #' @return Tibble of fishery information that includes fishery name, dates, and spatial structure (sections and sites).
 #' @export
 fishery_manager <- function(
-    conn = NULL
-) {
+    conn,
+    fishery_name = NULL
+  ) {
 
   # Check database connection
   if (!DBI::dbIsValid(conn)) {
     cli::cli_abort("Database connection is not valid or has been closed.")
   }
 
-  fetch_db_table(conn, "creel", "vw_fishery_manager")
+  filter <- NULL
+  if (!is.null(fishery_name)) {
+    filter <- glue::glue("fishery_name == '{fishery_name}'")
+  }
 
+  fetch_db_table(
+    conn,
+    schema = "creel",
+    table = "vw_fishery_manager",
+    filter = filter
+  )
 }
 
+#' Get 'fishery_catch_groups' view
+#' @description Simple wrapper to query the vw_fishery_manager table.
+#' @param conn A valid database connection from `establish_db_con()`
+#' @param fishery_name Optional character string for pattern matching in analysis_name
+#' @return Tibble of catch groups of interest for a given fishery.
+#' @export
+fishery_catchgroups <- function(
+    conn,
+    fishery_name = NULL
+  ) {
 
+  # Check database connection
+  if (!DBI::dbIsValid(conn)) {
+    cli::cli_abort("Database connection is not valid or has been closed.")
+  }
+
+  filter <- NULL
+  if (!is.null(fishery_name)) {
+    filter <- glue::glue("fishery_name == '{fishery_name}'")
+  }
+
+  fetch_db_table(
+    conn,
+    schema = "creel",
+    table  = "vw_fishery_catch_group",
+    filter = filter
+  ) |>
+    dplyr::select(-dplyr::contains("_id")) |>
+    dplyr::relocate(fishery_name, species, life_stage, fin_mark, fate) |>
+    dplyr::mutate(catch_group = paste(species, life_stage, fin_mark, fate, sep = "_"))
+}
 
 #' Get analysis lookup table
 #'
@@ -62,7 +100,12 @@ analysis_lut <- function(
     filter <- glue::glue("stringr::str_detect(analysis_name, '{fishery_name}')")
   }
 
-  fetch_db_table(conn, "creel", "model_analysis_lut", filter = filter)
+  fetch_db_table(
+    conn,
+    schema = "creel",
+    table = "model_analysis_lut",
+    filter = filter
+  )
 }
 
 #' Get model estimates
@@ -108,5 +151,10 @@ model_estimates <- function(
   }
 
   # Query - let fetch_db_table handle NULL filter
-  fetch_db_table(conn, "creel", table, filter = filters)
+  fetch_db_table(
+    conn,
+    schema = "creel",
+    table = table,
+    filter = filters
+  )
 }

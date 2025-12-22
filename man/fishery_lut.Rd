@@ -4,7 +4,7 @@
 \alias{fishery_lut}
 \title{Get fishery lookup table}
 \usage{
-fishery_lut(conn = NULL)
+fishery_lut(conn)
 }
 \arguments{
 \item{conn}{A valid database connection from \code{establish_db_con()}}
