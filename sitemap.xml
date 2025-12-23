@@ -6,7 +6,6 @@
 <url><loc>https://wdfw-fp.github.io/creelutils/authors.html</loc></url>
 <url><loc>https://wdfw-fp.github.io/creelutils/index.html</loc></url>
 <url><loc>https://wdfw-fp.github.io/creelutils/news/index.html</loc></url>
-<url><loc>https://wdfw-fp.github.io/creelutils/reference/analysis_lut.html</loc></url>
 <url><loc>https://wdfw-fp.github.io/creelutils/reference/confirm_db_upload.html</loc></url>
 <url><loc>https://wdfw-fp.github.io/creelutils/reference/establish_db_con.html</loc></url>
 <url><loc>https://wdfw-fp.github.io/creelutils/reference/export_estimates.html</loc></url>
@@ -27,6 +26,7 @@
 <url><loc>https://wdfw-fp.github.io/creelutils/reference/prep_export.html</loc></url>
 <url><loc>https://wdfw-fp.github.io/creelutils/reference/process_estimates_bss.html</loc></url>
 <url><loc>https://wdfw-fp.github.io/creelutils/reference/process_estimates_pe.html</loc></url>
+<url><loc>https://wdfw-fp.github.io/creelutils/reference/query_analysis_lut.html</loc></url>
 <url><loc>https://wdfw-fp.github.io/creelutils/reference/query_creel_website.html</loc></url>
 <url><loc>https://wdfw-fp.github.io/creelutils/reference/render_progress_report.html</loc></url>
 <url><loc>https://wdfw-fp.github.io/creelutils/reference/search_fishery_name.html</loc></url>

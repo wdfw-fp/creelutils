@@ -33,7 +33,7 @@ database, which requires proper credentials and permissions.
   : Get 'fishery manager' table
 - [`fishery_catchgroups()`](https://wdfw-fp.github.io/creelutils/reference/fishery_catchgroups.md)
   : Get 'fishery_catch_groups' view
-- [`analysis_lut()`](https://wdfw-fp.github.io/creelutils/reference/analysis_lut.md)
+- [`query_analysis_lut()`](https://wdfw-fp.github.io/creelutils/reference/query_analysis_lut.md)
   : Get analysis lookup table
 - [`model_estimates()`](https://wdfw-fp.github.io/creelutils/reference/model_estimates.md)
   : Get model estimates

@@ -3,7 +3,7 @@ pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
   creelutils: creelutils.html
-last_built: 2025-12-22T22:45Z
+last_built: 2025-12-23T20:10Z
 urls:
   reference: https://wdfw-fp.github.io/creelutils/reference
   article: https://wdfw-fp.github.io/creelutils/articles
