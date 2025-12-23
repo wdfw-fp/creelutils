@@ -24,7 +24,7 @@ reference:
     - fishery_lut
     - fishery_manager
     - fishery_catchgroups
-    - analysis_lut
+    - query_analysis_lut
     - model_estimates
 
 - title: "BSS tools"

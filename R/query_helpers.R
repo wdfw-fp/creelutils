@@ -100,7 +100,7 @@ fishery_catchgroups <- function(
 #' @param fishery_name Optional character string for pattern matching in analysis_name
 #' @return Tibble of matching records from model_analysis_lut
 #' @export
-analysis_lut <- function(
+query_analysis_lut <- function(
     conn = NULL,
     analysis_id = NULL,
     fishery_name = NULL
