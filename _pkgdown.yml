@@ -56,3 +56,9 @@ reference:
     These functions produce standardized reports for a given fishery.
   contents:
     - render_progress_report
+
+- title: "Tools"
+  desc: >
+    Functions for working with creel datasets.
+  contents:
+    - drop_section
