@@ -87,3 +87,10 @@ These functions produce standardized reports for a given fishery.
 
 - [`render_progress_report()`](https://wdfw-fp.github.io/creelutils/reference/render_progress_report.md)
   : Produce a creel progress report and summaries
+
+## Tools
+
+Functions for working with creel datasets.
+
+- [`drop_section()`](https://wdfw-fp.github.io/creelutils/reference/drop_section.md)
+  : Drop sections from creel survey data
