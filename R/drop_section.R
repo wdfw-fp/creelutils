@@ -12,7 +12,7 @@
 #' @return A modified list with the same structure as `data`, with specified
 #'   sections removed from all applicable tables. Also removes corresponding
 #'   `open_section_X` columns from the `days` table.
-#'
+#' @import dplyr
 #' @examples
 #' \dontrun{
 #' # Drop a single section
@@ -62,12 +62,12 @@ drop_section <- function(data, section) {
   cli::cli_alert_success("Dropping section{?s}: {paste(sections_to_drop, collapse = ', ')}")
 
   # Filter tables
-  data$interview <- data$interview |> filter(!section_num %in% sections_to_drop)
-  data$effort <- data$effort |> filter(!section_num %in% sections_to_drop)
+  data$interview <- data$interview |> filter(!.data$section_num %in% sections_to_drop)
+  data$effort <- data$effort |> filter(!.data$section_num %in% sections_to_drop)
 
   # Filter catch by valid interview_ids
   valid_ids <- data$interview$interview_id
-  data$catch <- data$catch |> filter(interview_id %in% valid_ids)
+  data$catch <- data$catch |> filter(.data$interview_id %in% valid_ids)
 
   # Remove open_section columns from days table
   section_cols <- paste0("open_section_", sections_to_drop)
@@ -75,7 +75,7 @@ drop_section <- function(data, section) {
 
   # Filter closures if present
   if ("closures" %in% names(data) && "section_num" %in% names(data$closures)) {
-    data$closures <- data$closures |> filter(!section_num %in% sections_to_drop)
+    data$closures <- data$closures |> filter(!.data$section_num %in% sections_to_drop)
   }
 
   cli::cli_alert_info(" Remaining section{?s}: {paste(remaining_sections, collapse = ', ')}")
