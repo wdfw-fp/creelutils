@@ -13,6 +13,8 @@ confirm_db_upload <- function(con, analysis_lut) {
   #query database for records that match the estimates that were just written
   verification_table <- fetch_db_table(con, "creel", "model_analysis_lut") |> dplyr::select("analysis_id", "analysis_name")
 
+  verification_table$analysis_id <- toupper(verification_table$analysis_id)
+
   if (analysis_lut$analysis_id %in% verification_table$analysis_id) {
 
     DBI::dbDisconnect(con)
