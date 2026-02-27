@@ -14,6 +14,7 @@ reference:
     - search_fishery_name
     - query_creel_website
     - get_fishery_data
+    - raw_catch
 
 - title: "Accessing internal data"
   desc: >

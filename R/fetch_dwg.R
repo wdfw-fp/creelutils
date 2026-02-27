@@ -3,7 +3,7 @@
 #' Download freshwater recreational fishery creel datasets from Washington's public data warehouse, data.wa.gov. When a valid 'fishery_name' is provided several database views are downloaded (i.e., effort, interview, catch, water bodies, closures, and a )
 #' @family public_data
 #' @param fishery_name Identifier which represents the spatiotemporal configuration for a given dataset with associated fishery closures.
-#'
+#' @param print Logical TRUE/FALSE that toggles whether a summary table prints in the console reporting the number of rows per table downloaded. Useful as a quick check to see if anything was downloaded.
 #' @importFrom rlang .data
 #' @importFrom utils URLencode
 #' @importFrom tidyr drop_na
@@ -20,7 +20,7 @@
 #' \dontrun{
 #' dwg <- fetch_dwg("Skagit winter steelhead 2021")
 #' }
-fetch_dwg <- function(fishery_name){
+fetch_dwg <- function(fishery_name, print = FALSE){
 
   #links to database views
   dwg_base <- list(
@@ -115,7 +115,8 @@ fetch_dwg <- function(fishery_name){
     cli::cli_abort("fetch_dwg error: No data downloaded. Check that the 'fishery_name' is valid.")
   }
 
-  print(summary_table)
+  # print = TRUE
+  if(print) {print(summary_table)}
 
   return(dwg)
 }
