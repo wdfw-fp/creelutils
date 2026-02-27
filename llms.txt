@@ -41,6 +41,8 @@ Washington’s open data portal (data.wa.gov) for creel data.
 - [`get_fishery_data()`](https://wdfw-fp.github.io/creelutils/reference/get_fishery_data.md)
   : Obtain and format interview, catch, and effort data for sets of
   fishery-years
+- [`raw_catch()`](https://wdfw-fp.github.io/creelutils/reference/raw_catch.md)
+  : Get raw catch data for a fishery
 
 ## Accessing internal data
 

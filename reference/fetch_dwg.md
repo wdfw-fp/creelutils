@@ -8,7 +8,7 @@ effort, interview, catch, water bodies, closures, and a )
 ## Usage
 
 ``` r
-fetch_dwg(fishery_name)
+fetch_dwg(fishery_name, print = FALSE)
 ```
 
 ## Arguments
@@ -17,6 +17,12 @@ fetch_dwg(fishery_name)
 
   Identifier which represents the spatiotemporal configuration for a
   given dataset with associated fishery closures.
+
+- print:
+
+  Logical TRUE/FALSE that toggles whether a summary table prints in the
+  console reporting the number of rows per table downloaded. Useful as a
+  quick check to see if anything was downloaded.
 
 ## Value
 

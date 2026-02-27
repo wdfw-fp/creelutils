@@ -86,15 +86,6 @@ complete dataset from a fishery.</p>
 <span></span>
 <span><span class="va">fishery_name</span> <span class="op">&lt;-</span> <span class="st">"Skagit winter steelhead 2021"</span></span>
 <span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fetch_dwg.html">fetch_dwg</a></span><span class="op">(</span><span class="va">fishery_name</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
-<span><span class="co">#&gt;   `Data Component` Records</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> effort              <span style="text-decoration: underline;">4</span>864</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ll                     2</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> interview           <span style="text-decoration: underline;">1</span>860</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> catch                683</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> closures              60</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> fishery_manager       22</span></span>
 <span></span>
 <span><span class="co">#ll stands for latitude and longitude</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">dat</span><span class="op">)</span></span>
@@ -117,11 +108,11 @@ arguments, returns a list of all fishery names in the creel
 database.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/fetch_fishery_names.html">fetch_fishery_names</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  [1] "Baker summer sockeye 2022"   "Baker summer sockeye 2023"  </span></span>
-<span><span class="co">#&gt;  [3] "Cascade fall salmon 2021"    "Cascade fall salmon 2022"   </span></span>
-<span><span class="co">#&gt;  [5] "Cascade fall salmon 2023"    "Cascade fall salmon 2024"   </span></span>
-<span><span class="co">#&gt;  [7] "Cascade spring Chinook 2021" "Cascade spring Chinook 2022"</span></span>
-<span><span class="co">#&gt;  [9] "Cascade spring Chinook 2023" "Cascade spring Chinook 2024"</span></span></code></pre></div>
+<span><span class="co">#&gt;  [1] "2024 Potholes Reservoir"     "2025 Banks Lake"            </span></span>
+<span><span class="co">#&gt;  [3] "Baker summer sockeye 2022"   "Baker summer sockeye 2023"  </span></span>
+<span><span class="co">#&gt;  [5] "Cascade fall salmon 2021"    "Cascade fall salmon 2022"   </span></span>
+<span><span class="co">#&gt;  [7] "Cascade fall salmon 2023"    "Cascade fall salmon 2024"   </span></span>
+<span><span class="co">#&gt;  [9] "Cascade spring Chinook 2021" "Cascade spring Chinook 2022"</span></span></code></pre></div>
 <p><strong>What if I know part of the Fishery Name but not the specific
 syntax?</strong></p>
 <p>The function <code><a href="../reference/search_fishery_name.html">search_fishery_name()</a></code> can accept a vector
@@ -135,17 +126,17 @@ values.</p>
 <span></span>
 <span><span class="co"># by run / species</span></span>
 <span><span class="fu"><a href="../reference/search_fishery_name.html">search_fishery_name</a></span><span class="op">(</span><span class="st">"winter steelhead"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Chehalis winter steelhead 2024-25"   "Chehalis Winter Steelhead 2025-26"  </span></span>
+<span><span class="co">#&gt; [1] "Chehalis winter steelhead 2024-25"   "Chehalis winter steelhead 2025-26"  </span></span>
 <span><span class="co">#&gt; [3] "Clearwater winter steelhead 2024-25" "Hoh winter steelhead 2022-23"       </span></span>
 <span><span class="co">#&gt; [5] "Hoh winter steelhead 2023-24"</span></span>
 <span></span>
 <span><span class="co"># by year</span></span>
 <span><span class="fu"><a href="../reference/search_fishery_name.html">search_fishery_name</a></span><span class="op">(</span><span class="st">"2025"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Chehalis Salmon 2025"                </span></span>
-<span><span class="co">#&gt; [2] "Chehalis Winter Steelhead 2025-26"   </span></span>
-<span><span class="co">#&gt; [3] "Chum Broodstock Collection 2025"     </span></span>
-<span><span class="co">#&gt; [4] "Drano Lake salmon and steelhead 2025"</span></span>
-<span><span class="co">#&gt; [5] "Hoh fall salmon 2025"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "2025 Banks Lake"                     </span></span>
+<span><span class="co">#&gt; [2] "Chehalis salmon 2025"                </span></span>
+<span><span class="co">#&gt; [3] "Chehalis winter steelhead 2025-26"   </span></span>
+<span><span class="co">#&gt; [4] "Chum Broodstock Collection 2025"     </span></span>
+<span><span class="co">#&gt; [5] "Drano Lake salmon and steelhead 2025"</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="accessing-internal-data">Accessing internal data<a class="anchor" aria-label="anchor" href="#accessing-internal-data"></a>
 </h3>

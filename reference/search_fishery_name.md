@@ -61,9 +61,9 @@ search_fishery_name("gamefish")
 #> [26] "Wallace salmon and gamefish 2023-24"                
 #> [27] "Wallace salmon and gamefish 2024-25"                
 search_fishery_name("Humptulips")
-#> [1] "Humptulips Salmon 2025"              "Humptulips Winter Steelhead 2025-26"
-#> [3] "Humptulips salmon 2019"              "Humptulips salmon 2020"             
-#> [5] "Humptulips salmon 2021"              "Humptulips salmon 2022"             
-#> [7] "Humptulips salmon 2023"              "Humptulips salmon 2024"             
-#> [9] "Humptulips winter steelhead 2024-25"
+#> [1] "Humptulips salmon 2019"              "Humptulips salmon 2020"             
+#> [3] "Humptulips salmon 2021"              "Humptulips salmon 2022"             
+#> [5] "Humptulips salmon 2023"              "Humptulips salmon 2024"             
+#> [7] "Humptulips salmon 2025"              "Humptulips winter steelhead 2024-25"
+#> [9] "Humptulips winter steelhead 2025-26"
 ```

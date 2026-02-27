@@ -28,15 +28,6 @@ library(creelutils)
 
 fishery_name <- "Skagit winter steelhead 2021"
 dat <- fetch_dwg(fishery_name)
-#> # A tibble: 6 × 2
-#>   `Data Component` Records
-#>   <chr>              <int>
-#> 1 effort              4864
-#> 2 ll                     2
-#> 3 interview           1860
-#> 4 catch                683
-#> 5 closures              60
-#> 6 fishery_manager       22
 
 #ll stands for latitude and longitude
 names(dat)
@@ -64,11 +55,11 @@ database.
 
 ``` r
 fetch_fishery_names() |> head(n = 10)
-#>  [1] "Baker summer sockeye 2022"   "Baker summer sockeye 2023"  
-#>  [3] "Cascade fall salmon 2021"    "Cascade fall salmon 2022"   
-#>  [5] "Cascade fall salmon 2023"    "Cascade fall salmon 2024"   
-#>  [7] "Cascade spring Chinook 2021" "Cascade spring Chinook 2022"
-#>  [9] "Cascade spring Chinook 2023" "Cascade spring Chinook 2024"
+#>  [1] "2024 Potholes Reservoir"     "2025 Banks Lake"            
+#>  [3] "Baker summer sockeye 2022"   "Baker summer sockeye 2023"  
+#>  [5] "Cascade fall salmon 2021"    "Cascade fall salmon 2022"   
+#>  [7] "Cascade fall salmon 2023"    "Cascade fall salmon 2024"   
+#>  [9] "Cascade spring Chinook 2021" "Cascade spring Chinook 2022"
 ```
 
 **What if I know part of the Fishery Name but not the specific syntax?**
@@ -86,17 +77,17 @@ search_fishery_name("Humptulips") |> head(n = 5)
 
 # by run / species
 search_fishery_name("winter steelhead") |> head(n = 5)
-#> [1] "Chehalis winter steelhead 2024-25"   "Chehalis Winter Steelhead 2025-26"  
+#> [1] "Chehalis winter steelhead 2024-25"   "Chehalis winter steelhead 2025-26"  
 #> [3] "Clearwater winter steelhead 2024-25" "Hoh winter steelhead 2022-23"       
 #> [5] "Hoh winter steelhead 2023-24"
 
 # by year
 search_fishery_name("2025") |> head(n = 5)
-#> [1] "Chehalis Salmon 2025"                
-#> [2] "Chehalis Winter Steelhead 2025-26"   
-#> [3] "Chum Broodstock Collection 2025"     
-#> [4] "Drano Lake salmon and steelhead 2025"
-#> [5] "Hoh fall salmon 2025"
+#> [1] "2025 Banks Lake"                     
+#> [2] "Chehalis salmon 2025"                
+#> [3] "Chehalis winter steelhead 2025-26"   
+#> [4] "Chum Broodstock Collection 2025"     
+#> [5] "Drano Lake salmon and steelhead 2025"
 ```
 
 ### Accessing internal data
