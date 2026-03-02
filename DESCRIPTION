@@ -43,9 +43,12 @@ Suggests:
     yaml,
     dataRetrieval,
     here,
-    rprojroot
+    rprojroot,
+    testthat (>= 3.0.0)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 URL: https://wdfw-fp.github.io/creelutils
 BugReports: https://github.com/wdfw-fp/creelutils/issues
+LazyData: true
+Config/testthat/edition: 3
