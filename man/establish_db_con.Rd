@@ -5,13 +5,13 @@
 \title{Establish database connection}
 \usage{
 establish_db_con(
-  conn_type = c("odbc", "config"),
+  conn_type = c("config", "odbc"),
   dsn = "creel_estimates",
   config_path = "config.yml"
 )
 }
 \arguments{
-\item{conn_type}{Character input denoting either "odbc" or "config" connection type.}
+\item{conn_type}{\code{"config"} (default) uses a local \code{config.yml} + \code{RPostgres}; \code{"odbc"} uses a system-configured DSN.}
 
 \item{dsn}{Character string denoting the ODBC domain service name (DSN) to connect to.}
 
@@ -21,7 +21,10 @@ establish_db_con(
 A \code{DBI} connection to a PostgreSQL database management system. Recommend that this object be named "con".
 }
 \description{
-Establishes a connection to the WDFW PostgreSQL database. This process requires either a configured ODBC DSN or a local \code{config.yml} file.
+Establishes a connection to the WDFW PostgreSQL database.
+Requires either a  local \code{config.yml} file (default) or a configured ODBC DSN.
+The config path uses driver from the \code{RPostgres} package and is preferred for performance, particularly during build database writes.
+\strong{Note:} when called in a non-interactive session (scheduled render or automated script), the password prompt will block execution.
 }
 \seealso{
 Other internal_data: 
