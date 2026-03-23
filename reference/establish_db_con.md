@@ -1,13 +1,17 @@
 # Establish database connection
 
-Establishes a connection to the WDFW PostgreSQL database. This process
-requires either a configured ODBC DSN or a local `config.yml` file.
+Establishes a connection to the WDFW PostgreSQL database. Requires
+either a local `config.yml` file (default) or a configured ODBC DSN. The
+config path uses driver from the `RPostgres` package and is preferred
+for performance, particularly during build database writes. **Note:**
+when called in a non-interactive session (scheduled render or automated
+script), the password prompt will block execution.
 
 ## Usage
 
 ``` r
 establish_db_con(
-  conn_type = c("odbc", "config"),
+  conn_type = c("config", "odbc"),
   dsn = "creel_estimates",
   config_path = "config.yml"
 )
@@ -17,7 +21,8 @@ establish_db_con(
 
 - conn_type:
 
-  Character input denoting either "odbc" or "config" connection type.
+  `"config"` (default) uses a local `config.yml` + `RPostgres`; `"odbc"`
+  uses a system-configured DSN.
 
 - dsn:
 
