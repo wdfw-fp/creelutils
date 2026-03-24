@@ -16,7 +16,7 @@ establish_db_con<- function(
     config_path = "config.yml"
   ) {
 
-  conn_type <- match.arg(conn_type, choices = c("odbc", "config"))
+  conn_type <- match.arg(conn_type)
 
   # try odbc connection as default or if requested ####
   if (conn_type == "odbc") {
