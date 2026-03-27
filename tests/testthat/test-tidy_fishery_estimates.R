@@ -3,7 +3,7 @@
 
 # Setup test data ----
 
-# Helper function to create mock long-format estimates data
+# Helper function to create mock long-format estimates data (legacy single-df use)
 create_mock_estimates_long <- function() {
   tibble::tibble(
     analysis_id = rep("uuid-001", 24),
@@ -12,7 +12,7 @@ create_mock_estimates_long <- function() {
     project_name = rep("Test Project", 24),
     fishery_name = rep("Nisqually", 24),
 
-    # Catch records (12 rows: 2 catch groups × 2 models × 3 estimate types)
+    # Catch records (12 rows: 2 catch groups x 2 models x 3 estimate types)
     species_name = c(rep("Chinook", 6), rep("Steelhead", 6), rep(NA, 12)),
     life_stage_name = c(rep("Adult", 6), rep("Adult", 6), rep(NA, 12)),
     fin_mark_desc = c(rep("AD", 6), rep("UM", 6), rep(NA, 12)),
@@ -23,31 +23,19 @@ create_mock_estimates_long <- function() {
       rep("effort", 12)
     ),
 
-    # Model types and estimate types
     model_type = rep(c("PE", "PE", "PE", "BSS", "BSS", "BSS"), 4),
     estimate_type = rep(c("estimate_sum", "mean", "standard_error_mean"), 8),
     estimate_value = c(
-      # Chinook PE
       100, 95, 5,
-      # Chinook BSS
       105, 100, 6,
-      # Steelhead PE
       50, 48, 3,
-      # Steelhead BSS
       52, 50, 4,
-      # Effort PE
       1000, 980, 20,
-      # Effort BSS
       1050, 1000, 25,
-      # More effort
       2000, 1950, 30,
       2100, 2050, 35
     ),
-
-    estimate_category = c(
-      rep("catch", 12),
-      rep("effort", 12)
-    ),
+    estimate_category = c(rep("catch", 12), rep("effort", 12)),
 
     period = rep(1, 24),
     timestep = rep("week", 24),
@@ -59,24 +47,119 @@ create_mock_estimates_long <- function() {
   )
 }
 
+# Helper to create mock pre-split list (matching get_fishery_estimates() output)
+create_mock_estimates_list <- function() {
+  all_data <- create_mock_estimates_long()
+
+  catch_df <- all_data |> dplyr::filter(estimate_category == "catch")
+  effort_df <- all_data |>
+    dplyr::filter(estimate_category == "effort") |>
+    dplyr::select(-catch_group)
+
+  list(
+    catch_total    = catch_df,
+    effort_total   = effort_df,
+    catch_stratum  = NULL,
+    effort_stratum = NULL,
+    analysis_metadata = tibble::tibble(
+      fishery_name = "Nisqually",
+      analysis_id  = "uuid-001",
+      analysis_name = "Nisqually_2021_PE_final",
+      upload_date  = as.Date("2021-12-15"),
+      created_by   = "test_user"
+    )
+  )
+}
+
+# Helper to create mock list including stratum data (split by model type)
+create_mock_estimates_list_with_stratum <- function() {
+  base <- create_mock_estimates_list()
+
+  # Stratum catch: 2 catch groups x 2 model types x 3 estimate types x 2 strata
+  # columns match vw_model_estimates_stratum structure
+  catch_stratum <- tibble::tibble(
+    analysis_id      = rep("uuid-001", 24),
+    analysis_name    = rep("Nisqually_2021_PE_final", 24),
+    project_id       = rep("proj-001", 24),
+    project_name     = rep("Test Project", 24),
+    fishery_name     = rep("Nisqually", 24),
+    species_name     = rep(c("Chinook", "Steelhead"), each = 12),
+    life_stage_name  = rep("Adult", 24),
+    fin_mark_desc    = rep(c("AD", "UM"), each = 12),
+    fate_name        = rep(c("Kept", "Released"), each = 12),
+    catch_group      = rep(c("Chinook_Adult_AD_Kept", "Steelhead_Adult_UM_Released"), each = 12),
+    angler_type_name = rep("Bank Anglers", 24),
+    catch_area_code  = rep("786", 24),
+    section_num      = rep(1L, 24),
+    day_type         = rep(c("weekday", "weekend"), 12),
+    model_type       = rep(c(rep("PE", 6), rep("BSS", 6)), 2),
+    estimate_type    = rep(c("number_observations", "catch_estimate_mean",
+                             "catch_estimate_variance",
+                             "number_observations", "catch_estimate_mean",
+                             "catch_estimate_variance"), 4),
+    estimate_value   = runif(24, 0, 100),
+    estimate_category = rep("catch", 24),
+    period           = rep(1L, 24),
+    min_event_date   = rep(as.Date("2021-01-01"), 24),
+    max_event_date   = rep(as.Date("2021-01-07"), 24),
+    data_grade       = rep("Approved", 24),
+    upload_date      = rep(as.Date("2021-12-15"), 24),
+    created_by       = rep("test_user", 24),
+    period_timestep  = rep("week", 24)
+  )
+
+  effort_stratum <- tibble::tibble(
+    analysis_id      = rep("uuid-001", 12),
+    analysis_name    = rep("Nisqually_2021_PE_final", 12),
+    project_id       = rep("proj-001", 12),
+    project_name     = rep("Test Project", 12),
+    fishery_name     = rep("Nisqually", 12),
+    species_name     = NA_character_,
+    angler_type_name = rep("Bank Anglers", 12),
+    catch_area_code  = rep("786", 12),
+    section_num      = rep(1L, 12),
+    day_type         = rep(c("weekday", "weekend"), 6),
+    model_type       = rep(c(rep("PE", 6), rep("BSS", 6)), 1),
+    estimate_type    = rep(c("number_interviews", "effort_estimate_mean",
+                             "effort_estimate_variance",
+                             "number_interviews", "effort_estimate_mean",
+                             "effort_estimate_variance"), 2),
+    estimate_value   = runif(12, 0, 500),
+    estimate_category = rep("effort", 12),
+    period           = rep(1L, 12),
+    min_event_date   = rep(as.Date("2021-01-01"), 12),
+    max_event_date   = rep(as.Date("2021-01-07"), 12),
+    data_grade       = rep("Approved", 12),
+    upload_date      = rep(as.Date("2021-12-15"), 12),
+    created_by       = rep("test_user", 12),
+    period_timestep  = rep("week", 12)
+  )
+
+  base$catch_stratum  <- catch_stratum
+  base$effort_stratum <- effort_stratum
+  base
+}
+
 # Input Validation Tests ----
 
-test_that("tidy_fishery_estimates requires a dataframe", {
+test_that("tidy_fishery_estimates requires a dataframe or recognized list", {
   expect_message(
     result <- tidy_fishery_estimates(),
-    "ERROR: 'estimates_df' must be a dataframe"
+    "ERROR: 'estimates' must be a dataframe or a named list"
   )
   expect_null(result)
 
   expect_message(
     result <- tidy_fishery_estimates("not a dataframe"),
-    "ERROR: 'estimates_df' must be a dataframe"
+    "ERROR: 'estimates' must be a dataframe or a named list"
   )
   expect_null(result)
 
+  # An unrecognized plain list (no recognized table names) is treated as a
+  # non-dataframe and hits the legacy-path error
   expect_message(
     result <- tidy_fishery_estimates(list(a = 1, b = 2)),
-    "ERROR: 'estimates_df' must be a dataframe"
+    "ERROR: 'estimates' must be a dataframe or a named list"
   )
   expect_null(result)
 })
@@ -117,7 +200,112 @@ test_that("tidy_fishery_estimates handles empty dataframe", {
   expect_null(result$effort)
 })
 
-# Basic Functionality Tests ----
+# List-path Tests ----
+
+test_that("tidy_fishery_estimates accepts full list from get_fishery_estimates", {
+  mock_list <- create_mock_estimates_list()
+  result <- suppressMessages(tidy_fishery_estimates(mock_list))
+
+  expect_type(result, "list")
+  expect_true("catch_total" %in% names(result))
+  expect_true("effort_total" %in% names(result))
+  expect_true("analysis_metadata" %in% names(result))
+})
+
+test_that("tidy_fishery_estimates list-path produces wide catch_total table", {
+  mock_list <- create_mock_estimates_list()
+  result <- suppressMessages(tidy_fishery_estimates(mock_list))
+
+  expect_s3_class(result$catch_total, "data.frame")
+  expect_true("catch_group" %in% names(result$catch_total))
+  catch_cols <- names(result$catch_total)
+  expect_true(any(grepl("^PE_", catch_cols)))
+  expect_true(any(grepl("^BSS_", catch_cols)))
+})
+
+test_that("tidy_fishery_estimates list-path produces wide effort_total table", {
+  mock_list <- create_mock_estimates_list()
+  result <- suppressMessages(tidy_fishery_estimates(mock_list))
+
+  expect_s3_class(result$effort_total, "data.frame")
+  expect_false("catch_group" %in% names(result$effort_total))
+  effort_cols <- names(result$effort_total)
+  expect_true(any(grepl("^PE_|^BSS_", effort_cols)))
+})
+
+test_that("tidy_fishery_estimates passes analysis_metadata through unchanged", {
+  mock_list <- create_mock_estimates_list()
+  result <- suppressMessages(tidy_fishery_estimates(mock_list))
+
+  expect_identical(result$analysis_metadata, mock_list$analysis_metadata)
+})
+
+test_that("tidy_fishery_estimates skips NULL stratum tables gracefully", {
+  mock_list <- create_mock_estimates_list() # catch_stratum and effort_stratum are NULL
+  result <- suppressMessages(tidy_fishery_estimates(mock_list))
+
+  # NULL stratum tables are skipped entirely — keys will not be present
+  expect_null(result$catch_stratum_pe)
+  expect_null(result$catch_stratum_bss)
+  expect_null(result$effort_stratum_pe)
+  expect_null(result$effort_stratum_bss)
+})
+
+test_that("tidy_fishery_estimates splits stratum tables by model type", {
+  mock_list <- create_mock_estimates_list_with_stratum()
+  result <- suppressMessages(tidy_fishery_estimates(mock_list))
+
+  # Should produce separate PE and BSS stratum tables
+  expect_s3_class(result$catch_stratum_pe,  "data.frame")
+  expect_s3_class(result$catch_stratum_bss, "data.frame")
+  expect_s3_class(result$effort_stratum_pe,  "data.frame")
+  expect_s3_class(result$effort_stratum_bss, "data.frame")
+
+  # Original stratum keys should not appear
+  expect_null(result$catch_stratum)
+  expect_null(result$effort_stratum)
+})
+
+test_that("tidy_fishery_estimates stratum tables use bare estimate_type column names", {
+  mock_list <- create_mock_estimates_list_with_stratum()
+  result <- suppressMessages(tidy_fishery_estimates(mock_list))
+
+  # PE stratum catch should have bare estimate_type names (no PE_ prefix)
+  pe_cols <- names(result$catch_stratum_pe)
+  expect_false(any(grepl("^PE_", pe_cols)))
+  expect_false(any(grepl("^BSS_", pe_cols)))
+  expect_true(any(grepl("catch_estimate_mean|number_observations", pe_cols)))
+
+  # BSS stratum catch likewise
+  bss_cols <- names(result$catch_stratum_bss)
+  expect_false(any(grepl("^PE_", bss_cols)))
+  expect_false(any(grepl("^BSS_", bss_cols)))
+})
+
+test_that("tidy_fishery_estimates stratum catch has catch_group; effort does not", {
+  mock_list <- create_mock_estimates_list_with_stratum()
+  result <- suppressMessages(tidy_fishery_estimates(mock_list))
+
+  expect_true("catch_group" %in% names(result$catch_stratum_pe))
+  expect_true("catch_group" %in% names(result$catch_stratum_bss))
+  expect_false("catch_group" %in% names(result$effort_stratum_pe))
+  expect_false("catch_group" %in% names(result$effort_stratum_bss))
+})
+
+test_that("tidy_fishery_estimates stratum tables include stratum-specific columns", {
+  mock_list <- create_mock_estimates_list_with_stratum()
+  result <- suppressMessages(tidy_fishery_estimates(mock_list))
+
+  stratum_cols <- c("angler_type_name", "section_num", "day_type", "period_timestep")
+  for (col in stratum_cols) {
+    expect_true(col %in% names(result$catch_stratum_pe),
+                info = paste("Missing stratum column:", col, "in catch_stratum_pe"))
+    expect_true(col %in% names(result$catch_stratum_bss),
+                info = paste("Missing stratum column:", col, "in catch_stratum_bss"))
+  }
+})
+
+# Basic Functionality Tests (legacy single-df path) ----
 
 test_that("tidy_fishery_estimates returns correct structure", {
   test_data <- create_mock_estimates_long()
@@ -128,7 +316,6 @@ test_that("tidy_fishery_estimates returns correct structure", {
   expect_s3_class(result$catch, "data.frame")
   expect_s3_class(result$effort, "data.frame")
 })
-
 test_that("tidy_fishery_estimates separates catch and effort", {
   test_data <- create_mock_estimates_long()
   result <- suppressMessages(tidy_fishery_estimates(test_data))
@@ -409,6 +596,30 @@ test_that("tidy_fishery_estimates provides progress messages", {
   expect_match(messages_text, "Successfully created tidy estimates")
 })
 
+test_that("tidy_fishery_estimates list-path provides progress messages", {
+  mock_list <- create_mock_estimates_list()
+
+  messages <- capture_messages(tidy_fishery_estimates(mock_list))
+  messages_text <- paste(messages, collapse = "\n")
+
+  expect_match(messages_text, "Input detected as named list")
+  expect_match(messages_text, "Pivoting 'catch_total'")
+  expect_match(messages_text, "Pivoting 'effort_total'")
+  expect_match(messages_text, "Successfully created tidy estimates")
+})
+
+test_that("tidy_fishery_estimates list-path with stratum shows split model messages", {
+  mock_list <- create_mock_estimates_list_with_stratum()
+
+  messages <- capture_messages(tidy_fishery_estimates(mock_list))
+  messages_text <- paste(messages, collapse = "\n")
+
+  expect_match(messages_text, "Pivoting 'catch_stratum_pe'")
+  expect_match(messages_text, "Pivoting 'catch_stratum_bss'")
+  expect_match(messages_text, "Pivoting 'effort_stratum_pe'")
+  expect_match(messages_text, "Pivoting 'effort_stratum_bss'")
+})
+
 # Integration with get_fishery_estimates ----
 
 test_that("tidy_fishery_estimates works with get_fishery_estimates output", {
@@ -425,19 +636,29 @@ test_that("tidy_fishery_estimates works with get_fishery_estimates output", {
 
   skip_if_offline()
 
-  # Get real data
+  # Get real data as a list
   raw_data <- suppressMessages(
-    get_fishery_estimates(fishery_names = "Nisqually", years = 2021)
+    get_fishery_estimates(
+      fishery_names = "Nisqually",
+      years = 2021,
+      temporal_agg = "total"
+    )
   )
 
   skip_if(is.null(raw_data), "No data available for test")
 
-  # Should be able to tidy it
-  result <- suppressMessages(tidy_fishery_estimates(raw_data$estimates))
+  # Pass the full list — should return matching named list
+  result <- suppressMessages(tidy_fishery_estimates(raw_data))
 
   expect_type(result, "list")
-  expect_s3_class(result$catch, "data.frame")
-  expect_s3_class(result$effort, "data.frame")
+  expect_true("catch_total" %in% names(result))
+  expect_true("effort_total" %in% names(result))
+  if (!is.null(result$catch_total)) {
+    expect_s3_class(result$catch_total, "data.frame")
+  }
+  if (!is.null(result$effort_total)) {
+    expect_s3_class(result$effort_total, "data.frame")
+  }
 })
 
 # Performance Tests ----

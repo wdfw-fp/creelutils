@@ -27,7 +27,7 @@ export_estimates <- function(params, analysis_lut, creel_estimates, conn = NULL)
 
     # Connect to database if connection not supplied in argument
     if (is.null(conn)) {
-    con <- establish_db_con()
+    con <- establish_db_con(conn_type = "config")
     } else {
       con <- conn # Use connection provided
     }

@@ -67,7 +67,10 @@ test_that("extract_estimate_types keeps metadata columns", {
 test_that("extract_estimate_types handles multiple patterns", {
   test_data <- create_mock_tidy_catch()
 
-  patterns <- c("estimate_sum$", "mean$")
+  # Note: "mean$" matches both PE_mean, BSS_mean AND PE_standard_error_mean,
+  # BSS_standard_error_mean since the latter also end in "mean".
+  # Use "^PE_mean$|^BSS_mean$" for exact matching.
+  patterns <- c("estimate_sum$", "^PE_mean$", "^BSS_mean$")
   result <- suppressMessages(extract_estimate_types(test_data, patterns))
 
   result_cols <- names(result)

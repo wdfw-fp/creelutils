@@ -1,58 +1,134 @@
 #' Convert fishery estimates from long to wide (tidy) format
 #'
-#' @description Separates estimates into catch and effort tables, then pivots each
-#' so that each unique combination of analysis_id and catch_group has one row with
-#' all estimate types as separate columns. Estimate types are prefixed with model
-#' type (PE or BSS) to distinguish the source.
+#' @description Accepts either the full list returned by `get_fishery_estimates()` or
+#' a single estimates dataframe. Pivots each table so that each unique observation
+#' has one row with all estimate types as separate columns.
 #'
-#' Available estimate types in data:
-#' - estimate_sum
-#' - totaldaysopen
-#' - totalobs
-#' - mean
-#' - standard_error_mean
-#' - standard_deviation
-#' - quantile_lower_2_5
-#' - quantile_lower_25
-#' - quantile_median_50
-#' - quantile_upper_75
-#' - quantile_upper_97_5
-#' - n_eff
-#' - R_hat
-#' - n_div
+#' **Total-level tables** (`catch_total`, `effort_total`): PE and BSS rows are
+#' coalesced into a single row per observation; estimate type columns are prefixed
+#' with the model type (`PE_estimate_sum`, `BSS_mean`, etc.).
+#'
+#' **Stratum-level tables** are split by model type because PE and BSS operate on
+#' different temporal groupings and cannot be meaningfully coalesced. Each model
+#' gets its own table with bare `estimate_type` names (no redundant prefix):
+#' `catch_stratum_pe`, `catch_stratum_bss`, `effort_stratum_pe`, `effort_stratum_bss`.
+#'
+#' `analysis_metadata` is passed through unchanged.
+#'
+#' When a single dataframe is provided (legacy use), the function splits it into
+#' catch and effort and returns `list(catch = ..., effort = ...)`.
 #'
 #' @family data_formatting
-#' @param estimates_df A dataframe of estimates, typically from `get_fishery_estimates()$estimates`
+#' @param estimates A named list from `get_fishery_estimates()`, or a single
+#'   dataframe of estimates (legacy use). When a list is provided, recognized
+#'   table keys are `catch_total`, `effort_total`, `catch_stratum`, `effort_stratum`.
 #'
-#' @return A list with two tibbles:
+#' @return A named list:
 #'   \itemize{
-#'     \item `$catch`: Wide format catch estimates (one row per analysis_id + catch_group)
-#'     \item `$effort`: Wide format effort estimates (one row per analysis_id)
+#'     \item `$catch_total` Wide format, PE and BSS coalesced, prefixed columns
+#'     \item `$effort_total` Wide format, PE and BSS coalesced, prefixed columns
+#'     \item `$catch_stratum_pe` Wide format, PE stratum catch, bare column names
+#'     \item `$catch_stratum_bss` Wide format, BSS stratum catch, bare column names
+#'     \item `$effort_stratum_pe` Wide format, PE stratum effort, bare column names
+#'     \item `$effort_stratum_bss` Wide format, BSS stratum effort, bare column names
+#'     \item `$analysis_metadata` Passed through unchanged
+#'     \item When input is a dataframe: `list(catch = ..., effort = ...)`
 #'   }
 #'
 #' @export
 #'
 #' @examples
 #' \dontrun{
-#' # Get estimates
-#' nisqually_est <- get_fishery_estimates(
+#' # Get estimates for total and stratum levels
+#' est <- get_fishery_estimates(
 #'   fishery_names = "Nisqually salmon",
-#'   years = 2022
+#'   years = 2022,
+#'   temporal_agg = "all"
 #' )
 #'
-#' # Convert to tidy format
-#' tidy_est <- tidy_fishery_estimates(nisqually_est$estimates)
+#' # Convert full list to tidy format
+#' tidy_est <- tidy_fishery_estimates(est)
+#' tidy_est$catch_total        # PE + BSS coalesced, prefixed columns
+#' tidy_est$catch_stratum_pe   # PE stratum, bare column names
+#' tidy_est$catch_stratum_bss  # BSS stratum, bare column names
 #'
-#' # Access catch and effort separately
-#' catch_data <- tidy_est$catch
-#' effort_data <- tidy_est$effort
+#' # Legacy single-dataframe use
+#' tidy_total <- tidy_fishery_estimates(est$catch_total)
 #' }
 
-tidy_fishery_estimates <- function(estimates_df) {
+tidy_fishery_estimates <- function(estimates) {
 
-  # Input validation ----
-  if (missing(estimates_df) || !is.data.frame(estimates_df)) {
-    message("ERROR: 'estimates_df' must be a dataframe.")
+  # Input validation and dispatch ----
+  if (missing(estimates)) {
+    message("ERROR: 'estimates' must be a dataframe or a named list from get_fishery_estimates().")
+    return(NULL)
+  }
+
+  # Named list path: dispatch each recognized table, pass metadata through
+  recognized_catch   <- c("catch_total", "catch_stratum")
+  recognized_effort  <- c("effort_total", "effort_stratum")
+  recognized_stratum <- c("catch_stratum", "effort_stratum")
+  recognized_all     <- c(recognized_catch, recognized_effort, "analysis_metadata")
+
+  if (is.list(estimates) && !is.data.frame(estimates) &&
+      any(names(estimates) %in% recognized_all)) {
+    message("Input detected as named list from get_fishery_estimates()")
+
+    out <- list()
+
+    for (tbl_name in names(estimates)) {
+      if (tbl_name == "analysis_metadata") {
+        out$analysis_metadata <- estimates$analysis_metadata
+        next
+      }
+
+      if (!tbl_name %in% recognized_all) {
+        message("Skipping unrecognized list element: '", tbl_name, "'")
+        next
+      }
+
+      df <- estimates[[tbl_name]]
+
+      if (is.null(df) || nrow(df) == 0) {
+        message("Skipping empty table: '", tbl_name, "'")
+        next
+      }
+
+      # Stratum tables: split by model_type, one wide table per model
+      if (tbl_name %in% recognized_stratum) {
+        include_cg <- tbl_name == "catch_stratum"
+        model_types <- sort(unique(df$model_type))
+
+        if (length(model_types) == 0) {
+          message("WARNING: No model_type values found in '", tbl_name, "'. Skipping.")
+          next
+        }
+
+        for (mt in model_types) {
+          out_key <- paste0(tbl_name, "_", tolower(mt))
+          df_mt   <- df |> dplyr::filter(.data$model_type == mt)
+          message("Pivoting '", out_key, "' (", nrow(df_mt), " rows)...")
+          out[[out_key]] <- .pivot_single_model_wide(df_mt,
+                                                     include_catch_group = include_cg)
+        }
+        next
+      }
+
+      # Total tables: coalesce PE + BSS into one row, prefixed columns
+      include_cg <- tbl_name %in% recognized_catch
+      message("Pivoting '", tbl_name, "' (", nrow(df), " rows)...")
+      out[[tbl_name]] <- .pivot_estimates_wide(df, include_catch_group = include_cg)
+    }
+
+    message("Successfully created tidy estimates")
+    return(out)
+  }
+
+  # Single dataframe path (legacy) ----
+  estimates_df <- estimates
+
+  if (!is.data.frame(estimates_df)) {
+    message("ERROR: 'estimates' must be a dataframe or a named list from get_fishery_estimates().")
     return(NULL)
   }
 
@@ -232,13 +308,155 @@ tidy_fishery_estimates <- function(estimates_df) {
     effort_wide <- reorder_estimate_columns(effort_wide, include_catch_group = FALSE)
   }
 
-  # Return results ----
+  # Return results (legacy single-df path) ----
   message("Successfully created tidy estimates")
 
   return(list(
     catch = catch_wide,
     effort = effort_wide
   ))
+}
+
+
+#' Pivot a pre-split estimates dataframe to wide format
+#'
+#' @description Internal helper used by `tidy_fishery_estimates()`. Expects a
+#' dataframe that is already restricted to either catch or effort records
+#' (i.e., the `estimate_category` split has already been done upstream by
+#' `get_fishery_estimates()`). Adds model-type prefix, pivots wider, collapses
+#' PE/BSS rows, then reorders columns.
+#'
+#' @param df A long-format dataframe of either catch or effort estimates
+#' @param include_catch_group Logical; TRUE for catch tables, FALSE for effort tables
+#'
+#' @return Wide-format dataframe, or NULL on failure
+#' @keywords internal
+
+.pivot_estimates_wide <- function(df, include_catch_group = TRUE) {
+
+  required_cols <- c("analysis_id", "estimate_type", "estimate_value")
+  missing_cols <- setdiff(required_cols, names(df))
+  if (length(missing_cols) > 0) {
+    message("ERROR: Missing required columns in table: ", paste(missing_cols, collapse = ", "))
+    return(NULL)
+  }
+
+  # Add model type prefix to estimate_type
+  df_prefixed <- df |>
+    dplyr::mutate(
+      estimate_type_prefixed = paste(.data$model_type, .data$estimate_type, sep = "_")
+    )
+
+  exclude_cols <- c("estimate_type", "estimate_value", "estimate_category",
+                    "estimate_class", "estimate_type_prefixed", "model_type")
+
+  # For effort tables, drop catch_group from grouping (it always equals "effort")
+  if (!include_catch_group) {
+    exclude_cols <- c(exclude_cols, "catch_group")
+  }
+
+  grouping_cols <- setdiff(names(df_prefixed), exclude_cols)
+
+  wide <- try(
+    df_prefixed |>
+      tidyr::pivot_wider(
+        id_cols = dplyr::all_of(grouping_cols),
+        names_from = estimate_type_prefixed,
+        values_from = estimate_value,
+        values_fn = list(estimate_value = function(x) {
+          if (length(x) > 1) {
+            message("WARNING: Multiple values for same estimate_type. Using first value.")
+            return(x[1])
+          }
+          return(x)
+        })
+      ),
+    silent = FALSE
+  )
+
+  if (inherits(wide, "try-error")) {
+    message("ERROR: Failed to pivot data to wide format.")
+    message("Grouping columns: ", paste(grouping_cols, collapse = ", "))
+    return(NULL)
+  }
+
+  # Remove estimate_class column if present
+  if ("estimate_class" %in% names(wide)) {
+    wide <- wide |> dplyr::select(-estimate_class)
+  }
+
+  n_before <- nrow(wide)
+  wide <- collapse_model_rows(wide)
+  message("  ", n_before, " rows collapsed to ", nrow(wide), " rows with ",
+          length(grep("^(PE_|BSS_)", names(wide))), " estimate columns")
+
+  wide <- reorder_estimate_columns(wide, include_catch_group = include_catch_group)
+
+  return(wide)
+}
+
+
+#' Pivot a single-model-type stratum estimates dataframe to wide format
+#'
+#' @description Internal helper for stratum tables that have already been filtered
+#' to a single model type (PE or BSS). Uses bare `estimate_type` values as column
+#' names (no model-type prefix, since the table name already conveys the model).
+#' Does not call `collapse_model_rows()` — with one model type there is nothing
+#' to coalesce.
+#'
+#' @param df A long-format dataframe of stratum estimates for a single model type
+#' @param include_catch_group Logical; TRUE for catch tables, FALSE for effort tables
+#'
+#' @return Wide-format dataframe, or NULL on failure
+#' @keywords internal
+
+.pivot_single_model_wide <- function(df, include_catch_group = TRUE) {
+
+  required_cols <- c("analysis_id", "estimate_type", "estimate_value")
+  missing_cols <- setdiff(required_cols, names(df))
+  if (length(missing_cols) > 0) {
+    message("ERROR: Missing required columns in table: ", paste(missing_cols, collapse = ", "))
+    return(NULL)
+  }
+
+  # Exclude estimate-specific and model_type columns from grouping id_cols
+  exclude_cols <- c("estimate_type", "estimate_value", "estimate_category", "model_type")
+
+  if (!include_catch_group) {
+    exclude_cols <- c(exclude_cols, "catch_group")
+  }
+
+  grouping_cols <- setdiff(names(df), exclude_cols)
+
+  wide <- try(
+    df |>
+      tidyr::pivot_wider(
+        id_cols    = dplyr::all_of(grouping_cols),
+        names_from = estimate_type,
+        values_from = estimate_value,
+        values_fn  = list(estimate_value = function(x) {
+          if (length(x) > 1) {
+            message("WARNING: Multiple values for same estimate_type. Using first value.")
+            return(x[1])
+          }
+          return(x)
+        })
+      ),
+    silent = FALSE
+  )
+
+  if (inherits(wide, "try-error")) {
+    message("ERROR: Failed to pivot stratum data to wide format.")
+    message("Grouping columns: ", paste(grouping_cols, collapse = ", "))
+    return(NULL)
+  }
+
+  n_est_cols <- length(setdiff(names(wide), grouping_cols))
+  message("  ", nrow(wide), " rows x ", n_est_cols, " estimate columns")
+
+  wide <- reorder_estimate_columns(wide, include_catch_group = include_catch_group)
+
+  return(wide)
 }
 
 
@@ -319,7 +537,9 @@ reorder_estimate_columns <- function(df, include_catch_group = TRUE) {
   }
 
   meta_cols <- intersect(
-    c("period", "timestep", "min_event_date", "max_event_date",
+    c("period", "timestep", "period_timestep", "day_type",
+      "angler_type_name", "catch_area_code", "section_num",
+      "min_event_date", "max_event_date",
       "data_grade", "upload_date", "created_by"),
     names(df)
   )
@@ -355,14 +575,14 @@ reorder_estimate_columns <- function(df, include_catch_group = TRUE) {
 #' \dontrun{
 #' # Get and tidy estimates
 #' est <- get_fishery_estimates("Nisqually salmon", years = 2022)
-#' tidy_est <- tidy_fishery_estimates(est$estimates)
+#' tidy_est <- tidy_fishery_estimates(est)
 #'
-#' # Extract only PE estimates from catch
-#' pe_catch <- extract_estimate_types(tidy_est$catch, "^PE_")
+#' # Extract only PE estimates from total catch
+#' pe_catch <- extract_estimate_types(tidy_est$catch_total, "^PE_")
 #'
-#' # Extract only BSS mean and CI from catch
+#' # Extract only BSS mean and CI from total catch
 #' bss_summary <- extract_estimate_types(
-#'   tidy_est$catch,
+#'   tidy_est$catch_total,
 #'   c("BSS_mean", "BSS_quantile_lower_2_5", "BSS_quantile_upper_97_5")
 #' )
 #'

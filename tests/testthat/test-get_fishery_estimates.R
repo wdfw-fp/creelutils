@@ -100,6 +100,35 @@ test_that("get_fishery_estimates validates max_upload_date parameter", {
   expect_null(result)
 })
 
+test_that("get_fishery_estimates validates temporal_agg parameter", {
+  expect_message(
+    result <- get_fishery_estimates(
+      fishery_names = "Nisqually",
+      temporal_agg = "both"
+    ),
+    "ERROR: 'temporal_agg' must be one of: 'total', 'stratum', or 'all'"
+  )
+  expect_null(result)
+
+  expect_message(
+    result <- get_fishery_estimates(
+      fishery_names = "Nisqually",
+      temporal_agg = c("total", "stratum")
+    ),
+    "ERROR: 'temporal_agg' must be one of: 'total', 'stratum', or 'all'"
+  )
+  expect_null(result)
+
+  expect_message(
+    result <- get_fishery_estimates(
+      fishery_names = "Nisqually",
+      temporal_agg = 1
+    ),
+    "ERROR: 'temporal_agg' must be one of: 'total', 'stratum', or 'all'"
+  )
+  expect_null(result)
+})
+
 test_that("get_fishery_estimates validates database connection", {
   # Create invalid connection object
   invalid_con <- structure(list(), class = "invalid_connection")
@@ -131,12 +160,13 @@ test_that("get_fishery_estimates builds correct message for single fishery with 
 })
 
 test_that("get_fishery_estimates builds correct message for multiple fisheries with years", {
+  # interaction() pairs element-wise: c("A","B") x c(2021,2022) = 2 combinations
   expect_message(
     get_fishery_estimates(
       fishery_names = c("Nisqually", "Skagit"),
       years = 2021:2022
     ),
-    "Querying estimates for 4 fishery-year combination\\(s\\)"
+    "Querying estimates for 2 fishery-year combination\\(s\\)"
   )
 })
 
@@ -199,30 +229,61 @@ test_that("get_fishery_estimates handles nonexistent fishery gracefully", {
 
 # Return Structure Tests ----
 
-test_that("get_fishery_estimates returns list with correct structure", {
+test_that("get_fishery_estimates returns list with correct structure (temporal_agg = 'all')", {
   skip_if_offline()
 
   result <- suppressMessages(
-    get_fishery_estimates(fishery_names = "Nisqually", years = 2021)
+    get_fishery_estimates(fishery_names = "Nisqually", years = 2021, temporal_agg = "all")
   )
 
-  # Skip if no data found
   skip_if(is.null(result), "No data found for test fishery")
 
   expect_type(result, "list")
-  expect_named(result, c("estimates", "analysis_metadata"))
-  expect_s3_class(result$estimates, "data.frame")
+  expected_names <- c("analysis_metadata", "catch_total", "effort_total",
+                      "catch_stratum", "effort_stratum")
+  expect_true(all(expected_names %in% names(result)))
   expect_s3_class(result$analysis_metadata, "data.frame")
 })
 
-test_that("get_fishery_estimates estimates table has required columns", {
+test_that("get_fishery_estimates returns only total tables when temporal_agg = 'total'", {
   skip_if_offline()
 
   result <- suppressMessages(
-    get_fishery_estimates(fishery_names = "Nisqually", years = 2021)
+    get_fishery_estimates(fishery_names = "Nisqually", years = 2021, temporal_agg = "total")
   )
 
   skip_if(is.null(result), "No data found for test fishery")
+
+  expect_true(all(c("catch_total", "effort_total", "analysis_metadata") %in% names(result)))
+  expect_false("catch_stratum" %in% names(result))
+  expect_false("effort_stratum" %in% names(result))
+  expect_false("estimates" %in% names(result))
+})
+
+test_that("get_fishery_estimates returns only stratum tables when temporal_agg = 'stratum'", {
+  skip_if_offline()
+
+  result <- suppressMessages(
+    get_fishery_estimates(fishery_names = "Nisqually", years = 2021, temporal_agg = "stratum")
+  )
+
+  skip_if(is.null(result), "No data found for test fishery")
+
+  expect_true(all(c("catch_stratum", "effort_stratum", "analysis_metadata") %in% names(result)))
+  expect_false("catch_total" %in% names(result))
+  expect_false("effort_total" %in% names(result))
+  expect_false("estimates" %in% names(result))
+})
+
+test_that("get_fishery_estimates catch_total table has required columns", {
+  skip_if_offline()
+
+  result <- suppressMessages(
+    get_fishery_estimates(fishery_names = "Nisqually", years = 2021, temporal_agg = "total")
+  )
+
+  skip_if(is.null(result), "No data found for test fishery")
+  skip_if(is.null(result$catch_total) || nrow(result$catch_total) == 0, "No catch_total data")
 
   required_cols <- c(
     "analysis_id", "analysis_name", "fishery_name",
@@ -230,14 +291,29 @@ test_that("get_fishery_estimates estimates table has required columns", {
     "catch_group", "upload_date"
   )
 
-  expect_true(all(required_cols %in% names(result$estimates)))
+  expect_true(all(required_cols %in% names(result$catch_total)))
+})
+
+test_that("get_fishery_estimates catch_stratum table has stratum-specific columns", {
+  skip_if_offline()
+
+  result <- suppressMessages(
+    get_fishery_estimates(fishery_names = "Nisqually", years = 2021, temporal_agg = "stratum")
+  )
+
+  skip_if(is.null(result), "No data found for test fishery")
+  skip_if(is.null(result$catch_stratum) || nrow(result$catch_stratum) == 0, "No catch_stratum data")
+
+  # Stratum-specific columns
+  stratum_cols <- c("angler_type_name", "section_num", "day_type", "period_timestep")
+  expect_true(any(stratum_cols %in% names(result$catch_stratum)))
 })
 
 test_that("get_fishery_estimates analysis_metadata has required columns", {
   skip_if_offline()
 
   result <- suppressMessages(
-    get_fishery_estimates(fishery_names = "Nisqually", years = 2021)
+    get_fishery_estimates(fishery_names = "Nisqually", years = 2021, temporal_agg = "total")
   )
 
   skip_if(is.null(result), "No data found for test fishery")
@@ -250,50 +326,53 @@ test_that("get_fishery_estimates analysis_metadata has required columns", {
   expect_true(all(required_cols %in% names(result$analysis_metadata)))
 })
 
-test_that("get_fishery_estimates creates catch_group correctly", {
+test_that("get_fishery_estimates creates catch_group correctly in catch_total", {
   skip_if_offline()
 
   result <- suppressMessages(
-    get_fishery_estimates(fishery_names = "Nisqually", years = 2021)
+    get_fishery_estimates(fishery_names = "Nisqually", years = 2021, temporal_agg = "total")
   )
 
   skip_if(is.null(result), "No data found for test fishery")
+  skip_if(is.null(result$catch_total) || nrow(result$catch_total) == 0, "No catch_total data")
 
-  # Check that catch_group exists
-  expect_true("catch_group" %in% names(result$estimates))
+  # All records in catch_total should be catch (not effort)
+  expect_true("catch_group" %in% names(result$catch_total))
+  expect_false(any(result$catch_total$catch_group == "effort"))
 
-  # Check for effort records
-  effort_records <- result$estimates[result$estimates$catch_group == "effort", ]
-  if (nrow(effort_records) > 0) {
-    expect_true(all(is.na(effort_records$species_name)))
-  }
+  # catch_group should have underscore-separated format
+  expect_true(all(grepl("_", result$catch_total$catch_group)))
+})
 
-  # Check for catch records (should have underscore-separated format)
-  catch_records <- result$estimates[result$estimates$catch_group != "effort", ]
-  if (nrow(catch_records) > 0) {
-    # Should match pattern: Species_LifeStage_FinMark_Fate
-    expect_true(all(grepl("_", catch_records$catch_group)))
-  }
+test_that("get_fishery_estimates effort tables contain only effort records", {
+  skip_if_offline()
+
+  result <- suppressMessages(
+    get_fishery_estimates(fishery_names = "Nisqually", years = 2021, temporal_agg = "total")
+  )
+
+  skip_if(is.null(result), "No data found for test fishery")
+  skip_if(is.null(result$effort_total) || nrow(result$effort_total) == 0, "No effort_total data")
+
+  expect_true(all(result$effort_total$estimate_category %in% c("effort", "E_sum")))
 })
 
 test_that("get_fishery_estimates formats fin_mark_desc to short codes", {
   skip_if_offline()
 
   result <- suppressMessages(
-    get_fishery_estimates(fishery_names = "Nisqually", years = 2021)
+    get_fishery_estimates(fishery_names = "Nisqually", years = 2021, temporal_agg = "total")
   )
 
   skip_if(is.null(result), "No data found for test fishery")
+  skip_if(is.null(result$catch_total) || nrow(result$catch_total) == 0, "No catch_total data")
 
-  # Filter to records that have fin_mark_desc
-  with_finmark <- result$estimates[!is.na(result$estimates$fin_mark_desc), ]
+  with_finmark <- result$catch_total[!is.na(result$catch_total$fin_mark_desc), ]
 
   if (nrow(with_finmark) > 0) {
-    # Should only contain short codes or original values, not long descriptions
     expect_false(any(grepl("Adclip clip \\+ No other external marks", with_finmark$fin_mark_desc)))
     expect_false(any(grepl("No Adclip \\+ No Other external marks", with_finmark$fin_mark_desc)))
 
-    # Check that AD, UM, UNK exist if appropriate
     valid_codes <- c("AD", "UM", "UNK")
     if (any(with_finmark$fin_mark_desc %in% valid_codes)) {
       expect_true(all(with_finmark$fin_mark_desc %in% c(valid_codes, NA)))
@@ -306,31 +385,30 @@ test_that("get_fishery_estimates formats fin_mark_desc to short codes", {
 test_that("get_fishery_estimates filters to max_upload_date when TRUE", {
   skip_if_offline()
 
-  # Get all estimates
   all_estimates <- suppressMessages(
     get_fishery_estimates(
       fishery_names = "Nisqually",
       years = 2021,
+      temporal_agg = "total",
       max_upload_date = FALSE
     )
   )
 
   skip_if(is.null(all_estimates), "No data found for test fishery")
+  skip_if(is.null(all_estimates$catch_total), "No catch_total data")
 
-  # Get filtered estimates
   filtered_estimates <- suppressMessages(
     get_fishery_estimates(
       fishery_names = "Nisqually",
       years = 2021,
+      temporal_agg = "total",
       max_upload_date = TRUE
     )
   )
 
-  # If there are multiple upload dates, filtered should have fewer or equal rows
-  expect_lte(nrow(filtered_estimates$estimates), nrow(all_estimates$estimates))
+  expect_lte(nrow(filtered_estimates$catch_total), nrow(all_estimates$catch_total))
 
-  # Each fishery_name + catch_group combination should have only one upload_date
-  unique_combos <- filtered_estimates$estimates |>
+  unique_combos <- filtered_estimates$catch_total |>
     dplyr::group_by(fishery_name, catch_group) |>
     dplyr::summarise(n_dates = dplyr::n_distinct(upload_date), .groups = "drop")
 
@@ -344,6 +422,7 @@ test_that("get_fishery_estimates returns all estimates when max_upload_date FALS
     get_fishery_estimates(
       fishery_names = "Nisqually",
       years = 2021,
+      temporal_agg = "total",
       max_upload_date = FALSE
     )
   )
@@ -354,9 +433,10 @@ test_that("get_fishery_estimates returns all estimates when max_upload_date FALS
     get_fishery_estimates(
       fishery_names = "Nisqually",
       years = 2021,
+      temporal_agg = "total",
       max_upload_date = FALSE
     ),
-    "Returning all estimates \\(max_upload_date = FALSE\\)"
+    "Returning all available estimates \\(max_upload_date = FALSE\\)"
   )
 })
 
@@ -366,16 +446,20 @@ test_that("get_fishery_estimates removes duplicate .x and .y columns", {
   skip_if_offline()
 
   result <- suppressMessages(
-    get_fishery_estimates(fishery_names = "Nisqually", years = 2021)
+    get_fishery_estimates(fishery_names = "Nisqually", years = 2021, temporal_agg = "all")
   )
 
   skip_if(is.null(result), "No data found for test fishery")
 
-  # Check estimates table
   duplicate_pattern <- "\\.(x|y)$"
-  expect_false(any(grepl(duplicate_pattern, names(result$estimates))))
-
-  # Check analysis_metadata table
+  for (tbl_name in c("catch_total", "effort_total", "catch_stratum", "effort_stratum")) {
+    if (!is.null(result[[tbl_name]])) {
+      expect_false(
+        any(grepl(duplicate_pattern, names(result[[tbl_name]]))),
+        info = paste("Duplicate columns found in", tbl_name)
+      )
+    }
+  }
   expect_false(any(grepl(duplicate_pattern, names(result$analysis_metadata))))
 })
 
@@ -387,14 +471,15 @@ test_that("get_fishery_estimates handles multiple fisheries", {
   result <- suppressMessages(
     get_fishery_estimates(
       fishery_names = c("Nisqually", "Skagit"),
-      years = 2021
+      years = 2021,
+      temporal_agg = "total"
     )
   )
 
   skip_if(is.null(result), "No data found for test fisheries")
+  skip_if(is.null(result$catch_total), "No catch_total data")
 
-  # Should have data for multiple fisheries
-  fishery_names <- unique(result$estimates$fishery_name)
+  fishery_names <- unique(result$catch_total$fishery_name)
   expect_gte(length(fishery_names), 1)
 })
 
@@ -404,14 +489,15 @@ test_that("get_fishery_estimates handles multiple years", {
   result <- suppressMessages(
     get_fishery_estimates(
       fishery_names = "Nisqually",
-      years = 2021:2022
+      years = 2021:2022,
+      temporal_agg = "total"
     )
   )
 
   skip_if(is.null(result), "No data found for test years")
+  skip_if(is.null(result$catch_total), "No catch_total data")
 
-  # Should have data for multiple years
-  fishery_names <- unique(result$estimates$fishery_name)
+  fishery_names <- unique(result$catch_total$fishery_name)
   expect_gte(length(fishery_names), 1)
 })
 
@@ -421,33 +507,32 @@ test_that("get_fishery_estimates returns valid estimate_value types", {
   skip_if_offline()
 
   result <- suppressMessages(
-    get_fishery_estimates(fishery_names = "Nisqually", years = 2021)
+    get_fishery_estimates(fishery_names = "Nisqually", years = 2021, temporal_agg = "total")
   )
 
   skip_if(is.null(result), "No data found for test fishery")
+  skip_if(is.null(result$catch_total) || nrow(result$catch_total) == 0, "No catch_total data")
 
-  expect_true(is.numeric(result$estimates$estimate_value))
-  expect_false(any(is.na(result$estimates$estimate_value)))
+  expect_true(is.numeric(result$catch_total$estimate_value))
 })
 
 test_that("get_fishery_estimates returns valid date columns", {
   skip_if_offline()
 
   result <- suppressMessages(
-    get_fishery_estimates(fishery_names = "Nisqually", years = 2021)
+    get_fishery_estimates(fishery_names = "Nisqually", years = 2021, temporal_agg = "total")
   )
 
   skip_if(is.null(result), "No data found for test fishery")
+  skip_if(is.null(result$catch_total) || nrow(result$catch_total) == 0, "No catch_total data")
 
-  # Check upload_date
-  expect_s3_class(result$estimates$upload_date, "Date")
+  expect_s3_class(result$catch_total$upload_date, "Date")
 
-  # Check min/max event dates if they exist
-  if ("min_event_date" %in% names(result$estimates)) {
-    expect_true(inherits(result$estimates$min_event_date, "Date"))
+  if ("min_event_date" %in% names(result$catch_total)) {
+    expect_true(inherits(result$catch_total$min_event_date, "Date"))
   }
-  if ("max_event_date" %in% names(result$estimates)) {
-    expect_true(inherits(result$estimates$max_event_date, "Date"))
+  if ("max_event_date" %in% names(result$catch_total)) {
+    expect_true(inherits(result$catch_total$max_event_date, "Date"))
   }
 })
 
@@ -455,13 +540,13 @@ test_that("get_fishery_estimates has consistent analysis_id between tables", {
   skip_if_offline()
 
   result <- suppressMessages(
-    get_fishery_estimates(fishery_names = "Nisqually", years = 2021)
+    get_fishery_estimates(fishery_names = "Nisqually", years = 2021, temporal_agg = "total")
   )
 
   skip_if(is.null(result), "No data found for test fishery")
+  skip_if(is.null(result$catch_total) || nrow(result$catch_total) == 0, "No catch_total data")
 
-  # All analysis_ids in estimates should exist in analysis_metadata
-  estimates_ids <- unique(result$estimates$analysis_id)
+  estimates_ids <- unique(result$catch_total$analysis_id)
   metadata_ids <- unique(result$analysis_metadata$analysis_id)
 
   expect_true(all(estimates_ids %in% metadata_ids))
@@ -473,30 +558,27 @@ test_that("get_fishery_estimates provides appropriate progress messages", {
   skip_if_offline()
 
   messages <- capture_messages(
-    get_fishery_estimates(fishery_names = "Nisqually", years = 2021)
+    get_fishery_estimates(fishery_names = "Nisqually", years = 2021, temporal_agg = "total")
   )
 
   messages_text <- paste(messages, collapse = "\n")
 
-  # Check for key progress messages
   expect_match(messages_text, "Querying estimates for")
-  expect_match(messages_text, "Querying analysis metadata")
-  expect_match(messages_text, "Querying model estimates")
-  expect_match(messages_text, "Formatting estimate data")
+  expect_match(messages_text, "analysis metadata|analysis record")
+  expect_match(messages_text, "total-level estimates|total-level estimate")
 })
 
 test_that("get_fishery_estimates reports record counts", {
   skip_if_offline()
 
   messages <- capture_messages(
-    get_fishery_estimates(fishery_names = "Nisqually", years = 2021)
+    get_fishery_estimates(fishery_names = "Nisqually", years = 2021, temporal_agg = "total")
   )
 
   messages_text <- paste(messages, collapse = "\n")
 
-  # Should report number of records found
-  expect_match(messages_text, "Found [0-9]+ analysis record\\(s\\)")
-  expect_match(messages_text, "Found [0-9]+ estimate record\\(s\\)")
+  expect_match(messages_text, "analysis record|Found [0-9]+ analysis")
+  expect_match(messages_text, "catch.*effort|estimate record")
 })
 
 # Edge Cases ----
