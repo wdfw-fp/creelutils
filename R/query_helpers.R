@@ -50,6 +50,7 @@ fishery_manager <- function(
 #' @description Simple wrapper to query the vw_fishery_manager table.
 #' @param conn A valid database connection from `establish_db_con()`
 #' @param fishery_name Optional character string for pattern matching in analysis_name
+#' @param print Logical. If `TRUE`, prints all rows to the console. Default `FALSE`.
 #' @return Tibble of catch groups of interest for a given fishery.
 #' @export
 fishery_catchgroups <- function(
@@ -84,7 +85,7 @@ fishery_catchgroups <- function(
     ) |>
     dplyr::mutate(
       # apparently the db lut for life stage uses "Unknown" but fin mark lut uses "UNK", aligning to "UNK"
-      life_stage = stringr::str_replace(life_stage, "Unknown", "UNK"),
+      life_stage = stringr::str_replace(.data$life_stage, "Unknown", "UNK"),
 
       catch_group = paste( # create catch_group combined field
         .data$species,
@@ -94,7 +95,7 @@ fishery_catchgroups <- function(
         sep = "_"
       )
     ) |>
-    dplyr::arrange(catch_group)
+    dplyr::arrange(.data$catch_group)
 
   if (print) {print(result, n = Inf)}
 
