@@ -82,7 +82,10 @@ fishery_catchgroups <- function(
       .data$fate
     ) |>
     dplyr::mutate(
-      catch_group = paste(
+      # apparently the db lut for life stage uses "Unknown" but fin mark lut uses "UNK", aligning to "UNK"
+      life_stage = stringr::str_replace(life_stage, "Unknown", "UNK"),
+
+      catch_group = paste( # create catch_group combined field
         .data$species,
         .data$life_stage,
         .data$fin_mark,
