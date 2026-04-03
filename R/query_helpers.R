@@ -54,7 +54,8 @@ fishery_manager <- function(
 #' @export
 fishery_catchgroups <- function(
     conn,
-    fishery_name = NULL
+    fishery_name = NULL,
+    print = FALSE
   ) {
 
   # Check database connection
@@ -67,7 +68,7 @@ fishery_catchgroups <- function(
     filter <- glue::glue("fishery_name == '{fishery_name}'")
   }
 
-  fetch_db_table(
+  result <- fetch_db_table(
     conn,
     schema = "creel",
     table  = "vw_model_catch_group",
@@ -94,6 +95,10 @@ fishery_catchgroups <- function(
       )
     ) |>
     dplyr::arrange(catch_group)
+
+  if (print) {print(result, n = Inf)}
+
+  invisible(result)
 }
 
 #' Get analysis lookup table
