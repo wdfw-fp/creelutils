@@ -70,7 +70,7 @@ fishery_catchgroups <- function(
   fetch_db_table(
     conn,
     schema = "creel",
-    table  = "vw_fishery_catch_group",
+    table  = "vw_model_catch_group",
     filter = filter
   ) |>
     dplyr::select(-dplyr::contains("_id")) |>
@@ -89,7 +89,8 @@ fishery_catchgroups <- function(
         .data$fate,
         sep = "_"
       )
-    )
+    ) |>
+    dplyr::arrange(catch_group)
 }
 
 #' Get analysis lookup table
