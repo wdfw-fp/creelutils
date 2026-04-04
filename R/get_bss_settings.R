@@ -1,11 +1,11 @@
 #' Summarize priors, sampler settings, and metadata from a stanfit object
 #'
-#' @param ecg Estimate catch group (e.g., Steelhead_Adult_UM_Released).
+#' @param ecg Estimate catch group (e.g., Steelhead_Adult_UM_Released)
 #' @param ecg_fit A fitted model (stanfit object)
 #' @param inputs_bss Inputs of the stan model
 #' @param print Logical. Return summary to Console
-#'
 #' @return List with model priors, sampler settings, and metadata
+#' @export
 get_bss_settings <- function(ecg, ecg_fit, inputs_bss, print = FALSE) {
 
   # --- Priors

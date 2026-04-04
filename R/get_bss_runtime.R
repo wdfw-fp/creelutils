@@ -26,14 +26,14 @@ get_bss_runtime <- function(stan_fit, output_file = NULL) {
   for (i in seq_len(nrow(chain_times_min))) {
     row <- chain_times_min[i, ]
     cli::cli_li(
-      "{.strong {row$chain}} — Warmup: {row$warmup} | Sample: {row$sample} | Total: {row$total}"
+      "{.strong {row$chain}} -- Warmup: {row$warmup} | Sample: {row$sample} | Total: {row$total}"
     )
   }
 
   cli::cli_alert_info("Total elapsed time (longest chain): {.val {total_elapsed}} minutes")
 
   # --- Write output file ---
-  summary_str <- sprintf("Stan model sampling summary — %s", format(Sys.time(), "%Y-%m-%d %H:%M:%S"))
+  summary_str <- sprintf("Stan model sampling summary -- %s", format(Sys.time(), "%Y-%m-%d %H:%M:%S"))
   summary_str <- c(summary_str, "Runtime in minutes:")
 
   for (i in seq_len(nrow(chain_times_min))) {
@@ -41,7 +41,7 @@ get_bss_runtime <- function(stan_fit, output_file = NULL) {
     summary_str <- c(
       summary_str,
       sprintf(
-        "• %s — Warmup: %s | Sample: %s | Total: %s",
+        "- %s -- Warmup: %s | Sample: %s | Total: %s",
         row$chain, row$warmup, row$sample, row$total
       )
     )

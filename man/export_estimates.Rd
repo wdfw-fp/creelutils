@@ -4,14 +4,16 @@
 \alias{export_estimates}
 \title{Export creel model estimates}
 \usage{
-export_estimates(params, analysis_lut, creel_estimates)
+export_estimates(params, analysis_lut, creel_estimates, conn = NULL)
 }
 \arguments{
-\item{params}{??}
+\item{params}{User-input parameters defined during the model estimation process.}
 
-\item{analysis_lut}{??}
+\item{analysis_lut}{Lookup table created during the model estimation process which stores a session-specific analysis_id key and metadata about the analysis.}
 
-\item{creel_estimates}{??}
+\item{creel_estimates}{List object containing model estimates in a standardized format. Typically passed from 'transform_estimates' function.}
+
+\item{conn}{Database connection object. If NULL (default), a new connection will be established.}
 }
 \value{
 ??
