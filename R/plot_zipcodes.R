@@ -1,110 +1,107 @@
 #' Plot angler ZIP codes
 #'
-#' @param data list, creel dataset where interviewed anglers provided their home zip codes
-#' @param type categorical, options: state, US, or full
-#' @param unlocated logical, prints a list of zip codes that were not geolocated correctly
-#' @import dplyr
-#' @import cli
-#' @import ggplot2
-#' @importFrom tidyr separate_rows tibble
-#' @importFrom stringr str_detect
-#' @importFrom zipcodeR geocode_zip
-#' @importFrom usmap usmap_transform plot_usmap
-#' @importFrom sf st_coordinates
-#' @importFrom glue glue
-#' @importFrom cowplot plot_grid
-
-#' @return plot
+#' Creates a map displaying the home ZIP codes reported by anglers during creel
+#' interviews, conveying the geographic range and density of angler origin for a
+#' given fishery.
+#'
+#' @param data list, creel dataset where interviewed anglers provided their home
+#'   zip codes (expects `data$interview$zip_code`).
+#' @param type character, map extent. Either `"wa"` (default) or `"us"`.
+#'   Case-insensitive.
+#'
+#' @importFrom ggplot2 geom_point aes theme element_text element_rect labs
+#'   scale_size_continuous scale_color_viridis_c scale_alpha_continuous
+#' @importFrom dplyr filter mutate rename select relocate arrange left_join
+#' @importFrom rlang .data
+#' @importFrom tidyr separate_longer_delim
+#' @return A ggplot object
 #' @export
-plot_zipcodes <- function(data, type) {
+plot_zipcodes <- function(data, type = "wa") {
 
-  #validate input types
-  type <- tolower(trimws(type))
-  types <- c("wa", "washington", "us", "usa", "full"," both", "all")
+  # Validate and normalize type argument ----
+  type <- toupper(trimws(type))
+  type <- match.arg(type, choices = c("WA", "US"))
 
-  if (!type  %in% types) {
-    stop("Incorrect 'type' argument.")
+  # Process zip code data ----
+  raw_zipcodes <- data$interview$zip_code
+
+  # Report ZIP code coverage ----
+  n_total    <- nrow(data$interview)
+  n_with_zip <- sum(!is.na(data$interview$zip_code))
+  pct        <- round(100 * n_with_zip / n_total)
+  cli::cli_h1("ZIP code representation: {n_with_zip} of {n_total} interviews ({pct}%)")
+
+  # Detect and report Canadian postal codes (alphanumeric, e.g. "V5K 0A1")
+  # before filtering to US-only format. Canadian codes are not currently
+  # geocoded; this count is informational only.
+  canadian_pattern <- "^[A-Za-z][0-9][A-Za-z]\\s?[0-9][A-Za-z][0-9]$"
+  canadian_codes <- trimws(unlist(strsplit(as.character(raw_zipcodes[!is.na(raw_zipcodes)]), ",")))
+  canadian_codes <- canadian_codes[stringr::str_detect(canadian_codes, canadian_pattern)]
+
+  if (length(canadian_codes) > 0) {
+    cli::cli_h3("Note: Canadian postal codes detected (n={length(canadian_codes)}):")
+    cli::cli_text("{paste(canadian_codes, collapse = ', ')}")
+    cli::cli_alert_info("Canadian postal codes are not currently geocoded.")
   }
 
-  # Process zip code data ####
+  # Extract and tidy US zip codes ----
+  zip_tbl <- tibble::tibble(zipcode = as.character(raw_zipcodes)) |>
+    filter(!is.na(.data$zipcode)) |>
+    separate_longer_delim(.data$zipcode, delim = ",") |>  # one row per zip when >1 listed
+    mutate(zipcode = trimws(.data$zipcode)) |>
+    filter(stringr::str_detect(.data$zipcode, "^[0-9]{5}$"))  # US zip code format only
 
-  #extract and tidy zip code data
-  zipcode <- as_tibble(data$interview$zip_code) |>
-    rename(zipcode = value) |>
-    filter(!is.na(zipcode)) |>
-    separate_rows(zipcode, sep = ",") |> #create a new row for any that have >1 zip code listed
-    mutate(zipcode = trimws(zipcode)) |>
-    filter(str_detect(zipcode, "^[0-9]{5}$")) #5 digits of 0-9 = a zip code format
+  # Frequency of each unique zip code
+  zipcodes_freq <- as.data.frame(table(zip_tbl$zipcode)) |>
+    rename(zipcode = .data$Var1)
 
-  #calculate frequency of each zip code
-  zipcodes_freq <- data.frame(table(zipcode))
-
-  #relate zip codes to centroid coordinates
-  geocoded <- geocode_zip(unlist(zipcode)) |>
-    rename(geo_lat = lat,
-           geo_long = lng)
-
-  #initialize zip code database from zipcodeR package
+  # Load zip code database and join coordinates and metadata ----
   zip_code_db <- zipcodeR::zip_code_db
 
-  #formatted table of zipcodes and other info
   zipcodes_table <- zipcodes_freq |>
-    left_join(geocoded, by = "zipcode") |> #join frequencies with geolocated zips
-    left_join(zip_code_db, by="zipcode") |> #join with zipcode database
-    select(zipcode, Freq, geo_lat, geo_long, major_city, county, state) |>
-    relocate(geo_long, geo_lat) # usmapp::usmap_transform() reqs first two cols be long and lat
+    left_join(zip_code_db, by = "zipcode") |>
+    select(.data$zipcode, .data$Freq, .data$lat, .data$lng, .data$major_city, .data$county, .data$state) |>
+    rename(geo_lat = .data$lat, geo_long = .data$lng) |>
+    relocate(.data$geo_long, .data$geo_lat)  # usmap_transform() requires long, lat as first two cols
 
-  ## handle zips that were not geolocated ####
+  # Report unlocated zip codes ----
   unlocated <- zipcodes_table |>
-    filter(is.na(geo_lat) | is.na(geo_long)) |>
-    select(zipcode, Freq) |>
-    arrange(desc(Freq)) |>
-    rename(count = Freq) |>
-    as_tibble()
+    filter(is.na(.data$geo_lat) | is.na(.data$geo_long)) |>
+    select(.data$zipcode, .data$Freq) |>
+    arrange(desc(.data$Freq)) |>
+    rename(count = .data$Freq) |>
+    tibble::as_tibble()
 
-  if (length(unlocated) > 0) {
-    cli_h1("Warning")
-    cli_alert_warning("The following zip codes could not be geolocated:")
-    cat("\n")
-    print(unlocated)
+  if (nrow(unlocated) > 0) {
+    cli::cli_h3("Warning: The following ZIP codes could not be geolocated (n={nrow(unlocated)}):")
+    cli::cli_text("{paste(unlocated$zipcode, collapse = ', ')}")
+    cli::cli_alert_info("These ZIP codes are typically either associated with a PO Box or data entry error.")
   } else {
-    cli_alert_success("All ZIP codes were successfully geolocated.")
+    cli::cli_alert_success("All ZIP codes were successfully geolocated.")
   }
 
-  ## Perform transformation ####
-
-  # moves AK and HI near the western coast
+  # Transform coordinates ----
+  # Filters unlocated zips and relocates AK/HI near the western coast
   zipcodes_table <- zipcodes_table |>
-    filter(!is.na(geo_lat) | !is.na(geo_long)) |>   #filter unlocated zipsnow that they have been isolated
-    usmap_transform(input_names = c("geo_long", "geo_lat"))
+    filter(!is.na(.data$geo_lat) & !is.na(.data$geo_long)) |>
+    usmap::usmap_transform(input_names = c("geo_long", "geo_lat"))
 
-  #convey geometry to point pairs
-  geometry <- st_coordinates(zipcodes_table)
+  # Convert sf geometry to plain X/Y columns for ggplot
+  geometry <- sf::st_coordinates(zipcodes_table)
   zipcodes_table <- cbind(zipcodes_table, geometry)
 
-  # define plots ####
-
-  ## legend breaks ####
-
-  #calculate logarithmic breaks, good for skewed data
+  # Data-driven legend breaks ----
   values <- zipcodes_table$Freq
 
-  my_breaks <- c(1, 10, 50, 100, 200)
-  my_labels <- format(my_breaks, big.mark = ",")
+  # scales::breaks_log() computes clean breaks from the actual data range,
+  # handling both low- and high-pressure fisheries without hardcoding.
+  # n = 5 is a target; the function may return fewer.
+  my_breaks <- scales::breaks_log(n = 5)(range(values[values > 0], na.rm = TRUE))
+  my_labels <- scales::label_comma()(my_breaks)
 
-  # my_breaks <- round(exp(seq(log(min(values[values > 0], na.rm = TRUE)),
-  #                      log(max(values, na.rm = TRUE)), length.out = 5)))
-  # my_labels <- format(my_breaks, big.mark = ",")
-
-  # log_values <- log10(values[values > 0])
-  # log_breaks <- pretty(log_values, n = 5)
-  # my_breaks <- round(10^log_breaks)
-  # my_labels <- format(my_breaks, big.mark = ",")
-
-  ## custom theme ####
+  # Custom theme ----
   my_theme <- function(my_breaks, my_labels) {
     list(
-      # Size
       scale_size_continuous(
         name = "Frequency",
         trans = "log",
@@ -112,8 +109,7 @@ plot_zipcodes <- function(data, type) {
         labels = my_labels,
         range = c(2, 10)
       ),
-      # Color
-      scale_color_viridis(
+      scale_color_viridis_c(
         name = "Frequency",
         guide = "legend",
         trans = "log",
@@ -121,7 +117,6 @@ plot_zipcodes <- function(data, type) {
         labels = my_labels,
         option = "inferno"
       ),
-      # Opacity
       scale_alpha_continuous(
         name = "Frequency",
         guide = "legend",
@@ -130,33 +125,31 @@ plot_zipcodes <- function(data, type) {
         labels = my_labels,
         range = c(0.3, 0.9)
       ),
-      # Theme
       theme(
         text = element_text(size = 12, color = "#22211d"),
-        # plot.background = element_rect(fill = "#F8F8F9", color = NA),
-        # panel.background = element_rect(fill = "#F8F8F9", color = NA),
         legend.background = element_rect(fill = "transparent", color = NA),
-        legend.key = element_rect(fill = "white", color = NA)
+        legend.key = element_rect(fill = "white", color = NA),
+        plot.title = element_text(hjust = 0.5)
       )
     )
   }
 
-  # Filter by region
-  if (type %in% c("wa", "washington")) {
-    zip_plot_data <- zipcodes_table |> filter(state == "WA")
-    base_map <- plot_usmap(regions = "counties", include = "WA", fill = "#92D4DA", alpha = 0.7)
+  # Build map ----
+  if (type == "WA") {
+    zip_plot_data <- zipcodes_table |> filter(.data$state == "WA")
+    base_map <- usmap::plot_usmap(regions = "counties", include = "WA", fill = "#92D4DA", alpha = 0.7)
   } else {
     zip_plot_data <- zipcodes_table
-    base_map <- plot_usmap(regions = "states", fill = "#92D4DA", alpha = 0.7)
+    base_map <- usmap::plot_usmap(regions = "states", fill = "#92D4DA", alpha = 0.7)
   }
 
-  # Final plot
   map_plot <- base_map +
     geom_point(
       data = zip_plot_data,
       aes(x = X, y = Y, size = Freq, color = Freq, alpha = Freq)
     ) +
-    my_theme(my_breaks, my_labels)
+    my_theme(my_breaks, my_labels) +
+    labs(title = unique(data$interview$fishery_name))
 
   return(map_plot)
 }
