@@ -1,3 +1,7 @@
+# cbind() and table() in plot_zipcodes() produce these vars, cols from baase operations
+# defining as a global var prevents a warning in R-CMD-Check
+utils::globalVariables(c("X", "Y", "Freq"))
+
 #' Plot angler ZIP codes
 #'
 #' Creates a map displaying the home ZIP codes reported by anglers during creel
@@ -17,6 +21,12 @@
 #' @return A ggplot object
 #' @export
 plot_zipcodes <- function(data, type = "wa") {
+
+  # packages in DESCRIPTION Suggests
+  rlang::check_installed(
+    c("scales", "sf", "usmap", "zipcodeR"),
+    reason = "to use `plot_zipcodes()`"
+  )
 
   # Validate and normalize type argument ----
   type <- toupper(trimws(type))
