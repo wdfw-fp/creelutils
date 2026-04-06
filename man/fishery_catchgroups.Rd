@@ -4,12 +4,14 @@
 \alias{fishery_catchgroups}
 \title{Get 'fishery_catch_groups' view}
 \usage{
-fishery_catchgroups(conn, fishery_name = NULL)
+fishery_catchgroups(conn, fishery_name = NULL, print = FALSE)
 }
 \arguments{
 \item{conn}{A valid database connection from \code{establish_db_con()}}
 
 \item{fishery_name}{Optional character string for pattern matching in analysis_name}
+
+\item{print}{Logical. If \code{TRUE}, prints all rows to the console. Default \code{FALSE}.}
 }
 \value{
 Tibble of catch groups of interest for a given fishery.

@@ -50,11 +50,13 @@ fishery_manager <- function(
 #' @description Simple wrapper to query the vw_fishery_manager table.
 #' @param conn A valid database connection from `establish_db_con()`
 #' @param fishery_name Optional character string for pattern matching in analysis_name
+#' @param print Logical. If `TRUE`, prints all rows to the console. Default `FALSE`.
 #' @return Tibble of catch groups of interest for a given fishery.
 #' @export
 fishery_catchgroups <- function(
     conn,
-    fishery_name = NULL
+    fishery_name = NULL,
+    print = FALSE
   ) {
 
   # Check database connection
@@ -67,10 +69,10 @@ fishery_catchgroups <- function(
     filter <- glue::glue("fishery_name == '{fishery_name}'")
   }
 
-  fetch_db_table(
+  result <- fetch_db_table(
     conn,
     schema = "creel",
-    table  = "vw_fishery_catch_group",
+    table  = "vw_model_catch_group",
     filter = filter
   ) |>
     dplyr::select(-dplyr::contains("_id")) |>
@@ -82,14 +84,22 @@ fishery_catchgroups <- function(
       .data$fate
     ) |>
     dplyr::mutate(
-      catch_group = paste(
+      # apparently the db lut for life stage uses "Unknown" but fin mark lut uses "UNK", aligning to "UNK"
+      life_stage = stringr::str_replace(.data$life_stage, "Unknown", "UNK"),
+
+      catch_group = paste( # create catch_group combined field
         .data$species,
         .data$life_stage,
         .data$fin_mark,
         .data$fate,
         sep = "_"
       )
-    )
+    ) |>
+    dplyr::arrange(.data$catch_group)
+
+  if (print) {print(result, n = Inf)}
+
+  invisible(result)
 }
 
 #' Get analysis lookup table
