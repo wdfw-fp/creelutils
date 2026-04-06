@@ -24,9 +24,9 @@ Imports:
     tidyr,
     glue,
     rstan,
-    odbc
+    odbc,
+    ggplot2
 Suggests:
-    ggplot2,
     knitr,
     rmarkdown,
     gt,
@@ -42,7 +42,11 @@ Suggests:
     yaml,
     dataRetrieval,
     here,
-    rprojroot
+    rprojroot,
+    scales,
+    sf,
+    usmap,
+    zipcodeR
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
