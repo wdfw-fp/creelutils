@@ -41,6 +41,14 @@ plot_zipcodes <- function(data, type = "wa") {
   pct        <- round(100 * n_with_zip / n_total)
   cli::cli_h1("ZIP code representation: {n_with_zip} of {n_total} interviews ({pct}%)")
 
+  # Silently return NULL and message user if the dataset does not contain ZIP codes
+  if (n_with_zip == 0) {
+    cli::cli_alert_warning(
+      "No ZIP codes were recorded for this fishery. {.fn plot_zipcodes} requires ZIP code data to generate a map."
+    )
+    return(invisible(NULL))
+  }
+
   # Detect and report Canadian postal codes (alphanumeric, e.g. "V5K 0A1")
   # before filtering to US-only format. Canadian codes are not currently
   # geocoded; this count is informational only.
