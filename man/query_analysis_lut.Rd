@@ -7,7 +7,7 @@
 query_analysis_lut(conn = NULL, analysis_id = NULL, fishery_name = NULL)
 }
 \arguments{
-\item{conn}{A valid database connection from \code{establish_db_con()}}
+\item{conn}{A valid database connection from \code{connect_creel_db()}}
 
 \item{analysis_id}{Optional character string for exact analysis_id match}
 

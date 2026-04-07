@@ -7,7 +7,7 @@
 fishery_lut(conn)
 }
 \arguments{
-\item{conn}{A valid database connection from \code{establish_db_con()}}
+\item{conn}{A valid database connection from \code{connect_creel_db()}}
 }
 \value{
 Tibble of fishery names with year, start dates, end dates, and metadata
