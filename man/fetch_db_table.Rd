@@ -46,6 +46,6 @@ c <- fetch_db_table(
 }
 \seealso{
 Other internal_data: 
-\code{\link{establish_db_con}()}
+\code{\link{connect_creel_db}()}
 }
 \concept{internal_data}
