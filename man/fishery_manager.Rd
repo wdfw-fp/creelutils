@@ -7,7 +7,7 @@
 fishery_manager(conn, fishery_name = NULL)
 }
 \arguments{
-\item{conn}{A valid database connection from \code{establish_db_con()}}
+\item{conn}{A valid database connection from \code{connect_creel_db()}}
 
 \item{fishery_name}{Optional character string for pattern matching in analysis_name}
 }
