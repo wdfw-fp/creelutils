@@ -24,7 +24,6 @@ Imports:
     tidyr,
     glue,
     rstan,
-    odbc,
     ggplot2
 Suggests:
     knitr,
@@ -46,7 +45,8 @@ Suggests:
     scales,
     sf,
     usmap,
-    zipcodeR
+    zipcodeR,
+    keyring
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
