@@ -7,7 +7,7 @@
 fishery_catchgroups(conn, fishery_name = NULL, print = FALSE)
 }
 \arguments{
-\item{conn}{A valid database connection from \code{establish_db_con()}}
+\item{conn}{A valid database connection from \code{connect_creel_db()}}
 
 \item{fishery_name}{Optional character string for pattern matching in analysis_name}
 
@@ -19,3 +19,10 @@ Tibble of catch groups of interest for a given fishery.
 \description{
 Simple wrapper to query the vw_fishery_manager table.
 }
+\seealso{
+Other internal_data: 
+\code{\link{connect_creel_db}()},
+\code{\link{fetch_db_table}()},
+\code{\link{fishery_catchgroups_obs}()}
+}
+\concept{internal_data}
