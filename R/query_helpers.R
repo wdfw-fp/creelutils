@@ -149,7 +149,7 @@ fishery_catchgroups_obs <- function(conn, data, include_zero = FALSE) {
   # Expand composite catch group rows (e.g. "AD|UM|UNK") into one row per
   # atomic combination, retaining the original catch_group label for re-aggregation
   cg_expanded <- purrr::pmap_dfr(
-    dplyr::select(cg, fishery_name, catch_group, species, life_stage, fin_mark, fate),
+    dplyr::select(cg, .data$fishery_name, .data$catch_group, .data$species, .data$life_stage, .data$fin_mark, .data$fate),
     function(fishery_name, catch_group, species, life_stage, fin_mark, fate) {
       expand.grid(
         fishery_name = fishery_name,
