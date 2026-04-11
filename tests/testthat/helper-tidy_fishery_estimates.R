@@ -3,7 +3,7 @@
 # Skip function for offline tests
 skip_if_offline <- function() {
   con_available <- tryCatch({
-    con <- creelutils::establish_db_con()
+    con <- creelutils::connect_creel_db()
     valid <- DBI::dbIsValid(con)
     if (valid) DBI::dbDisconnect(con)
     valid

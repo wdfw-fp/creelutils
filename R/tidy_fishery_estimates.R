@@ -31,6 +31,7 @@
 #'     \item `$catch_stratum_bss` Wide format, BSS stratum catch, bare column names
 #'     \item `$effort_stratum_pe` Wide format, PE stratum effort, bare column names
 #'     \item `$effort_stratum_bss` Wide format, BSS stratum effort, bare column names
+#'     \item `$catchrate_stratum_bss` Wide format, BSS stratum CPUE, bare column names
 #'     \item `$analysis_metadata` Passed through unchanged
 #'     \item When input is a dataframe: `list(catch = ..., effort = ...)`
 #'   }
@@ -67,8 +68,8 @@ tidy_fishery_estimates <- function(estimates) {
   # Named list path: dispatch each recognized table, pass metadata through
   recognized_catch   <- c("catch_total", "catch_stratum")
   recognized_effort  <- c("effort_total", "effort_stratum")
-  recognized_stratum <- c("catch_stratum", "effort_stratum")
-  recognized_all     <- c(recognized_catch, recognized_effort, "analysis_metadata")
+  recognized_stratum <- c("catch_stratum", "effort_stratum", "catchrate_stratum")
+  recognized_all     <- c(recognized_catch, recognized_effort, "catchrate_stratum", "analysis_metadata")
 
   if (is.list(estimates) && !is.data.frame(estimates) &&
       any(names(estimates) %in% recognized_all)) {
@@ -96,7 +97,7 @@ tidy_fishery_estimates <- function(estimates) {
 
       # Stratum tables: split by model_type, one wide table per model
       if (tbl_name %in% recognized_stratum) {
-        include_cg <- tbl_name == "catch_stratum"
+        include_cg <- tbl_name %in% c("catch_stratum", "catchrate_stratum")
         model_types <- sort(unique(df$model_type))
 
         if (length(model_types) == 0) {
@@ -109,7 +110,8 @@ tidy_fishery_estimates <- function(estimates) {
           df_mt   <- df |> dplyr::filter(.data$model_type == mt)
           message("Pivoting '", out_key, "' (", nrow(df_mt), " rows)...")
           out[[out_key]] <- .pivot_single_model_wide(df_mt,
-                                                     include_catch_group = include_cg)
+                                                     include_catch_group = include_cg) |>
+            .add_date_fields()
         }
         next
       }
@@ -117,7 +119,8 @@ tidy_fishery_estimates <- function(estimates) {
       # Total tables: coalesce PE + BSS into one row, prefixed columns
       include_cg <- tbl_name %in% recognized_catch
       message("Pivoting '", tbl_name, "' (", nrow(df), " rows)...")
-      out[[tbl_name]] <- .pivot_estimates_wide(df, include_catch_group = include_cg)
+      out[[tbl_name]] <- .pivot_estimates_wide(df, include_catch_group = include_cg) |>
+        .add_date_fields()
     }
 
     message("Successfully created tidy estimates")
@@ -312,9 +315,36 @@ tidy_fishery_estimates <- function(estimates) {
   message("Successfully created tidy estimates")
 
   return(list(
-    catch = catch_wide,
-    effort = effort_wide
+    catch  = .add_date_fields(catch_wide),
+    effort = .add_date_fields(effort_wide)
   ))
+}
+
+
+#' Add derived date fields to a wide estimates table
+#'
+#' @description Internal helper that adds `year`, `month`, and `week` columns
+#' derived from `min_event_date` (the start of each observation's time window).
+#' If `min_event_date` is absent the table is returned unchanged.
+#'
+#' @param df A wide-format estimates dataframe
+#' @return The same dataframe with `year`, `month`, and `week` columns appended
+#'   before the estimate columns, or unchanged if `min_event_date` is missing.
+#' @keywords internal
+
+.add_date_fields <- function(df) {
+  if (is.null(df) || !"min_event_date" %in% names(df)) {
+    return(df)
+  }
+
+  df |>
+    dplyr::mutate(
+      year         = lubridate::year(.data$min_event_date),
+      month        = lubridate::month(.data$min_event_date),
+      week         = lubridate::week(.data$min_event_date),
+      julian_date  = lubridate::yday(.data$min_event_date)
+    ) |>
+    dplyr::relocate("year", "month", "week", "julian_date", .after = "max_event_date")
 }
 
 
@@ -341,29 +371,42 @@ tidy_fishery_estimates <- function(estimates) {
     return(NULL)
   }
 
-  # Add model type prefix to estimate_type
+  # Use an explicit, curated set of observation-identity columns as id_cols.
+  # These are guaranteed to be identical between PE and BSS rows for the same
+  # observation. Deriving id_cols dynamically (all non-estimate cols) is the root
+  # cause of PE/BSS rows landing in separate pivot rows: columns like data_grade
+  # can differ between models and break the grouping key.
+  # With matching id_cols, pivot_wider puts PE_xxx and BSS_xxx in the same row
+  # automatically — no collapse step required.
+  id_col_candidates <- c(
+    "analysis_id", "analysis_name", "project_id", "project_name", "fishery_name",
+    "period", "timestep", "min_event_date", "max_event_date",
+    "upload_date", "created_by"
+  )
+
+  if (include_catch_group) {
+    id_col_candidates <- c(
+      id_col_candidates,
+      "catch_group", "species_name", "life_stage_name", "fate_name", "fin_mark"
+    )
+  }
+
+  id_cols <- intersect(id_col_candidates, names(df))
+
+  # Prefix estimate_type with model_type so PE and BSS estimates become distinct
+  # named columns (PE_mean, BSS_mean) within the same output row.
   df_prefixed <- df |>
     dplyr::mutate(
       estimate_type_prefixed = paste(.data$model_type, .data$estimate_type, sep = "_")
     )
 
-  exclude_cols <- c("estimate_type", "estimate_value", "estimate_category",
-                    "estimate_class", "estimate_type_prefixed", "model_type")
-
-  # For effort tables, drop catch_group from grouping (it always equals "effort")
-  if (!include_catch_group) {
-    exclude_cols <- c(exclude_cols, "catch_group")
-  }
-
-  grouping_cols <- setdiff(names(df_prefixed), exclude_cols)
-
   wide <- try(
     df_prefixed |>
       tidyr::pivot_wider(
-        id_cols = dplyr::all_of(grouping_cols),
-        names_from = estimate_type_prefixed,
+        id_cols     = dplyr::all_of(id_cols),
+        names_from  = estimate_type_prefixed,
         values_from = estimate_value,
-        values_fn = list(estimate_value = function(x) {
+        values_fn   = list(estimate_value = function(x) {
           if (length(x) > 1) {
             message("WARNING: Multiple values for same estimate_type. Using first value.")
             return(x[1])
@@ -376,19 +419,12 @@ tidy_fishery_estimates <- function(estimates) {
 
   if (inherits(wide, "try-error")) {
     message("ERROR: Failed to pivot data to wide format.")
-    message("Grouping columns: ", paste(grouping_cols, collapse = ", "))
+    message("Observation key columns used: ", paste(id_cols, collapse = ", "))
     return(NULL)
   }
 
-  # Remove estimate_class column if present
-  if ("estimate_class" %in% names(wide)) {
-    wide <- wide |> dplyr::select(-estimate_class)
-  }
-
-  n_before <- nrow(wide)
-  wide <- collapse_model_rows(wide)
-  message("  ", n_before, " rows collapsed to ", nrow(wide), " rows with ",
-          length(grep("^(PE_|BSS_)", names(wide))), " estimate columns")
+  n_est_cols <- length(grep("^(PE_|BSS_)", names(wide)))
+  message("  ", nrow(wide), " rows x ", n_est_cols, " estimate columns")
 
   wide <- reorder_estimate_columns(wide, include_catch_group = include_catch_group)
 
@@ -419,22 +455,32 @@ tidy_fishery_estimates <- function(estimates) {
     return(NULL)
   }
 
-  # Exclude estimate-specific and model_type columns from grouping id_cols
-  exclude_cols <- c("estimate_type", "estimate_value", "estimate_category", "model_type")
+  # Explicit observation-identity columns for stratum data.
+  # Stratum adds grouping dimensions: angler_type, area, section, day_type.
+  # period_timestep replaces timestep for stratum-level time grouping.
+  id_col_candidates <- c(
+    "analysis_id", "analysis_name", "project_id", "project_name", "fishery_name",
+    "period", "period_timestep", "min_event_date", "max_event_date",
+    "angler_type_name", "catch_area_code", "section_num", "day_type",
+    "upload_date", "created_by"
+  )
 
-  if (!include_catch_group) {
-    exclude_cols <- c(exclude_cols, "catch_group")
+  if (include_catch_group) {
+    id_col_candidates <- c(
+      id_col_candidates,
+      "catch_group", "species_name", "life_stage_name", "fate_name", "fin_mark"
+    )
   }
 
-  grouping_cols <- setdiff(names(df), exclude_cols)
+  id_cols <- intersect(id_col_candidates, names(df))
 
   wide <- try(
     df |>
       tidyr::pivot_wider(
-        id_cols    = dplyr::all_of(grouping_cols),
-        names_from = estimate_type,
+        id_cols     = dplyr::all_of(id_cols),
+        names_from  = estimate_type,
         values_from = estimate_value,
-        values_fn  = list(estimate_value = function(x) {
+        values_fn   = list(estimate_value = function(x) {
           if (length(x) > 1) {
             message("WARNING: Multiple values for same estimate_type. Using first value.")
             return(x[1])
@@ -447,11 +493,11 @@ tidy_fishery_estimates <- function(estimates) {
 
   if (inherits(wide, "try-error")) {
     message("ERROR: Failed to pivot stratum data to wide format.")
-    message("Grouping columns: ", paste(grouping_cols, collapse = ", "))
+    message("Observation key columns used: ", paste(id_cols, collapse = ", "))
     return(NULL)
   }
 
-  n_est_cols <- length(setdiff(names(wide), grouping_cols))
+  n_est_cols <- length(setdiff(names(wide), id_cols))
   message("  ", nrow(wide), " rows x ", n_est_cols, " estimate columns")
 
   wide <- reorder_estimate_columns(wide, include_catch_group = include_catch_group)
@@ -529,7 +575,7 @@ reorder_estimate_columns <- function(df, include_catch_group = TRUE) {
 
   if (include_catch_group) {
     bio_cols <- intersect(
-      c("catch_group", "species_name", "life_stage_name", "fate_name", "fin_mark_desc"),
+      c("catch_group", "species_name", "life_stage_name", "fate_name", "fin_mark"),
       names(df)
     )
   } else {

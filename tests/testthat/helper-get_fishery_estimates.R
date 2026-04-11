@@ -3,7 +3,7 @@
 # Check if we can connect to the database
 can_connect_to_db <- function() {
   tryCatch({
-    con <- creelutils::establish_db_con()
+    con <- creelutils::connect_creel_db()
     valid <- DBI::dbIsValid(con)
     if (valid) DBI::dbDisconnect(con)
     valid
@@ -15,7 +15,7 @@ get_test_fishery <- function() {
   if (!can_connect_to_db()) return(NULL)
 
   tryCatch({
-    con <- creelutils::establish_db_con()
+    con <- creelutils::connect_creel_db()
     on.exit(DBI::dbDisconnect(con), add = TRUE)
 
     # Get any fishery with data

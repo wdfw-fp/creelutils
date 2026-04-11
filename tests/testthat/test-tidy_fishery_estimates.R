@@ -15,7 +15,7 @@ create_mock_estimates_long <- function() {
     # Catch records (12 rows: 2 catch groups x 2 models x 3 estimate types)
     species_name = c(rep("Chinook", 6), rep("Steelhead", 6), rep(NA, 12)),
     life_stage_name = c(rep("Adult", 6), rep("Adult", 6), rep(NA, 12)),
-    fin_mark_desc = c(rep("AD", 6), rep("UM", 6), rep(NA, 12)),
+    fin_mark = c(rep("AD", 6), rep("UM", 6), rep(NA, 12)),
     fate_name = c(rep("Kept", 6), rep("Released", 6), rep(NA, 12)),
     catch_group = c(
       rep("Chinook_Adult_AD_Kept", 6),
@@ -85,7 +85,7 @@ create_mock_estimates_list_with_stratum <- function() {
     fishery_name     = rep("Nisqually", 24),
     species_name     = rep(c("Chinook", "Steelhead"), each = 12),
     life_stage_name  = rep("Adult", 24),
-    fin_mark_desc    = rep(c("AD", "UM"), each = 12),
+    fin_mark         = rep(c("AD", "UM"), each = 12),
     fate_name        = rep(c("Kept", "Released"), each = 12),
     catch_group      = rep(c("Chinook_Adult_AD_Kept", "Steelhead_Adult_UM_Released"), each = 12),
     angler_type_name = rep("Bank Anglers", 24),
@@ -135,8 +135,39 @@ create_mock_estimates_list_with_stratum <- function() {
     period_timestep  = rep("week", 12)
   )
 
-  base$catch_stratum  <- catch_stratum
-  base$effort_stratum <- effort_stratum
+  # Catchrate stratum: BSS only, estimate_category == "CPUE"
+  # 2 catch groups x 1 model type (BSS) x 3 estimate types x 2 strata
+  catchrate_stratum <- tibble::tibble(
+    analysis_id      = rep("uuid-001", 12),
+    analysis_name    = rep("Nisqually_2021_PE_final", 12),
+    project_id       = rep("proj-001", 12),
+    project_name     = rep("Test Project", 12),
+    fishery_name     = rep("Nisqually", 12),
+    species_name     = rep(c("Chinook", "Steelhead"), each = 6),
+    life_stage_name  = rep("Adult", 12),
+    fin_mark         = rep(c("AD", "UM"), each = 6),
+    fate_name        = rep(c("Kept", "Released"), each = 6),
+    catch_group      = rep(c("Chinook_Adult_AD_Kept", "Steelhead_Adult_UM_Released"), each = 6),
+    angler_type_name = rep("Bank Anglers", 12),
+    catch_area_code  = rep("786", 12),
+    section_num      = rep(1L, 12),
+    day_type         = rep(c("weekday", "weekend"), 6),
+    model_type       = rep("BSS", 12),
+    estimate_type    = rep(c("mean", "quantile_lower_2_5", "quantile_upper_97_5"), 4),
+    estimate_value   = runif(12, 0, 5),
+    estimate_category = rep("CPUE", 12),
+    period           = rep(1L, 12),
+    min_event_date   = rep(as.Date("2021-01-01"), 12),
+    max_event_date   = rep(as.Date("2021-01-07"), 12),
+    data_grade       = rep("Approved", 12),
+    upload_date      = rep(as.Date("2021-12-15"), 12),
+    created_by       = rep("test_user", 12),
+    period_timestep  = rep("week", 12)
+  )
+
+  base$catch_stratum     <- catch_stratum
+  base$effort_stratum    <- effort_stratum
+  base$catchrate_stratum <- catchrate_stratum
   base
 }
 
@@ -241,29 +272,34 @@ test_that("tidy_fishery_estimates passes analysis_metadata through unchanged", {
 })
 
 test_that("tidy_fishery_estimates skips NULL stratum tables gracefully", {
-  mock_list <- create_mock_estimates_list() # catch_stratum and effort_stratum are NULL
+  mock_list <- create_mock_estimates_list() # catch_stratum, effort_stratum, catchrate_stratum are NULL
   result <- suppressMessages(tidy_fishery_estimates(mock_list))
 
   # NULL stratum tables are skipped entirely — keys will not be present
-  expect_null(result$catch_stratum_pe)
-  expect_null(result$catch_stratum_bss)
-  expect_null(result$effort_stratum_pe)
-  expect_null(result$effort_stratum_bss)
+  expect_null(result[["catch_stratum_pe"]])
+  expect_null(result[["catch_stratum_bss"]])
+  expect_null(result[["effort_stratum_pe"]])
+  expect_null(result[["effort_stratum_bss"]])
+  expect_null(result[["catchrate_stratum_bss"]])
 })
 
 test_that("tidy_fishery_estimates splits stratum tables by model type", {
   mock_list <- create_mock_estimates_list_with_stratum()
   result <- suppressMessages(tidy_fishery_estimates(mock_list))
 
-  # Should produce separate PE and BSS stratum tables
+  # Should produce separate PE and BSS stratum tables for catch/effort
   expect_s3_class(result$catch_stratum_pe,  "data.frame")
   expect_s3_class(result$catch_stratum_bss, "data.frame")
   expect_s3_class(result$effort_stratum_pe,  "data.frame")
   expect_s3_class(result$effort_stratum_bss, "data.frame")
 
+  # BSS-only catchrate table
+  expect_s3_class(result$catchrate_stratum_bss, "data.frame")
+
   # Original stratum keys should not appear
-  expect_null(result$catch_stratum)
-  expect_null(result$effort_stratum)
+  expect_null(result[["catch_stratum"]])
+  expect_null(result[["effort_stratum"]])
+  expect_null(result[["catchrate_stratum"]])
 })
 
 test_that("tidy_fishery_estimates stratum tables use bare estimate_type column names", {
@@ -280,9 +316,15 @@ test_that("tidy_fishery_estimates stratum tables use bare estimate_type column n
   bss_cols <- names(result$catch_stratum_bss)
   expect_false(any(grepl("^PE_", bss_cols)))
   expect_false(any(grepl("^BSS_", bss_cols)))
+
+  # BSS catchrate table likewise
+  cr_cols <- names(result$catchrate_stratum_bss)
+  expect_false(any(grepl("^PE_", cr_cols)))
+  expect_false(any(grepl("^BSS_", cr_cols)))
+  expect_true(any(grepl("mean|quantile", cr_cols)))
 })
 
-test_that("tidy_fishery_estimates stratum catch has catch_group; effort does not", {
+test_that("tidy_fishery_estimates stratum catch has catch_group; effort does not; catchrate does", {
   mock_list <- create_mock_estimates_list_with_stratum()
   result <- suppressMessages(tidy_fishery_estimates(mock_list))
 
@@ -290,6 +332,7 @@ test_that("tidy_fishery_estimates stratum catch has catch_group; effort does not
   expect_true("catch_group" %in% names(result$catch_stratum_bss))
   expect_false("catch_group" %in% names(result$effort_stratum_pe))
   expect_false("catch_group" %in% names(result$effort_stratum_bss))
+  expect_true("catch_group" %in% names(result$catchrate_stratum_bss))
 })
 
 test_that("tidy_fishery_estimates stratum tables include stratum-specific columns", {
@@ -302,6 +345,8 @@ test_that("tidy_fishery_estimates stratum tables include stratum-specific column
                 info = paste("Missing stratum column:", col, "in catch_stratum_pe"))
     expect_true(col %in% names(result$catch_stratum_bss),
                 info = paste("Missing stratum column:", col, "in catch_stratum_bss"))
+    expect_true(col %in% names(result$catchrate_stratum_bss),
+                info = paste("Missing stratum column:", col, "in catchrate_stratum_bss"))
   }
 })
 
@@ -618,6 +663,7 @@ test_that("tidy_fishery_estimates list-path with stratum shows split model messa
   expect_match(messages_text, "Pivoting 'catch_stratum_bss'")
   expect_match(messages_text, "Pivoting 'effort_stratum_pe'")
   expect_match(messages_text, "Pivoting 'effort_stratum_bss'")
+  expect_match(messages_text, "Pivoting 'catchrate_stratum_bss'")
 })
 
 # Integration with get_fishery_estimates ----
@@ -625,7 +671,7 @@ test_that("tidy_fishery_estimates list-path with stratum shows split model messa
 test_that("tidy_fishery_estimates works with get_fishery_estimates output", {
   skip_if_offline <- function() {
     con_available <- tryCatch({
-      con <- creelutils::establish_db_con()
+      con <- creelutils::connect_creel_db()
       valid <- DBI::dbIsValid(con)
       if (valid) DBI::dbDisconnect(con)
       valid

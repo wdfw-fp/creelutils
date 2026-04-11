@@ -8,7 +8,7 @@
 # Helper to check database availability
 skip_if_offline <- function() {
   con_available <- tryCatch({
-    con <- creelutils::establish_db_con()
+    con <- creelutils::connect_creel_db()
     valid <- DBI::dbIsValid(con)
     if (valid) DBI::dbDisconnect(con)
     valid
@@ -98,6 +98,54 @@ test_that("get_fishery_estimates validates max_upload_date parameter", {
     "ERROR: 'max_upload_date' must be a single logical value \\(TRUE or FALSE\\)"
   )
   expect_null(result)
+})
+
+test_that("get_fishery_estimates validates query_timeout parameter", {
+  expect_message(
+    result <- get_fishery_estimates(
+      fishery_names = "Nisqually",
+      query_timeout = "60"
+    ),
+    "ERROR: 'query_timeout' must be NULL or a single positive number"
+  )
+  expect_null(result)
+
+  expect_message(
+    result <- get_fishery_estimates(
+      fishery_names = "Nisqually",
+      query_timeout = -5
+    ),
+    "ERROR: 'query_timeout' must be NULL or a single positive number"
+  )
+  expect_null(result)
+
+  expect_message(
+    result <- get_fishery_estimates(
+      fishery_names = "Nisqually",
+      query_timeout = 0
+    ),
+    "ERROR: 'query_timeout' must be NULL or a single positive number"
+  )
+  expect_null(result)
+
+  expect_message(
+    result <- get_fishery_estimates(
+      fishery_names = "Nisqually",
+      query_timeout = c(30, 60)
+    ),
+    "ERROR: 'query_timeout' must be NULL or a single positive number"
+  )
+  expect_null(result)
+
+  # NULL and valid positive values should pass validation (will fail at DB step)
+  expect_message(
+    get_fishery_estimates(fishery_names = "Nisqually", query_timeout = NULL),
+    "Querying estimates"
+  )
+  expect_message(
+    get_fishery_estimates(fishery_names = "Nisqually", query_timeout = 30),
+    "Querying estimates"
+  )
 })
 
 test_that("get_fishery_estimates validates temporal_agg parameter", {
@@ -199,7 +247,7 @@ test_that("get_fishery_estimates establishes connection when none provided", {
 test_that("get_fishery_estimates uses provided connection", {
   skip_if_offline()
 
-  con <- establish_db_con()
+  con <- connect_creel_db()
   on.exit(DBI::dbDisconnect(con), add = TRUE)
 
   # Should NOT show "establishing connection" message
@@ -240,7 +288,7 @@ test_that("get_fishery_estimates returns list with correct structure (temporal_a
 
   expect_type(result, "list")
   expected_names <- c("analysis_metadata", "catch_total", "effort_total",
-                      "catch_stratum", "effort_stratum")
+                      "catch_stratum", "effort_stratum", "catchrate_stratum")
   expect_true(all(expected_names %in% names(result)))
   expect_s3_class(result$analysis_metadata, "data.frame")
 })
@@ -269,7 +317,7 @@ test_that("get_fishery_estimates returns only stratum tables when temporal_agg =
 
   skip_if(is.null(result), "No data found for test fishery")
 
-  expect_true(all(c("catch_stratum", "effort_stratum", "analysis_metadata") %in% names(result)))
+  expect_true(all(c("catch_stratum", "effort_stratum", "catchrate_stratum", "analysis_metadata") %in% names(result)))
   expect_false("catch_total" %in% names(result))
   expect_false("effort_total" %in% names(result))
   expect_false("estimates" %in% names(result))
@@ -357,7 +405,7 @@ test_that("get_fishery_estimates effort tables contain only effort records", {
   expect_true(all(result$effort_total$estimate_category %in% c("effort", "E_sum")))
 })
 
-test_that("get_fishery_estimates formats fin_mark_desc to short codes", {
+test_that("get_fishery_estimates formats fin_mark to short codes", {
   skip_if_offline()
 
   result <- suppressMessages(
@@ -367,15 +415,15 @@ test_that("get_fishery_estimates formats fin_mark_desc to short codes", {
   skip_if(is.null(result), "No data found for test fishery")
   skip_if(is.null(result$catch_total) || nrow(result$catch_total) == 0, "No catch_total data")
 
-  with_finmark <- result$catch_total[!is.na(result$catch_total$fin_mark_desc), ]
+  with_finmark <- result$catch_total[!is.na(result$catch_total$fin_mark), ]
 
   if (nrow(with_finmark) > 0) {
-    expect_false(any(grepl("Adclip clip \\+ No other external marks", with_finmark$fin_mark_desc)))
-    expect_false(any(grepl("No Adclip \\+ No Other external marks", with_finmark$fin_mark_desc)))
+    expect_false(any(grepl("Adclip clip \\+ No other external marks", with_finmark$fin_mark)))
+    expect_false(any(grepl("No Adclip \\+ No Other external marks", with_finmark$fin_mark)))
 
     valid_codes <- c("AD", "UM", "UNK")
-    if (any(with_finmark$fin_mark_desc %in% valid_codes)) {
-      expect_true(all(with_finmark$fin_mark_desc %in% c(valid_codes, NA)))
+    if (any(with_finmark$fin_mark %in% valid_codes)) {
+      expect_true(all(with_finmark$fin_mark %in% c(valid_codes, NA)))
     }
   }
 })
@@ -452,7 +500,7 @@ test_that("get_fishery_estimates removes duplicate .x and .y columns", {
   skip_if(is.null(result), "No data found for test fishery")
 
   duplicate_pattern <- "\\.(x|y)$"
-  for (tbl_name in c("catch_total", "effort_total", "catch_stratum", "effort_stratum")) {
+  for (tbl_name in c("catch_total", "effort_total", "catch_stratum", "effort_stratum", "catchrate_stratum")) {
     if (!is.null(result[[tbl_name]])) {
       expect_false(
         any(grepl(duplicate_pattern, names(result[[tbl_name]]))),
