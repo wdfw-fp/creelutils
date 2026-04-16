@@ -4,15 +4,17 @@
 \alias{connect_creel_db}
 \title{Connect to the WDFW freshwater creel database}
 \usage{
-connect_creel_db(db_env = c("prod", "test"), config_path = "config.yml")
+connect_creel_db(db_env = c("prod", "test"), config_path = NULL)
 }
 \arguments{
 \item{db_env}{\code{"prod"} (default) connects to the production database.
 \code{"test"} connects to the test database. Credentials are the same for both;
 write permissions are more restricted on the test server.}
 
-\item{config_path}{Path to the local \code{config.yml} file containing server
-connection details. Defaults to \code{"config.yml"} in the working directory.}
+\item{config_path}{Path to the \code{config.yml} file containing server
+connection details. When \code{NULL} (the default), checks the
+\code{CREELUTILS_CONFIG_PATH} environment variable first, then falls back to
+\code{rappdirs::user_config_dir("creelutils")}.}
 }
 \value{
 A \code{DBI} connection object to a PostgreSQL database. It is

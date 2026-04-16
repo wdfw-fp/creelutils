@@ -18,8 +18,10 @@
 #' @param db_env `"prod"` (default) connects to the production database.
 #'   `"test"` connects to the test database. Credentials are the same for both;
 #'   write permissions are more restricted on the test server.
-#' @param config_path Path to the local `config.yml` file containing server
-#'   connection details. Defaults to `"config.yml"` in the working directory.
+#' @param config_path Path to the `config.yml` file containing server
+#'   connection details. When `NULL` (the default), checks the
+#'   `CREELUTILS_CONFIG_PATH` environment variable first, then falls back to
+#'   `rappdirs::user_config_dir("creelutils")`.
 #'
 #' @return A `DBI` connection object to a PostgreSQL database. It is
 #'   conventional to assign this to `con`:
@@ -43,17 +45,31 @@
 #' }
 connect_creel_db <- function(
     db_env = c("prod", "test"),
-    config_path = "config.yml"
+    config_path = NULL
 ) {
   db_env <- match.arg(db_env)
+
+  # Connection priority
+  # 1 - config_path arg supplied, 2 - env var for GH Actions workflow, 3 - config.yml file in .config dotfolder
+  if (is.null(config_path)) {
+    env_path <- Sys.getenv("CREELUTILS_CONFIG_PATH", unset = "")
+    config_path <- if (nzchar(env_path)) {
+      env_path
+    } else {
+      file.path(Sys.getenv("USERPROFILE", unset = Sys.getenv("HOME")), ".config", "creelutils", "config.yml")
+    }
+  }
 
   # -- 1. Read and validate config --------------------------------------------
 
   if (!file.exists(config_path)) {
     cli::cli_abort(c(
       "Config file not found at {.path {config_path}}.",
-      "i" = "Ensure {.file config.yml} exists in your working directory, or
-             supply the correct path via {.arg config_path}."
+      "i" = "Place your {.file config.yml} in
+             {.path ~/.config/creelutils/},
+             or supply the path via {.arg config_path}.",
+      "i" = "You can also set the {.envvar CREELUTILS_CONFIG_PATH} environment
+             variable."
     ))
   }
 
