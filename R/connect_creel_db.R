@@ -21,7 +21,7 @@
 #' @param config_path Path to the `config.yml` file containing server
 #'   connection details. When `NULL` (the default), checks the
 #'   `CREELUTILS_CONFIG_PATH` environment variable first, then falls back to
-#'   `rappdirs::user_config_dir("creelutils")`.
+#'   `C:/Users/user-name/.config/creelutils`.
 #'
 #' @return A `DBI` connection object to a PostgreSQL database. It is
 #'   conventional to assign this to `con`:

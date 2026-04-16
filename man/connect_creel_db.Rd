@@ -14,7 +14,7 @@ write permissions are more restricted on the test server.}
 \item{config_path}{Path to the \code{config.yml} file containing server
 connection details. When \code{NULL} (the default), checks the
 \code{CREELUTILS_CONFIG_PATH} environment variable first, then falls back to
-\code{rappdirs::user_config_dir("creelutils")}.}
+\verb{C:/Users/user-name/.config/creelutils}.}
 }
 \value{
 A \code{DBI} connection object to a PostgreSQL database. It is
