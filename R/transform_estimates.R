@@ -1,6 +1,7 @@
 #' Transform individual model outputs into a single object
 #'
 #' @family ETL
+#' @param params list object containing fishery- and analysis- specific metadata
 #' @param dwg list object containing freshwater creel dataset, returned by `fetch_dwg()`
 #' @param transformed_pe_data standardized outputs from the PE model, returned by `process_pe_estimates()`
 #' @param transformed_bss_data standardized outputs from the BSS model, returned by `process_bss_estimates()`
@@ -8,9 +9,12 @@
 #' @return list object containing standardized model estimates
 #' @export
 #'
-transform_estimates <- function(dwg,
-                                transformed_pe_data,
-                                transformed_bss_data) {
+transform_estimates <- function(
+    params,
+    dwg,
+    transformed_pe_data,
+    transformed_bss_data
+) {
   #Combine PE and BSS standardized objects
 
   creel_estimates <- list(
