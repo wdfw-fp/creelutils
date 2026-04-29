@@ -5,11 +5,12 @@
 #'
 #' @return Tibble of fishery names with year, start dates, end dates, and metadata
 #' @export
-fishery_lut <- function(conn) {
+fishery_lut <- function(conn = NULL) {
 
-  # Check database connection
-  if (!DBI::dbIsValid(conn)) {
-    cli::cli_abort("Database connection is not valid or has been closed.")
+  # Establish lazy connection if conn not provided
+  if (is.null(conn) || !DBI::dbIsValid(conn)) {
+    conn <- connect_creel_db()
+    on.exit(DBI::dbDisconnect(conn), add = TRUE)
   }
 
   fetch_db_table(conn, "creel", "fishery_lut")
@@ -24,13 +25,14 @@ fishery_lut <- function(conn) {
 #' @return Tibble of fishery information that includes fishery name, dates, and spatial structure (sections and sites).
 #' @export
 fishery_manager <- function(
-    conn,
+    conn = NULL,
     fishery_name = NULL
   ) {
 
-  # Check database connection
-  if (!DBI::dbIsValid(conn)) {
-    cli::cli_abort("Database connection is not valid or has been closed.")
+  # Establish lazy connection if conn not provided
+  if (is.null(conn) || !DBI::dbIsValid(conn)) {
+    conn <- connect_creel_db()
+    on.exit(DBI::dbDisconnect(conn), add = TRUE)
   }
 
   filter <- NULL
@@ -55,14 +57,15 @@ fishery_manager <- function(
 #' @return Tibble of catch groups of interest for a given fishery.
 #' @export
 fishery_catchgroups <- function(
-    conn,
+    conn = NULL,
     fishery_name = NULL,
     print = FALSE
   ) {
 
-  # Check database connection
-  if (!DBI::dbIsValid(conn)) {
-    cli::cli_abort("Database connection is not valid or has been closed. Reconnect with {.fn connect_creel_db}.")
+  # Establish lazy connection if conn not provided
+  if (is.null(conn) || !DBI::dbIsValid(conn)) {
+    conn <- connect_creel_db()
+    on.exit(DBI::dbDisconnect(conn), add = TRUE)
   }
 
   filter <- NULL
@@ -127,10 +130,12 @@ fishery_catchgroups <- function(
 #' @return A tibble of catch groups from [fishery_catchgroups()] with an appended
 #'   `fish_count` column, filtered to observed catch groups unless `include_zero = TRUE`.
 #' @export
-fishery_catchgroups_obs <- function(conn, data, include_zero = FALSE) {
+fishery_catchgroups_obs <- function(conn = NULL, data, include_zero = FALSE) {
 
-  if (!DBI::dbIsValid(conn)) {
-    cli::cli_abort("Database connection is not valid or has been closed. Reconnect with {.fn connect_creel_db}.")
+  # Establish lazy connection if conn not provided
+  if (is.null(conn) || !DBI::dbIsValid(conn)) {
+    conn <- connect_creel_db()
+    on.exit(DBI::dbDisconnect(conn), add = TRUE)
   }
 
   fishery_name <- unique(data$fishery_manager$fishery_name)
@@ -206,8 +211,13 @@ query_analysis_lut <- function(
     fishery_name = NULL
   ) {
 
-  filter <- NULL
+  # Establish lazy connection if conn not provided
+  if (is.null(conn) || !DBI::dbIsValid(conn)) {
+    conn <- connect_creel_db()
+    on.exit(DBI::dbDisconnect(conn), add = TRUE)
+  }
 
+  filter <- NULL
   if (!is.null(analysis_id)) {
     filter <- glue::glue("analysis_id == '{analysis_id}'")
   } else if (!is.null(fishery_name)) {
@@ -240,6 +250,12 @@ model_estimates <- function(
     ...
   ) {
 
+  # Establish lazy connection if conn not provided
+  if (is.null(conn) || !DBI::dbIsValid(conn)) {
+    conn <- connect_creel_db()
+    on.exit(DBI::dbDisconnect(conn), add = TRUE)
+  }
+
   scale <- match.arg(scale)
   table <- glue::glue("model_estimates_{scale}")
 
@@ -253,7 +269,6 @@ model_estimates <- function(
 
   # Build filters
   filters <- NULL
-
   if (!is.null(analysis_id)) {
     filters <- c(filters, glue::glue("analysis_id == '{analysis_id}'"))
   }

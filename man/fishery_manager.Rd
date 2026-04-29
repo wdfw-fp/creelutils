@@ -4,7 +4,7 @@
 \alias{fishery_manager}
 \title{Get 'fishery manager' table}
 \usage{
-fishery_manager(conn, fishery_name = NULL)
+fishery_manager(conn = NULL, fishery_name = NULL)
 }
 \arguments{
 \item{conn}{A valid database connection from \code{connect_creel_db()}}

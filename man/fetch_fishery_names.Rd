@@ -16,7 +16,9 @@ Character vector of "fishery_name" values which represent identifiers for a give
 List all available 'fishery name' values
 }
 \examples{
+\dontrun{
 head(fetch_fishery_names(), n = 10)
+}
 }
 \seealso{
 Other public_data: 

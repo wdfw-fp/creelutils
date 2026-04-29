@@ -4,10 +4,10 @@
 \alias{fetch_db_table}
 \title{Query database tables}
 \usage{
-fetch_db_table(con, schema, table, filter = NULL, show_query = FALSE)
+fetch_db_table(conn = NULL, schema, table, filter = NULL, show_query = FALSE)
 }
 \arguments{
-\item{con}{A valid connection to the WDFW PostgreSQL database. @seealso \code{\link[=establish_db_con]{establish_db_con()}}}
+\item{conn}{A valid connection to the WDFW PostgreSQL database. @seealso \code{\link[=connect_creel_db]{connect_creel_db()}}}
 
 \item{schema}{The database schema of interest. Most freshwater creel tasks use the "creel" schema.}
 

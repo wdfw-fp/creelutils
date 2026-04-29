@@ -5,7 +5,7 @@
 #' Note: If the 'filter' argument contains a "catch_group" component, the value provided will be parsed into component fields. For example, "Chinook_Adult_AD_Released" is translated to "species_name = 'Chinook', life_stage_name = 'Adult', fin_mark_desc = 'Adclip clip + No other external marks', fate_name = 'Released'".
 #'
 #' @family internal_data
-#' @param con A valid connection to the WDFW PostgreSQL database. @seealso [establish_db_con()]
+#' @param conn A valid connection to the WDFW PostgreSQL database. @seealso [connect_creel_db()]
 #' @param schema The database schema of interest. Most freshwater creel tasks use the "creel" schema.
 #' @param table The table or view within the database schema that is to be queried.
 #' @param filter A `dplyr` style filter which may contain one or more elements. See Examples section for more information.
@@ -34,10 +34,19 @@
 #'   )
 #' }
 
-fetch_db_table <- function(con, schema, table, filter = NULL, show_query = FALSE) {
-  # check connection to database
-  if(!DBI::dbIsValid(con)) {
-    stop("fetch_db_table error: No database connection provided.")
+fetch_db_table <- function(conn = NULL, schema, table, filter = NULL, show_query = FALSE) {
+
+  if (!is.null(conn) && !inherits(conn, "DBIConnection")) {
+    cli::cli_abort(c(
+      "{.arg conn} must be a {.cls DBIConnection} object or {.code NULL}.",
+      "i" = "Got an object of class {.cls {class(conn)}}.",
+      "i" = "Did you forget to name {.arg schema} and {.arg table}?"
+    ))
+  }
+  # Establish lazy connection if conn not provided
+  if (is.null(conn) || !DBI::dbIsValid(conn)) {
+    conn <- connect_creel_db()
+    on.exit(DBI::dbDisconnect(conn), add = TRUE)
   }
 
   # validate inputs
@@ -46,7 +55,7 @@ fetch_db_table <- function(con, schema, table, filter = NULL, show_query = FALSE
   }
 
   # build query
-  query <- dplyr::tbl(con, dbplyr::in_schema(schema, table))
+  query <- dplyr::tbl(conn, dbplyr::in_schema(schema, table))
 
   # define lookup for mark_status translation
   mark_status_lookup <- c(

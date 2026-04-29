@@ -6,7 +6,9 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' head(fetch_fishery_names(), n = 10)
+#' }
 fetch_fishery_names = function(...){
   if (length(list(...)) > 0) {
     cli::cli_abort("The function {.fn fetch_fishery_names} does not take any arguments. Call it as {.code fetch_fishery_names()} with empty parentheses.")
@@ -32,8 +34,10 @@ fetch_fishery_names = function(...){
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' search_fishery_name("gamefish")
 #' search_fishery_name("Humptulips")
+#' }
 search_fishery_name <- function(fishery_partial){
   grep(fishery_partial, fetch_fishery_names(), ignore.case = T, value = TRUE)
 }

@@ -4,7 +4,7 @@
 \alias{fishery_catchgroups_obs}
 \title{Get observed catch groups for a fishery}
 \usage{
-fishery_catchgroups_obs(conn, data, include_zero = FALSE)
+fishery_catchgroups_obs(conn = NULL, data, include_zero = FALSE)
 }
 \arguments{
 \item{conn}{A valid database connection from \code{\link[=connect_creel_db]{connect_creel_db()}}.}
