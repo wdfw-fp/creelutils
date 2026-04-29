@@ -43,7 +43,7 @@ For example, the *Skagit winter steelhead 2021* dataset contains effort counts, 
 
 The function `fetch_dwg` downloads creel data from data.wa.gov by Fishery Name and is the primary route for accessing a complete dataset from a fishery.
 
-```{r}
+```{r, eval = FALSE}
 library(creelutils)
 
 fishery_name <- "Skagit winter steelhead 2021"
@@ -59,7 +59,7 @@ colnames(dat$effort)
 
 The function `fetch_fishery_names()`, which has no arguments, returns a list of all fishery names in the creel database.
 
-```{r}
+```{r, eval = FALSE}
 fetch_fishery_names() |> head(n = 10)
 ```
 
@@ -67,7 +67,7 @@ fetch_fishery_names() |> head(n = 10)
 
 The function `search_fishery_name()` can accept a vector of characters or numbers and returns the fishery names with those values.
 
-```{r}
+```{r, eval = FALSE}
 # by water body
 search_fishery_name("Humptulips") |> head(n = 5)
 
@@ -86,7 +86,7 @@ This section covers operations that require the appropriate credentials and perm
 
 An internal connection to the Postgres creel database can be made using the `establish_db_con` function. When called a RStudio UI prompt will open for the user to enter their password. This requires the proper user credentials and setup on local computer. If this is your first time using this method, contact the package maintainer for assistance. 
 
-```{r}
+```{r, eval = FALSE}
 # con <- establish_db_con()
 ```
 
