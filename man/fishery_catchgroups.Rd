@@ -22,7 +22,6 @@ Simple wrapper to query the vw_fishery_manager table.
 \seealso{
 Other internal_data: 
 \code{\link{connect_creel_db}()},
-\code{\link{fetch_data}()},
 \code{\link{fetch_db_table}()},
 \code{\link{fishery_catchgroups_obs}()}
 }
