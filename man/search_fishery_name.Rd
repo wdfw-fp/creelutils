@@ -16,8 +16,10 @@ Character vector of 'fishery_name' identifiers containing the partial value.
 Helps identify options for \code{fetch_dwg()}.
 }
 \examples{
+\dontrun{
 search_fishery_name("gamefish")
 search_fishery_name("Humptulips")
+}
 }
 \seealso{
 Other public_data: 
