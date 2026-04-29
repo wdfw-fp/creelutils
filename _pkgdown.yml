@@ -26,8 +26,8 @@ reference:
     - fishery_manager
     - fishery_catchgroups
     - fishery_catchgroups_obs
-    - query_analysis_lut
     - model_estimates
+    - query_analysis_lut
 
 - title: "BSS tools"
   desc: >
@@ -57,5 +57,6 @@ reference:
   desc: >
     Functions for working with creel datasets.
   contents:
+    - catchgroups_to_params
     - drop_section
     - plot_zipcodes
