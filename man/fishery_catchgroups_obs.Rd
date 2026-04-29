@@ -4,7 +4,7 @@
 \alias{fishery_catchgroups_obs}
 \title{Get observed catch groups for a fishery}
 \usage{
-fishery_catchgroups_obs(conn, data, include_zero = FALSE)
+fishery_catchgroups_obs(conn = NULL, data, include_zero = FALSE)
 }
 \arguments{
 \item{conn}{A valid database connection from \code{\link[=connect_creel_db]{connect_creel_db()}}.}
@@ -34,6 +34,7 @@ The standard input for \code{data} is the list object returned by \code{\link[=f
 \seealso{
 Other internal_data: 
 \code{\link{connect_creel_db}()},
+\code{\link{fetch_data}()},
 \code{\link{fetch_db_table}()},
 \code{\link{fishery_catchgroups}()}
 }

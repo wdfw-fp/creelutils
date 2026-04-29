@@ -4,7 +4,7 @@
 \alias{fishery_catchgroups}
 \title{Get 'fishery_catch_groups' view}
 \usage{
-fishery_catchgroups(conn, fishery_name = NULL, print = FALSE)
+fishery_catchgroups(conn = NULL, fishery_name = NULL, print = FALSE)
 }
 \arguments{
 \item{conn}{A valid database connection from \code{connect_creel_db()}}
@@ -22,6 +22,7 @@ Simple wrapper to query the vw_fishery_manager table.
 \seealso{
 Other internal_data: 
 \code{\link{connect_creel_db}()},
+\code{\link{fetch_data}()},
 \code{\link{fetch_db_table}()},
 \code{\link{fishery_catchgroups_obs}()}
 }
