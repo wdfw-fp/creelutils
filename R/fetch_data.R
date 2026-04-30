@@ -137,7 +137,9 @@ fetch_data <- function(
   needs_effort <- "effort" %in% tables || "ll" %in% tables || "creel_event" %in% tables
 
   if (needs_effort) {
-    effort <- fetch_db_table(con, "creel", view_map[["effort"]], filter = fishery_filter)
+    effort <- fetch_db_table(con, "creel", view_map[["effort"]], filter = fishery_filter) |>
+      tidyr::drop_na(.data$count_type) |>
+      dplyr::select(-dplyr::any_of(c("created_datetime", "modified_datetime")))
 
     if ("effort" %in% tables) {
       result[["effort"]] <- effort
@@ -148,7 +150,8 @@ fetch_data <- function(
   needs_interview <- "interview" %in% tables || "creel_event" %in% tables
 
   if (needs_interview) {
-    interview <- fetch_db_table(con, "creel", view_map[["interview"]], filter = fishery_filter)
+    interview <- fetch_db_table(con, "creel", view_map[["interview"]], filter = fishery_filter) |>
+      dplyr::select(-dplyr::any_of(c("created_datetime", "modified_datetime")))
 
     if ("interview" %in% tables) {
       result[["interview"]] <- interview
@@ -162,9 +165,28 @@ fetch_data <- function(
     result[["ll"]] <- fetch_db_table(con, "creel", "water_body_lut", filter = wb_filter)
   }
 
-  # Remaining standard tables (these views all have fishery_name)
-  for (tbl in intersect(tables, c("catch", "closures", "fishery_manager",
-                                  "model_catch_group"))) {
+  # Catch — select columns and derive catch_group
+  if ("catch" %in% tables) {
+    result[["catch"]] <- fetch_db_table(con, "creel", view_map[["catch"]], filter = fishery_filter) |>
+      dplyr::select(
+        .data$interview_id, .data$catch_id, .data$species, .data$run,
+        .data$life_stage, .data$fin_mark, .data$sex, .data$fork_length_cm,
+        .data$fate, .data$fish_count
+      ) |>
+      dplyr::mutate(
+        catch_group = paste(.data$species, .data$life_stage, .data$fin_mark,
+                            .data$fate, sep = "_")
+      )
+  }
+
+  # Closures — select columns
+  if ("closures" %in% tables) {
+    result[["closures"]] <- fetch_db_table(con, "creel", view_map[["closures"]], filter = fishery_filter) |>
+      dplyr::select(.data$fishery_name, .data$section_num, .data$event_date)
+  }
+
+  # Remaining standard tables
+  for (tbl in intersect(tables, c("fishery_manager", "model_catch_group"))) {
     result[[tbl]] <- fetch_db_table(con, "creel", view_map[[tbl]], filter = fishery_filter)
   }
 
