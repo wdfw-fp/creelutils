@@ -133,7 +133,7 @@ fetch_data <- function(
 
   result <- list()
 
-  # Effort — also needed internally if ll or creel_event is requested
+  # Effort — also needed if ll or creel_event is requested
   needs_effort <- "effort" %in% tables || "ll" %in% tables || "creel_event" %in% tables
 
   if (needs_effort) {
@@ -141,6 +141,17 @@ fetch_data <- function(
 
     if ("effort" %in% tables) {
       result[["effort"]] <- effort
+    }
+  }
+
+  # Interview — also needed if creel_event is requested
+  needs_interview <- "interview" %in% tables || "creel_event" %in% tables
+
+  if (needs_interview) {
+    interview <- fetch_db_table(con, "creel", view_map[["interview"]], filter = fishery_filter)
+
+    if ("interview" %in% tables) {
+      result[["interview"]] <- interview
     }
   }
 
@@ -152,16 +163,17 @@ fetch_data <- function(
   }
 
   # Remaining standard tables (these views all have fishery_name)
-  for (tbl in intersect(tables, c("interview", "catch", "closures", "fishery_manager",
+  for (tbl in intersect(tables, c("catch", "closures", "fishery_manager",
                                   "model_catch_group"))) {
     result[[tbl]] <- fetch_db_table(con, "creel", view_map[[tbl]], filter = fishery_filter)
   }
 
-  # creel_event — filter by water bodies and date range from effort
+  # creel_event — filter by water bodies and date range from effort + interview
   if ("creel_event" %in% tables) {
-    water_bodies <- unique(effort$water_body)
-    min_date <- min(effort$event_date, na.rm = TRUE)
-    max_date <- max(effort$event_date, na.rm = TRUE)
+    water_bodies <- unique(c(effort$water_body, interview$water_body))
+    all_dates <- c(effort$event_date, interview$event_date)
+    min_date <- min(all_dates, na.rm = TRUE)
+    max_date <- max(all_dates, na.rm = TRUE)
 
     event_filter <- c(
       glue::glue("water_body %in% c({paste0(\"'\", water_bodies, \"'\", collapse = ', ')})"),
@@ -189,13 +201,14 @@ fetch_data <- function(
     catch           = "https://data.wa.gov/resource/6y4e-8ftk.csv",
     water_bodies    = "https://data.wa.gov/resource/nbd2-vdmz.csv",
     closures        = "https://data.wa.gov/resource/6zm6-iep6.csv",
-    fishery_manager = "https://data.wa.gov/resource/vkjc-s5u8.csv"
+    fishery_manager = "https://data.wa.gov/resource/vkjc-s5u8.csv",
+    creel_event     = "https://data.wa.gov/resource/ui95-axtn.csv"
   )
 
   result <- list()
 
-  # Effort — also needed internally if ll is requested
-  needs_effort <- "effort" %in% tables || "ll" %in% tables
+  # Effort — also needed if ll or creel_event is requested
+  needs_effort <- "effort" %in% tables || "ll" %in% tables || "creel_event" %in% tables
 
   if (needs_effort) {
     effort <- paste0(
@@ -224,15 +237,21 @@ fetch_data <- function(
       readr::read_csv(show_col_types = FALSE)
   }
 
-  # Interview
-  if ("interview" %in% tables) {
-    result[["interview"]] <- paste0(
+  # Interview — also needed if creel_event is requested
+  needs_interview <- "interview" %in% tables || "creel_event" %in% tables
+
+  if (needs_interview) {
+    interview <- paste0(
       dwg_base$interview,
       "?$where=fishery_name='", fishery_name, "'&$limit=100000"
     ) |>
       utils::URLencode() |>
       readr::read_csv(show_col_types = FALSE) |>
       dplyr::select(-.data$created_datetime, -.data$modified_datetime)
+
+    if ("interview" %in% tables) {
+      result[["interview"]] <- interview
+    }
   }
 
   # Catch
@@ -276,10 +295,23 @@ fetch_data <- function(
       readr::read_csv(show_col_types = FALSE)
   }
 
-  # Creel event — not filterable by fishery_name on data.wa.gov
+  # Creel event — filter by water bodies and date range from effort + interview
   if ("creel_event" %in% tables) {
-    message("creel_event on data.wa.gov does not contain a fishery_name column. Returning NULL for this table. Use data_source = 'internal' instead.")
-    result[["creel_event"]] <- NULL
+    water_bodies <- unique(c(effort$water_body, interview$water_body))
+    all_dates <- c(effort$event_date, interview$event_date)
+    min_date <- min(all_dates, na.rm = TRUE)
+    max_date <- max(all_dates, na.rm = TRUE)
+
+    wb_clause <- paste0("water_body in('", paste0(water_bodies, collapse = "','"), "')")
+    date_clause <- paste0("event_date >= '", min_date, "' AND event_date <= '", max_date, "'")
+    where_clause <- paste0(wb_clause, " AND ", date_clause)
+
+    result[["creel_event"]] <- paste0(
+      dwg_base$creel_event,
+      "?$where=", where_clause, "&$limit=100000"
+    ) |>
+      utils::URLencode() |>
+      readr::read_csv(show_col_types = FALSE)
   }
 
   # model_catch_group — not yet available externally
