@@ -21,6 +21,7 @@ Imports:
     tibble,
     purrr,
     readr,
+    httr,
     tidyr,
     glue,
     rstan,

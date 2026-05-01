@@ -45,6 +45,7 @@
 #' @importFrom utils URLencode
 #' @importFrom tidyr drop_na
 #' @importFrom readr read_csv
+#' @importFrom httr GET add_headers content status_code stop_for_status
 #' @importFrom dplyr select mutate
 #'
 #' @examples
@@ -216,6 +217,17 @@ fetch_data <- function(
 
 .fetch_data_external <- function(fishery_name, tables) {
 
+  # -- App token setup ---------------------------------------------------------
+  app_token <- Sys.getenv("SOCRATA_APP_TOKEN", unset = NA)
+
+  if (is.na(app_token)) {
+    cli::cli_warn(c(
+      "No SOCRATA_APP_TOKEN found in environment.",
+      "i" = "Requests will be unauthenticated and may be throttled.",
+      "i" = "See README for setup instructions: {.url https://github.com/wdfw-fp/CreelEstimates}"
+    ))
+  }
+
   # Socrata endpoint mapping
   dwg_base <- list(
     effort          = "https://data.wa.gov/resource/h9a6-g38s.csv",
@@ -233,12 +245,11 @@ fetch_data <- function(
   needs_effort <- "effort" %in% tables || "ll" %in% tables || "creel_event" %in% tables
 
   if (needs_effort) {
-    effort <- paste0(
+    effort <- .socrata_get(
       dwg_base$effort,
-      "?$where=fishery_name='", fishery_name, "'&$limit=100000"
+      paste0("fishery_name='", fishery_name, "'"),
+      app_token
     ) |>
-      utils::URLencode() |>
-      readr::read_csv(show_col_types = FALSE) |>
       tidyr::drop_na(.data$count_type) |>
       dplyr::select(-.data$created_datetime, -.data$modified_datetime)
 
@@ -249,26 +260,20 @@ fetch_data <- function(
 
   # ll (water body coordinates) — filtered to water bodies in effort
   if ("ll" %in% tables) {
-    result[["ll"]] <- paste0(
-      dwg_base$water_bodies,
-      "?$where=water_body_desc in('",
-      paste0(unique(effort$water_body), collapse = "','"),
-      "')&$limit=100000"
-    ) |>
-      utils::URLencode() |>
-      readr::read_csv(show_col_types = FALSE)
+    wb_in <- paste0("water_body_desc in('",
+      paste0(unique(effort$water_body), collapse = "','"), "')")
+    result[["ll"]] <- .socrata_get(dwg_base$water_bodies, wb_in, app_token)
   }
 
   # Interview — also needed if creel_event is requested
   needs_interview <- "interview" %in% tables || "creel_event" %in% tables
 
   if (needs_interview) {
-    interview <- paste0(
+    interview <- .socrata_get(
       dwg_base$interview,
-      "?$where=fishery_name='", fishery_name, "'&$limit=100000"
+      paste0("fishery_name='", fishery_name, "'"),
+      app_token
     ) |>
-      utils::URLencode() |>
-      readr::read_csv(show_col_types = FALSE) |>
       dplyr::select(-.data$created_datetime, -.data$modified_datetime)
 
     if ("interview" %in% tables) {
@@ -278,12 +283,11 @@ fetch_data <- function(
 
   # Catch
   if ("catch" %in% tables) {
-    result[["catch"]] <- paste0(
+    result[["catch"]] <- .socrata_get(
       dwg_base$catch,
-      "?$where=fishery_name='", fishery_name, "'&$limit=100000"
+      paste0("fishery_name='", fishery_name, "'"),
+      app_token
     ) |>
-      utils::URLencode() |>
-      readr::read_csv(show_col_types = FALSE) |>
       dplyr::select(
         .data$interview_id, .data$catch_id, .data$species, .data$run,
         .data$life_stage, .data$fin_mark, .data$sex, .data$fork_length_cm,
@@ -297,24 +301,22 @@ fetch_data <- function(
 
   # Closures
   if ("closures" %in% tables) {
-    result[["closures"]] <- paste0(
+    result[["closures"]] <- .socrata_get(
       dwg_base$closures,
-      "?$where=fishery_name='", fishery_name, "'&$limit=100000"
+      paste0("fishery_name='", fishery_name, "'"),
+      app_token
     ) |>
-      utils::URLencode() |>
-      readr::read_csv(show_col_types = FALSE) |>
       dplyr::select(.data$fishery_name, .data$section_num, .data$event_date)
   }
 
 
   # Fishery manager
   if ("fishery_manager" %in% tables) {
-    result[["fishery_manager"]] <- paste0(
+    result[["fishery_manager"]] <- .socrata_get(
       dwg_base$fishery_manager,
-      "?$where=fishery_name='", fishery_name, "'&$limit=100000"
-    ) |>
-      utils::URLencode() |>
-      readr::read_csv(show_col_types = FALSE)
+      paste0("fishery_name='", fishery_name, "'"),
+      app_token
+    )
   }
 
   # Creel event — filter by water bodies and date range from effort + interview
@@ -328,12 +330,9 @@ fetch_data <- function(
     date_clause <- paste0("event_date >= '", min_date, "' AND event_date <= '", max_date, "'")
     where_clause <- paste0(wb_clause, " AND ", date_clause)
 
-    result[["creel_event"]] <- paste0(
-      dwg_base$creel_event,
-      "?$where=", where_clause, "&$limit=100000"
-    ) |>
-      utils::URLencode() |>
-      readr::read_csv(show_col_types = FALSE)
+    result[["creel_event"]] <- .socrata_get(
+      dwg_base$creel_event, where_clause, app_token
+    )
   }
 
   # model_catch_group — not yet available externally
@@ -343,4 +342,51 @@ fetch_data <- function(
   }
 
   result
+}
+
+
+# ==============================================================================
+# Socrata HTTP helper
+# ==============================================================================
+
+.socrata_get <- function(base_url, where_clause, app_token, limit = 50000L) {
+
+  headers <- if (!is.na(app_token)) {
+    httr::add_headers(`X-App-Token` = app_token)
+  } else {
+    NULL
+  }
+
+  offset <- 0L
+  pages <- list()
+
+
+  repeat {
+    url <- paste0(
+      base_url, "?$where=", where_clause,
+      "&$limit=", limit, "&$offset=", offset
+    ) |> utils::URLencode()
+
+    response <- httr::GET(url = url, headers)
+
+    if (httr::status_code(response) == 429) {
+      cli::cli_abort(c(
+        "API request throttled (HTTP 429).",
+        "x" = "You are likely missing a SOCRATA_APP_TOKEN.",
+        "i" = "Set the token in your .Renviron: {.code SOCRATA_APP_TOKEN=your_token_here}"
+      ))
+    }
+
+    httr::stop_for_status(response)
+
+    page <- httr::content(response, as = "text", encoding = "UTF-8") |>
+      readr::read_csv(show_col_types = FALSE)
+
+    pages <- c(pages, list(page))
+
+    if (nrow(page) < limit) break
+    offset <- offset + limit
+  }
+
+  dplyr::bind_rows(pages)
 }
