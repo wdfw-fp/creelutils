@@ -21,6 +21,7 @@ reference:
     These functions interact directly with the WDFW PostgreSQL creel database, which requires proper credentials and permissions.
   contents:
     - connect_creel_db
+    - fetch_data
     - fetch_db_table
     - fishery_lut
     - fishery_manager

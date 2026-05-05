@@ -56,7 +56,6 @@ DBI::dbDisconnect(con)
 }
 \seealso{
 Other internal_data: 
-\code{\link{fetch_data}()},
 \code{\link{fetch_db_table}()},
 \code{\link{fishery_catchgroups}()},
 \code{\link{fishery_catchgroups_obs}()}
