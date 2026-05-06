@@ -7,8 +7,8 @@
 #' (`data_source = "external"`). Returns a named list of tibbles in a
 #' consistent structure regardless of the source.
 #'
-#' @param con A valid database connection from [connect_creel_db()]. When
-#'   `data_source = "internal"` and `con = NULL` (default), a connection is
+#' @param conn A valid database connection from [connect_creel_db()]. When
+#'   `data_source = "internal"` and `conn = NULL` (default), a connection is
 #'   opened automatically via [connect_creel_db()] and closed on exit. Ignored
 #'   entirely when `data_source = "external"`.
 #' @param fishery_name Character string. The exact fishery name to filter on.
@@ -17,7 +17,7 @@
 #'   `"fishery_manager"`, `"creel_event"`, `"model_catch_group"`. Subset as
 #'   needed, e.g. `tables = c("catch", "interview")`.
 #' @param data_source Character string, either `"internal"` or `"external"`.
-#'   `"internal"` queries the WDFW PostgreSQL database (requires `con`).
+#'   `"internal"` queries the WDFW PostgreSQL database (requires `conn`).
 #'   `"external"` downloads from data.wa.gov (no database connection needed).
 #'
 #' @return A named list of tibbles. Only requested tables are included. Element
@@ -27,7 +27,7 @@
 #'
 #' @details
 #' ## Internal path (`data_source = "internal"`)
-#' Queries database views via [fetch_db_table()]. The `con` argument must be a
+#' Queries database views via [fetch_db_table()]. The `conn` argument must be a
 #' valid connection from [connect_creel_db()]. The `ll` (latitude/longitude)
 #' table is derived by filtering `water_body_lut` to water bodies present in the
 #' effort data. If `"ll"` is requested without `"effort"`, the effort view is
@@ -64,7 +64,7 @@
 #'                    data_source = "external")
 #' }
 fetch_data <- function(
-    con = NULL,
+    conn = NULL,
     fishery_name,
     tables = c("effort", "ll", "interview", "catch", "closures",
                "fishery_manager", "creel_event", "model_catch_group"),
@@ -89,7 +89,7 @@ fetch_data <- function(
   # Dispatch on data_source ----
 
   if (data_source == "internal") {
-    result <- .fetch_data_internal(con, fishery_name, tables)
+    result <- .fetch_data_internal(conn, fishery_name, tables)
   } else {
     result <- .fetch_data_external(fishery_name, tables)
   }
@@ -106,16 +106,16 @@ fetch_data <- function(
 #'
 #' This function queries raw datasets from the creel schema of the WDFW Postgres database
 #' @noRd
-.fetch_data_internal <- function(con, fishery_name, tables) {
+.fetch_data_internal <- function(conn, fishery_name, tables) {
 
   # Lazy connection: open internally if none supplied, close on exit
 
-  if (is.null(con)) {
-    con <- connect_creel_db()
-    on.exit(DBI::dbDisconnect(con), add = TRUE)
+  if (is.null(conn)) {
+    conn <- connect_creel_db()
+    on.exit(DBI::dbDisconnect(conn), add = TRUE)
   }
 
-  if (!DBI::dbIsValid(con)) {
+  if (!DBI::dbIsValid(conn)) {
     cli::cli_abort("Database connection is not valid or has been closed. Reconnect with {.fn connect_creel_db}.")
   }
 
@@ -138,7 +138,7 @@ fetch_data <- function(
   needs_effort <- "effort" %in% tables || "ll" %in% tables || "creel_event" %in% tables
 
   if (needs_effort) {
-    effort <- fetch_db_table(con, "creel", view_map[["effort"]], filter = fishery_filter) |>
+    effort <- fetch_db_table(conn, "creel", view_map[["effort"]], filter = fishery_filter) |>
       tidyr::drop_na(.data$count_type) |>
       dplyr::select(-dplyr::any_of(c("created_datetime", "modified_datetime")))
 
@@ -151,7 +151,7 @@ fetch_data <- function(
   needs_interview <- "interview" %in% tables || "creel_event" %in% tables
 
   if (needs_interview) {
-    interview <- fetch_db_table(con, "creel", view_map[["interview"]], filter = fishery_filter) |>
+    interview <- fetch_db_table(conn, "creel", view_map[["interview"]], filter = fishery_filter) |>
       dplyr::select(-dplyr::any_of(c("created_datetime", "modified_datetime")))
 
     if ("interview" %in% tables) {
@@ -163,12 +163,12 @@ fetch_data <- function(
   if ("ll" %in% tables) {
     water_bodies <- unique(effort$water_body)
     wb_filter <- glue::glue("water_body_desc %in% c({paste0(\"'\", water_bodies, \"'\", collapse = ', ')})")
-    result[["ll"]] <- fetch_db_table(con, "creel", "water_body_lut", filter = wb_filter)
+    result[["ll"]] <- fetch_db_table(conn, "creel", "water_body_lut", filter = wb_filter)
   }
 
   # Catch — select columns and derive catch_group
   if ("catch" %in% tables) {
-    result[["catch"]] <- fetch_db_table(con, "creel", view_map[["catch"]], filter = fishery_filter) |>
+    result[["catch"]] <- fetch_db_table(conn, "creel", view_map[["catch"]], filter = fishery_filter) |>
       dplyr::select(
         .data$interview_id, .data$catch_id, .data$species, .data$run,
         .data$life_stage, .data$fin_mark, .data$sex, .data$fork_length_cm,
@@ -182,13 +182,13 @@ fetch_data <- function(
 
   # Closures — select columns
   if ("closures" %in% tables) {
-    result[["closures"]] <- fetch_db_table(con, "creel", view_map[["closures"]], filter = fishery_filter) |>
+    result[["closures"]] <- fetch_db_table(conn, "creel", view_map[["closures"]], filter = fishery_filter) |>
       dplyr::select(.data$fishery_name, .data$section_num, .data$event_date)
   }
 
   # Remaining standard tables
   for (tbl in intersect(tables, c("fishery_manager", "model_catch_group"))) {
-    result[[tbl]] <- fetch_db_table(con, "creel", view_map[[tbl]], filter = fishery_filter)
+    result[[tbl]] <- fetch_db_table(conn, "creel", view_map[[tbl]], filter = fishery_filter)
   }
 
   # creel_event — filter by water bodies and date range from effort + interview
@@ -204,7 +204,7 @@ fetch_data <- function(
       glue::glue("event_date <= '{max_date}'")
     )
 
-    result[["creel_event"]] <- fetch_db_table(con, "creel", view_map[["creel_event"]], filter = event_filter)
+    result[["creel_event"]] <- fetch_db_table(conn, "creel", view_map[["creel_event"]], filter = event_filter)
   }
 
   result
