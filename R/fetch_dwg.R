@@ -2,13 +2,13 @@
 #'
 #' Retrieves freshwater recreational fishery creel datasets. By default,
 #' downloads from the public data portal (data.wa.gov). If a database
-#' connection is supplied via `con`, data is pulled from the WDFW PostgreSQL
+#' connection is supplied via `conn`, data is pulled from the WDFW PostgreSQL
 #' database instead.
 #'
 #' @family public_data
 #' @param fishery_name Identifier which represents the spatiotemporal
 #'   configuration for a given dataset with associated fishery closures.
-#' @param con Optional database connection from [connect_creel_db()]. When
+#' @param conn Optional database connection from [connect_creel_db()]. When
 #'   provided, data is sourced from the internal database rather than
 #'   data.wa.gov. Defaults to `NULL` (external).
 #' @param print Logical TRUE/FALSE that toggles whether a summary table prints
@@ -29,15 +29,15 @@
 #'
 #' # Using an existing DB connection
 #' con <- connect_creel_db()
-#' dwg <- fetch_dwg("Skagit winter steelhead 2021", con = con)
+#' dwg <- fetch_dwg("Skagit winter steelhead 2021", conn = con)
 #' DBI::dbDisconnect(con)
 #' }
-fetch_dwg <- function(fishery_name, con = NULL, print = FALSE) {
+fetch_dwg <- function(fishery_name, conn = NULL, print = FALSE) {
 
-  data_source <- if (!is.null(con)) "internal" else "external"
+  data_source <- if (!is.null(conn)) "internal" else "external"
 
   dwg <- fetch_data(
-    con         = con,
+    conn         = conn,
     fishery_name = fishery_name,
     tables      = c("effort", "ll", "interview", "catch", "closures", "fishery_manager"),
     data_source = data_source

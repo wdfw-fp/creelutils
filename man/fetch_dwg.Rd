@@ -4,13 +4,13 @@
 \alias{fetch_dwg}
 \title{Download creel datasets from data.wa.gov (or the internal database)}
 \usage{
-fetch_dwg(fishery_name, con = NULL, print = FALSE)
+fetch_dwg(fishery_name, conn = NULL, print = FALSE)
 }
 \arguments{
 \item{fishery_name}{Identifier which represents the spatiotemporal
 configuration for a given dataset with associated fishery closures.}
 
-\item{con}{Optional database connection from \code{\link[=connect_creel_db]{connect_creel_db()}}. When
+\item{conn}{Optional database connection from \code{\link[=connect_creel_db]{connect_creel_db()}}. When
 provided, data is sourced from the internal database rather than
 data.wa.gov. Defaults to \code{NULL} (external).}
 
@@ -25,7 +25,7 @@ A named list of tibbles: \verb{$effort}, \verb{$ll}, \verb{$interview}, \verb{$c
 \description{
 Retrieves freshwater recreational fishery creel datasets. By default,
 downloads from the public data portal (data.wa.gov). If a database
-connection is supplied via \code{con}, data is pulled from the WDFW PostgreSQL
+connection is supplied via \code{conn}, data is pulled from the WDFW PostgreSQL
 database instead.
 }
 \examples{
@@ -35,7 +35,7 @@ dwg <- fetch_dwg("Skagit winter steelhead 2021")
 
 # Using an existing DB connection
 con <- connect_creel_db()
-dwg <- fetch_dwg("Skagit winter steelhead 2021", con = con)
+dwg <- fetch_dwg("Skagit winter steelhead 2021", conn = con)
 DBI::dbDisconnect(con)
 }
 }
