@@ -32,9 +32,9 @@ These are expanded to their atomic equivalents before matching against observed 
 The standard input for \code{data} is the list object returned by \code{\link[=fetch_dwg]{fetch_dwg()}}.
 }
 \seealso{
-Other internal_data: 
-\code{\link{connect_creel_db}()},
-\code{\link{fetch_db_table}()},
-\code{\link{fishery_catchgroups}()}
+Other internal_data:
+\code{\link[=connect_creel_db]{connect_creel_db()}},
+\code{\link[=fetch_db_table]{fetch_db_table()}},
+\code{\link[=fishery_catchgroups]{fishery_catchgroups()}}
 }
 \concept{internal_data}

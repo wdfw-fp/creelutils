@@ -45,9 +45,9 @@ c <- fetch_db_table(
 }
 }
 \seealso{
-Other internal_data: 
-\code{\link{connect_creel_db}()},
-\code{\link{fishery_catchgroups}()},
-\code{\link{fishery_catchgroups_obs}()}
+Other internal_data:
+\code{\link[=connect_creel_db]{connect_creel_db()}},
+\code{\link[=fishery_catchgroups]{fishery_catchgroups()}},
+\code{\link[=fishery_catchgroups_obs]{fishery_catchgroups_obs()}}
 }
 \concept{internal_data}

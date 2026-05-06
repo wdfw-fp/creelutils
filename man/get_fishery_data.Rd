@@ -31,10 +31,10 @@ temp <- get_fishery_data(
 }
 }
 \seealso{
-Other public_data: 
-\code{\link{fetch_dwg}()},
-\code{\link{fetch_fishery_names}()},
-\code{\link{query_creel_website}()},
-\code{\link{search_fishery_name}()}
+Other public_data:
+\code{\link[=fetch_dwg]{fetch_dwg()}},
+\code{\link[=fetch_fishery_names]{fetch_fishery_names()}},
+\code{\link[=query_creel_website]{query_creel_website()}},
+\code{\link[=search_fishery_name]{search_fishery_name()}}
 }
 \concept{public_data}

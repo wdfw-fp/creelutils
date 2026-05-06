@@ -2,31 +2,48 @@
 % Please edit documentation in R/fetch_dwg.R
 \name{fetch_dwg}
 \alias{fetch_dwg}
-\title{Download creel datasets from data.wa.gov}
+\title{Download creel datasets from data.wa.gov (or the internal database)}
 \usage{
-fetch_dwg(fishery_name, print = FALSE)
+fetch_dwg(fishery_name, conn = NULL, print = FALSE)
 }
 \arguments{
-\item{fishery_name}{Identifier which represents the spatiotemporal configuration for a given dataset with associated fishery closures.}
+\item{fishery_name}{Identifier which represents the spatiotemporal
+configuration for a given dataset with associated fishery closures.}
 
-\item{print}{Logical TRUE/FALSE that toggles whether a summary table prints in the console reporting the number of rows per table downloaded. Useful as a quick check to see if anything was downloaded.}
+\item{conn}{Optional database connection from \code{\link[=connect_creel_db]{connect_creel_db()}}. When
+provided, data is sourced from the internal database rather than
+data.wa.gov. Defaults to \code{NULL} (external).}
+
+\item{print}{Logical TRUE/FALSE that toggles whether a summary table prints
+in the console reporting the number of rows per table downloaded. Useful
+as a quick check to see if anything was downloaded.}
 }
 \value{
-dwg, a list object containing a dataframe for each database view downloaded (e.g., effort, interview, catch)
+A named list of tibbles: \verb{$effort}, \verb{$ll}, \verb{$interview}, \verb{$catch},
+\verb{$closures}, \verb{$fishery_manager}.
 }
 \description{
-Download freshwater recreational fishery creel datasets from Washington's public data warehouse, data.wa.gov. When a valid 'fishery_name' is provided several database views are downloaded (i.e., effort, interview, catch, water bodies, closures, and a )
+Retrieves freshwater recreational fishery creel datasets. By default,
+downloads from the public data portal (data.wa.gov). If a database
+connection is supplied via \code{conn}, data is pulled from the WDFW PostgreSQL
+database instead.
 }
 \examples{
 \dontrun{
+# External (default)
 dwg <- fetch_dwg("Skagit winter steelhead 2021")
+
+# Using an existing DB connection
+con <- connect_creel_db()
+dwg <- fetch_dwg("Skagit winter steelhead 2021", conn = con)
+DBI::dbDisconnect(con)
 }
 }
 \seealso{
-Other public_data: 
-\code{\link{fetch_fishery_names}()},
-\code{\link{get_fishery_data}()},
-\code{\link{query_creel_website}()},
-\code{\link{search_fishery_name}()}
+Other public_data:
+\code{\link[=fetch_fishery_names]{fetch_fishery_names()}},
+\code{\link[=get_fishery_data]{get_fishery_data()}},
+\code{\link[=query_creel_website]{query_creel_website()}},
+\code{\link[=search_fishery_name]{search_fishery_name()}}
 }
 \concept{public_data}
