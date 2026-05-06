@@ -20,15 +20,15 @@ list object containing standardized model estimates
 Transform individual model outputs into a single object
 }
 \seealso{
-Other ETL: 
-\code{\link{export_estimates}()},
-\code{\link{json_conversion}()},
-\code{\link{map_data_grade}()},
-\code{\link{prep_export}()},
-\code{\link{process_estimates_bss}()},
-\code{\link{process_estimates_pe}()},
-\code{\link{write_lut}()},
-\code{\link{write_stratum}()},
-\code{\link{write_total}()}
+Other ETL:
+\code{\link[=export_estimates]{export_estimates()}},
+\code{\link[=json_conversion]{json_conversion()}},
+\code{\link[=map_data_grade]{map_data_grade()}},
+\code{\link[=prep_export]{prep_export()}},
+\code{\link[=process_estimates_bss]{process_estimates_bss()}},
+\code{\link[=process_estimates_pe]{process_estimates_pe()}},
+\code{\link[=write_lut]{write_lut()}},
+\code{\link[=write_stratum]{write_stratum()}},
+\code{\link[=write_total]{write_total()}}
 }
 \concept{ETL}

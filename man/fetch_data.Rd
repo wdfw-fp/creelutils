@@ -5,7 +5,7 @@
 \title{Fetch raw creel datasets}
 \usage{
 fetch_data(
-  con = NULL,
+  conn = NULL,
   fishery_name,
   tables = c("effort", "ll", "interview", "catch", "closures", "fishery_manager",
     "creel_event", "model_catch_group"),
@@ -13,8 +13,8 @@ fetch_data(
 )
 }
 \arguments{
-\item{con}{A valid database connection from \code{\link[=connect_creel_db]{connect_creel_db()}}. When
-\code{data_source = "internal"} and \code{con = NULL} (default), a connection is
+\item{conn}{A valid database connection from \code{\link[=connect_creel_db]{connect_creel_db()}}. When
+\code{data_source = "internal"} and \code{conn = NULL} (default), a connection is
 opened automatically via \code{\link[=connect_creel_db]{connect_creel_db()}} and closed on exit. Ignored
 entirely when \code{data_source = "external"}.}
 
@@ -26,7 +26,7 @@ all eight: \code{"effort"}, \code{"ll"}, \code{"interview"}, \code{"catch"}, \co
 needed, e.g. \code{tables = c("catch", "interview")}.}
 
 \item{data_source}{Character string, either \code{"internal"} or \code{"external"}.
-\code{"internal"} queries the WDFW PostgreSQL database (requires \code{con}).
+\code{"internal"} queries the WDFW PostgreSQL database (requires \code{conn}).
 \code{"external"} downloads from data.wa.gov (no database connection needed).}
 }
 \value{
@@ -45,7 +45,7 @@ consistent structure regardless of the source.
 \details{
 \subsection{Internal path (\code{data_source = "internal"})}{
 
-Queries database views via \code{\link[=fetch_db_table]{fetch_db_table()}}. The \code{con} argument must be a
+Queries database views via \code{\link[=fetch_db_table]{fetch_db_table()}}. The \code{conn} argument must be a
 valid connection from \code{\link[=connect_creel_db]{connect_creel_db()}}. The \code{ll} (latitude/longitude)
 table is derived by filtering \code{water_body_lut} to water bodies present in the
 effort data. If \code{"ll"} is requested without \code{"effort"}, the effort view is

@@ -20,9 +20,9 @@ Tibble of catch groups of interest for a given fishery.
 Simple wrapper to query the vw_fishery_manager table.
 }
 \seealso{
-Other internal_data: 
-\code{\link{connect_creel_db}()},
-\code{\link{fetch_db_table}()},
-\code{\link{fishery_catchgroups_obs}()}
+Other internal_data:
+\code{\link[=connect_creel_db]{connect_creel_db()}},
+\code{\link[=fetch_db_table]{fetch_db_table()}},
+\code{\link[=fishery_catchgroups_obs]{fishery_catchgroups_obs()}}
 }
 \concept{internal_data}
