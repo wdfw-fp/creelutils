@@ -40,13 +40,8 @@
 #' informative message.
 #'
 #' @family data
-#' @export
 #' @importFrom rlang .data
-#' @importFrom utils URLencode
-#' @importFrom tidyr drop_na
-#' @importFrom readr read_csv
-#' @importFrom httr GET add_headers content status_code stop_for_status
-#' @importFrom dplyr select mutate
+#' @export
 #'
 #' @examples
 #' \dontrun{
@@ -340,7 +335,7 @@ fetch_data <- function(
 
   # model_catch_group — not yet available externally
   if ("model_catch_group" %in% tables) {
-    message("model_catch_group is not yet published to data.wa.gov. Returning NULL for this table.")
+    cli::cli_alert_info("model_catch_group is not yet published to data.wa.gov. Returning NULL for this table.")
     result[["model_catch_group"]] <- NULL
   }
 
@@ -354,7 +349,7 @@ fetch_data <- function(
 #' @param base_url API endpoint for a given data component from `dwg_base` in `.fetch_data_external()`
 #' @param where_clause Filter supplied to specify a subset of data (e.g., fishery_name)
 #' @param app_token Optional user-specific ID stored in that prevents throttling. This is setup once per user
-#' and
+#' and stored in .Renviron file as SOCRATA_APP_TOKEN
 #' @param limit Maximum number of rows to return. Default is 50,000.
 #' @return A tibble of all rows matching `where_clause`, paginated until exhausted
 #' @noRd
