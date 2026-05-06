@@ -355,7 +355,7 @@ fetch_data <- function(
 #' @param where_clause Filter supplied to specify a subset of data (e.g., fishery_name)
 #' @param app_token Optional user-specific ID stored in that prevents throttling. This is setup once per user
 #' and
-#' @param limit
+#' @param limit Maximum number of rows to return. Default is 50,000.
 #' @return A tibble of all rows matching `where_clause`, paginated until exhausted
 #' @noRd
 .socrata_get <- function(base_url, where_clause, app_token, limit = 50000L) {
