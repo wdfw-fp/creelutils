@@ -71,7 +71,7 @@ fetch_data <- function(
     data_source = c("internal", "external")
 ) {
 
-  # -- 0. Validate arguments ---------------------------------------------------
+  # Validate arguments ----
 
   data_source <- match.arg(data_source)
 
@@ -86,7 +86,7 @@ fetch_data <- function(
     ))
   }
 
-  # -- 1. Dispatch on data_source ----------------------------------------------
+  # Dispatch on data_source ----
 
   if (data_source == "internal") {
     result <- .fetch_data_internal(con, fishery_name, tables)
@@ -94,16 +94,18 @@ fetch_data <- function(
     result <- .fetch_data_external(fishery_name, tables)
   }
 
-  # -- 2. Return in canonical order --------------------------------------------
+  # Return tables in canonical order ----
 
   result[intersect(valid_tables, names(result))]
 }
 
 
-# ==============================================================================
-# Internal path
-# ==============================================================================
+# Internal path dispatch function -----------------------------------------------------------------------------------
 
+#' Fetch raw data from internal Postgres database
+#'
+#' This function queries raw datasets from the creel schema of the WDFW Postgres database
+#' @noRd
 .fetch_data_internal <- function(con, fishery_name, tables) {
 
   # Lazy connection: open internally if none supplied, close on exit
@@ -209,13 +211,16 @@ fetch_data <- function(
 }
 
 
-# ==============================================================================
-# External path (data.wa.gov)
-# ==============================================================================
+# External path dispatch function -----------------------------------------------------------------------------------
 
+#' Fetch raw data from public data portal, data.wa.gov
+#'
+#' This function queries raw datasets from the public mirrors of database tables
+#' made available on https://data.wa.gov
+#' @noRd
 .fetch_data_external <- function(fishery_name, tables) {
 
-  # -- App token setup ---------------------------------------------------------
+  ## App token setup ----
   app_token <- Sys.getenv("SOCRATA_APP_TOKEN", unset = NA)
 
   if (is.na(app_token)) {
@@ -226,7 +231,7 @@ fetch_data <- function(
     ))
   }
 
-  # Socrata endpoint mapping
+  ## Socrata endpoint mapping ----
   dwg_base <- list(
     effort          = "https://data.wa.gov/resource/h9a6-g38s.csv",
     interview       = "https://data.wa.gov/resource/rpax-ahqm.csv",
@@ -343,10 +348,16 @@ fetch_data <- function(
 }
 
 
-# ==============================================================================
-# Socrata HTTP helper
-# ==============================================================================
+# Socrata HTTP helper function ------------------------------------------------------------------------------------
 
+#' Query a Socrata endpoint with pagination
+#' @param base_url API endpoint for a given data component from `dwg_base` in `.fetch_data_external()`
+#' @param where_clause Filter supplied to specify a subset of data (e.g., fishery_name)
+#' @param app_token Optional user-specific ID stored in that prevents throttling. This is setup once per user
+#' and
+#' @param limit
+#' @return A tibble of all rows matching `where_clause`, paginated until exhausted
+#' @noRd
 .socrata_get <- function(base_url, where_clause, app_token, limit = 50000L) {
 
   headers <- if (!is.na(app_token)) {
