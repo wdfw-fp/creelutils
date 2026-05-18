@@ -32,6 +32,7 @@ Suggests:
     gt,
     DBI,
     RPostgres,
+    bit64,
     crayon,
     dbplyr,
     jsonlite,
