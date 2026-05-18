@@ -214,8 +214,14 @@ fetch_data <- function(
 #' Socrata CSV data parsed by `readr::read_csv()` returns `numeric` for integer
 #' columns, `POSIXct` for date columns, and `logical` for all-NA character
 #' columns. PostgreSQL returns proper `integer`, `integer64`, `Date`, and
-#' `character` types. This helper makes internal output identical to external
-#' so downstream pipelines work interchangeably.
+#' `character` types. This helper makes internal output type-identical to
+#' external so downstream pipelines (including Stan data blocks) work
+#' interchangeably.
+#'
+#' Both `integer64` (PostgreSQL bigint via bit64) and plain R `integer` columns
+#' are coerced to `numeric` (double) to match what `readr::read_csv()` returns.
+#' This also prevents `bit64::integer64` from reaching rstan, which rejects
+#' that class in Stan data blocks.
 #'
 #' Additionally drops columns that exist only in the internal DB views but are
 #' absent from the public Socrata mirrors.
@@ -252,7 +258,11 @@ fetch_data <- function(
     # Coerce column types to match readr::read_csv() output
     for (col in names(tbl)) {
       if (inherits(tbl[[col]], "integer64") || is.integer(tbl[[col]])) {
-        # integer / integer64 → numeric (readr returns doubles for integer CSV cols)
+        # integer64 / integer → numeric (double).
+        # readr::read_csv() returns doubles for all integer CSV columns, so
+        # both integer64 (PostgreSQL bigint via bit64) and plain R integer
+        # must become numeric to match. This also prevents bit64::integer64
+        # from reaching rstan, which rejects that class in Stan data blocks.
         tbl[[col]] <- as.numeric(tbl[[col]])
       } else if (inherits(tbl[[col]], "Date") &&
                  col == "event_date" &&
