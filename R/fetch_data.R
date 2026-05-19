@@ -202,6 +202,100 @@ fetch_data <- function(
     result[["creel_event"]] <- fetch_db_table(conn, "creel", view_map[["creel_event"]], filter = event_filter)
   }
 
+  # Standardize types to match external (Socrata CSV) output ----
+  .standardize_types(result)
+}
+
+
+# Type standardization helper --------------------------------------------------------------------------------------
+
+#' Coerce internal (PostgreSQL) column types to match external (Socrata CSV) types
+#'
+#' Socrata CSV data parsed by `readr::read_csv()` returns `numeric` for integer
+#' columns, `POSIXct` for date columns, and `logical` for all-NA character
+#' columns. PostgreSQL returns proper `integer`, `integer64`, `Date`, and
+#' `character` types. This helper makes internal output type-identical to
+#' external so downstream pipelines (including Stan data blocks) work
+#' interchangeably.
+#'
+#' Both `integer64` (PostgreSQL bigint via bit64) and plain R `integer` columns
+#' are coerced to `numeric` (double) to match what `readr::read_csv()` returns.
+#' This also prevents `bit64::integer64` from reaching rstan, which rejects
+#' that class in Stan data blocks.
+#'
+#' Additionally drops columns that exist only in the internal DB views but are
+#' absent from the public Socrata mirrors.
+#' @param result Named list of tibbles from `.fetch_data_internal()`
+#' @return Same structure with coerced column types
+#' @noRd
+.standardize_types <- function(result) {
+
+  # Columns present in internal DB views but absent from Socrata mirrors
+  internal_only_cols <- list(
+    ll              = c("water_body_code", "shape", "sort",
+                        "water_body_id_int", "obsolete_flag", "obsolete_date"),
+    interview       = c("best_location_id"),
+    fishery_manager = c("fishery_start_date", "fishery_end_date")
+  )
+
+  # Tables where event_date is POSIXct externally (Socrata returns timestamp);
+
+  # all others keep Date
+  posixct_event_date_tables <- c("closures", "creel_event")
+
+  # Character columns that readr parses as numeric (they look numeric in CSV)
+  char_to_numeric_cols <- c("llid", "crc_area", "catch_area_code")
+
+  for (tbl_name in names(result)) {
+    tbl <- result[[tbl_name]]
+    if (is.null(tbl)) next
+
+    # Drop internal-only columns
+    if (tbl_name %in% names(internal_only_cols)) {
+      tbl <- dplyr::select(tbl, -dplyr::any_of(internal_only_cols[[tbl_name]]))
+    }
+
+    # Coerce column types to match readr::read_csv() output
+    for (col in names(tbl)) {
+      if (inherits(tbl[[col]], "integer64") || is.integer(tbl[[col]])) {
+        # integer64 / integer → numeric (double).
+        # readr::read_csv() returns doubles for all integer CSV columns, so
+        # both integer64 (PostgreSQL bigint via bit64) and plain R integer
+        # must become numeric to match. This also prevents bit64::integer64
+        # from reaching rstan, which rejects that class in Stan data blocks.
+        tbl[[col]] <- as.numeric(tbl[[col]])
+      } else if (inherits(tbl[[col]], "Date") &&
+                 col == "event_date" &&
+                 tbl_name %in% posixct_event_date_tables) {
+        # Date → POSIXct only for closures/creel_event (Socrata returns timestamp)
+        tbl[[col]] <- as.POSIXct(as.character(tbl[[col]]), tz = "UTC")
+      } else if (is.character(tbl[[col]]) && col %in% char_to_numeric_cols) {
+        # Character → numeric (readr infers these as numeric from CSV)
+        tbl[[col]] <- suppressWarnings(as.numeric(tbl[[col]]))
+      }
+    }
+
+    # All-NA columns → logical. readr::read_csv() infers all-NA columns as
+    # logical regardless of the source type, except for a few columns whose
+    # true schema type is character (see force_character_cols below).
+    # Second pass after int-num coercion so converted columns are also caught.
+    #
+    # NOTE: this heuristic is lossy for character columns that happen to be
+    # all-NA in a given fishery. force_character_cols is a stopgap; we should
+    # consider moving to an explicit expected-type schema map.
+    force_character_cols <- c("no_count_reason")
+
+    for (col in names(tbl)) {
+      if (col %in% force_character_cols && all(is.na(tbl[[col]]))) {
+        tbl[[col]] <- as.character(tbl[[col]])
+      } else if (!is.logical(tbl[[col]]) && all(is.na(tbl[[col]]))) {
+        tbl[[col]] <- as.logical(tbl[[col]])
+      }
+    }
+
+    result[[tbl_name]] <- tbl
+  }
+
   result
 }
 
