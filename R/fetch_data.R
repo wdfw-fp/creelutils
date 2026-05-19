@@ -276,10 +276,19 @@ fetch_data <- function(
     }
 
     # All-NA columns → logical. readr::read_csv() infers all-NA columns as
-    # logical regardless of the source type. Done as a second pass after
-    # integer→numeric coercion so converted columns are also caught.
+    # logical regardless of the source type, except for a few columns whose
+    # true schema type is character (see force_character_cols below).
+    # Second pass after int-num coercion so converted columns are also caught.
+    #
+    # NOTE: this heuristic is lossy for character columns that happen to be
+    # all-NA in a given fishery. force_character_cols is a stopgap; we should
+    # consider moving to an explicit expected-type schema map.
+    force_character_cols <- c("no_count_reason")
+
     for (col in names(tbl)) {
-      if (!is.logical(tbl[[col]]) && all(is.na(tbl[[col]]))) {
+      if (col %in% force_character_cols && all(is.na(tbl[[col]]))) {
+        tbl[[col]] <- as.character(tbl[[col]])
+      } else if (!is.logical(tbl[[col]]) && all(is.na(tbl[[col]]))) {
         tbl[[col]] <- as.logical(tbl[[col]])
       }
     }
