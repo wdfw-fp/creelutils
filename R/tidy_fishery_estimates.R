@@ -406,13 +406,7 @@ tidy_fishery_estimates <- function(estimates) {
         id_cols     = dplyr::all_of(id_cols),
         names_from  = estimate_type_prefixed,
         values_from = estimate_value,
-        values_fn   = list(estimate_value = function(x) {
-          if (length(x) > 1) {
-            message("WARNING: Multiple values for same estimate_type. Using first value.")
-            return(x[1])
-          }
-          return(x)
-        })
+        values_fn   = list(estimate_value = ~.x[1])
       ),
     silent = FALSE
   )
@@ -480,13 +474,7 @@ tidy_fishery_estimates <- function(estimates) {
         id_cols     = dplyr::all_of(id_cols),
         names_from  = estimate_type,
         values_from = estimate_value,
-        values_fn   = list(estimate_value = function(x) {
-          if (length(x) > 1) {
-            message("WARNING: Multiple values for same estimate_type. Using first value.")
-            return(x[1])
-          }
-          return(x)
-        })
+        values_fn   = list(estimate_value = ~.x[1])
       ),
     silent = FALSE
   )

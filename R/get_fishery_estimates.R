@@ -317,6 +317,13 @@ get_fishery_estimates <- function(fishery_names,
   if (temporal_agg %in% c("total", "all")) {
     cli::cli_progress_step("Querying total-level estimates (vw_model_estimates_total)")
 
+    n_ids <- length(relevant_ids)
+    message("  [", format(Sys.time(), "%H:%M:%S"), "] Sending total query (",
+            n_ids, " analysis ID(s))",
+            if (is.null(query_timeout)) " \u2014 no timeout set" else
+              paste0(" \u2014 auto-cancels in ", query_timeout, "s"),
+            "...")
+
     t0 <- proc.time()[["elapsed"]]
     .set_timeout(query_timeout)
     raw_total <- tryCatch(
@@ -363,6 +370,17 @@ get_fishery_estimates <- function(fishery_names,
 
   if (temporal_agg %in% c("stratum", "all")) {
     cli::cli_progress_step("Querying stratum-level estimates (vw_model_estimates_stratum)")
+
+    n_ids <- length(relevant_ids)
+    if (is.null(query_timeout)) {
+      message("  WARNING: No query_timeout set. Stratum queries on large datasets can hang.",
+              "\n  Use query_timeout = 120 (or higher) to auto-cancel if no response.")
+    }
+    message("  [", format(Sys.time(), "%H:%M:%S"), "] Sending stratum query (",
+            n_ids, " analysis ID(s))",
+            if (is.null(query_timeout)) " \u2014 no timeout set" else
+              paste0(" \u2014 auto-cancels in ", query_timeout, "s"),
+            "...")
 
     t0 <- proc.time()[["elapsed"]]
     .set_timeout(query_timeout)
