@@ -32,38 +32,8 @@ Other public_data:
 ## Examples
 
 ``` r
+if (FALSE) { # \dontrun{
 search_fishery_name("gamefish")
-#>  [1] "Cascade winter gamefish 2021-22"                    
-#>  [2] "Cascade winter gamefish 2023"                       
-#>  [3] "Nooksack winter gamefish 2021-22"                   
-#>  [4] "Nooksack winter gamefish 2022-23"                   
-#>  [5] "North Fork Skykomish summer gamefish 2025"          
-#>  [6] "Skagit spring gamefish 2025"                        
-#>  [7] "Skagit summer gamefish 2022"                        
-#>  [8] "Skagit summer gamefish 2024"                        
-#>  [9] "Skagit winter gamefish 2021-22"                     
-#> [10] "Skagit winter gamefish 2022-23"                     
-#> [11] "Skagit winter gamefish 2024"                        
-#> [12] "Skagit winter gamefish 2025"                        
-#> [13] "Skykomish summer Chinook and gamefish 2022"         
-#> [14] "Skykomish summer Chinook and gamefish 2025"         
-#> [15] "Skykomish summer gamefish 2023"                     
-#> [16] "Skykomish winter gamefish 2021-22"                  
-#> [17] "Skykomish winter gamefish 2022-23"                  
-#> [18] "Snoqualmie summer gamefish 2025"                    
-#> [19] "South Fork Skykomish summer gamefish 2025"          
-#> [20] "South Fork Stillaguamish summer gamefish 2024 upper"
-#> [21] "Stillaguamish salmon and gamefish 2022-23"          
-#> [22] "Stillaguamish salmon and gamefish 2023-24"          
-#> [23] "Stillaguamish salmon and gamefish 2024-25"          
-#> [24] "Stillaguamish salmon and gamefish 2025-26"          
-#> [25] "Wallace salmon and gamefish 2022-23"                
-#> [26] "Wallace salmon and gamefish 2023-24"                
-#> [27] "Wallace salmon and gamefish 2024-25"                
 search_fishery_name("Humptulips")
-#> [1] "Humptulips salmon 2019"              "Humptulips salmon 2020"             
-#> [3] "Humptulips salmon 2021"              "Humptulips salmon 2022"             
-#> [5] "Humptulips salmon 2023"              "Humptulips salmon 2024"             
-#> [7] "Humptulips salmon 2025"              "Humptulips winter steelhead 2024-25"
-#> [9] "Humptulips winter steelhead 2025-26"
+} # }
 ```

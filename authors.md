@@ -18,16 +18,16 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/wdfw-fp/creelutils/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/wdfw-fp/creelutils/blob/v0.2.0/DESCRIPTION)
 
 Holley C, Bentley K, Booher E, Edwards C (2026). *creelutils: Utility
 Functions for Interacting with Freshwater Creel Data*. R package version
-0.1.1, <https://wdfw-fp.github.io/creelutils>.
+0.2.0, <https://wdfw-fp.github.io/creelutils>.
 
     @Manual{,
       title = {creelutils: Utility Functions for Interacting with Freshwater Creel Data},
       author = {Colt Holley and Kale Bentley and Evan Booher and Collin Edwards},
       year = {2026},
-      note = {R package version 0.1.1},
+      note = {R package version 0.2.0},
       url = {https://wdfw-fp.github.io/creelutils},
     }

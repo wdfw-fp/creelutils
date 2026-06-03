@@ -1,44 +1,37 @@
 # Establish database connection
 
-Establishes a connection to the WDFW PostgreSQL database. Requires
-either a local `config.yml` file (default) or a configured ODBC DSN. The
-config path uses driver from the `RPostgres` package and is preferred
-for performance, particularly during build database writes. **Note:**
-when called in a non-interactive session (scheduled render or automated
-script), the password prompt will block execution.
+Compatibility wrapper for
+[`connect_creel_db()`](https://wdfw-fp.github.io/creelutils/reference/connect_creel_db.md).
+Retained for backwards compatibility with scripts written prior to
+v0.2.0.
+
+The `conn_type` and `dsn` arguments are no longer supported. ODBC
+connections have been removed in favor of `RPostgres` + `keyring`. Calls
+passing `conn_type` will receive a warning and the argument will be
+ignored. New code should use
+[`connect_creel_db()`](https://wdfw-fp.github.io/creelutils/reference/connect_creel_db.md)
+directly.
 
 ## Usage
 
 ``` r
-establish_db_con(
-  conn_type = c("config", "odbc"),
-  dsn = "creel_estimates",
-  config_path = "config.yml"
-)
+establish_db_con(...)
 ```
 
 ## Arguments
 
-- conn_type:
+- ...:
 
-  `"config"` (default) uses a local `config.yml` + `RPostgres`; `"odbc"`
-  uses a system-configured DSN.
-
-- dsn:
-
-  Character string denoting the ODBC domain service name (DSN) to
-  connect to.
-
-- config_path:
-
-  File path location of the local 'config.yml' file.
+  Arguments passed to
+  [`connect_creel_db()`](https://wdfw-fp.github.io/creelutils/reference/connect_creel_db.md).
+  `conn_type` and `dsn` are silently dropped with a warning if supplied.
 
 ## Value
 
-A `DBI` connection to a PostgreSQL database management system. Recommend
-that this object be named "con".
+A `DBI` connection object. See
+[`connect_creel_db()`](https://wdfw-fp.github.io/creelutils/reference/connect_creel_db.md)
+for details.
 
 ## See also
 
-Other internal_data:
-[`fetch_db_table()`](https://wdfw-fp.github.io/creelutils/reference/fetch_db_table.md)
+[`connect_creel_db()`](https://wdfw-fp.github.io/creelutils/reference/connect_creel_db.md)

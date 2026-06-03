@@ -14,7 +14,7 @@ query_analysis_lut(conn = NULL, analysis_id = NULL, fishery_name = NULL)
 - conn:
 
   A valid database connection from
-  [`establish_db_con()`](https://wdfw-fp.github.io/creelutils/reference/establish_db_con.md)
+  [`connect_creel_db()`](https://wdfw-fp.github.io/creelutils/reference/connect_creel_db.md)
 
 - analysis_id:
 

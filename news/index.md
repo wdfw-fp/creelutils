@@ -1,6 +1,100 @@
 # Changelog
 
+## creelutils 0.2.0
+
+*Released 2026-06-02*
+
+### New features
+
+- Overhaul database connectivity and streamline user experience
+
+  - Store user credentials in their OS credential manager with the
+    `keyring` package
+    ([\#19](https://github.com/wdfw-fp/creelutils/issues/19)).
+
+  - Relocate local `config.yml` from working directory of package
+    `creelutils` is being called from to a user-level dotfile stored at
+    `~/.config/creelutils`
+    ([\#22](https://github.com/wdfw-fp/creelutils/issues/22)).
+
+  - Implement lazy database connections for
+    [`fetch_db_table()`](https://wdfw-fp.github.io/creelutils/reference/fetch_db_table.md)
+    and its wrappers in `R/query_helpers.R`
+    ([\#26](https://github.com/wdfw-fp/creelutils/issues/26)).
+
+- New
+  [`fetch_data()`](https://wdfw-fp.github.io/creelutils/reference/fetch_data.md)
+  serves as a generalized method of querying raw datasets from either
+  the Postgres database directly or from public views hosted at
+  <https://data.wa.gov>
+  ([\#29](https://github.com/wdfw-fp/creelutils/issues/29),
+  [\#30](https://github.com/wdfw-fp/creelutils/issues/30)).
+
+  - Previously
+    [`fetch_dwg()`](https://wdfw-fp.github.io/creelutils/reference/fetch_dwg.md)
+    only allowed downloading from the public data source. The internal
+    option is a more direct approach that does not have the limitation
+    of waiting for the public views to sync on the preset schedule. Both
+    paths now return type-identical output (the internal route includes
+    several additional metadata columns), so database-sourced data feeds
+    cleanly into the downstream CreelEstimates Stan models.
+
+- New
+  [`plot_zipcodes()`](https://wdfw-fp.github.io/creelutils/reference/plot_zipcodes.md)
+  produces heat maps of angler-reported ZIP codes for individual states
+  and full US ([\#18](https://github.com/wdfw-fp/creelutils/issues/18)).
+
+- New
+  [`fishery_catchgroups_obs()`](https://wdfw-fp.github.io/creelutils/reference/fishery_catchgroups_obs.md)
+  leverages
+  [`fishery_catchgroups()`](https://wdfw-fp.github.io/creelutils/reference/fishery_catchgroups.md)
+  and the raw catch table to produce a tibble of reference catch groups
+  of interest for a given fishery filtered to just those with observed
+  catch data ([\#20](https://github.com/wdfw-fp/creelutils/issues/20)).
+
+- New
+  [`catchgroups_to_params()`](https://wdfw-fp.github.io/creelutils/reference/catchgroups_to_params.md)
+  helps convert from catch group component fields (i.e., species,
+  life_stage, fin_mark, fate) into the vector format used by
+  `wdfw-fp/CreelEstimates/template_scripts/fw_creel.Rmd` and its YAML
+  param `params$est_catch_group`
+  ([\#28](https://github.com/wdfw-fp/creelutils/issues/28)).
+
+### Minor improvements and bug fixes
+
+- Fixed
+  [`fishery_catchgroups()`](https://wdfw-fp.github.io/creelutils/reference/fishery_catchgroups.md)
+  which was querying the wrong database view
+  ([\#15](https://github.com/wdfw-fp/creelutils/issues/15)).
+
+- Added missing `params` argument to
+  [`transform_estimates()`](https://wdfw-fp.github.io/creelutils/reference/transform_estimates.md)
+  to prevent environmental scoping issues when using the ETL
+  ([\#24](https://github.com/wdfw-fp/creelutils/issues/24)).
+
+- Added `bit64` to Suggests
+  ([\#30](https://github.com/wdfw-fp/creelutils/issues/30)).
+
+### Deprecation
+
+- Removed experimental function `render_progress_report()`
+  ([\#17](https://github.com/wdfw-fp/creelutils/issues/17)).
+
+- [`fetch_dwg()`](https://wdfw-fp.github.io/creelutils/reference/fetch_dwg.md)
+  was folded into
+  [`fetch_data()`](https://wdfw-fp.github.io/creelutils/reference/fetch_data.md)
+  and now serves as a wrapper for the new generalized data querying
+  function ([\#29](https://github.com/wdfw-fp/creelutils/issues/29)).
+
+### Documentation enhancements
+
+- Changed `pkgdown.yaml` to trigger on version tags instead of on every
+  pull request and merge
+  ([\#16](https://github.com/wdfw-fp/creelutils/issues/16)).
+
 ## creelutils 0.1.1
+
+*Released 2026-03-23*
 
 - [`establish_db_con()`](https://wdfw-fp.github.io/creelutils/reference/establish_db_con.md):
   changed default `conn_type` from `"odbc"` to `"config"` to use the
@@ -10,5 +104,9 @@
 
 ## creelutils 0.1.0
 
+*Released 2025-05-08*
+
 - Early development version. Putting the package together with basic
   structure, documentation, GitHub actions, etc.
+
+*creelutils initialized on 2025-01-31*

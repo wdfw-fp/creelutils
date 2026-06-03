@@ -31,10 +31,7 @@ Other public_data:
 ## Examples
 
 ``` r
+if (FALSE) { # \dontrun{
 head(fetch_fishery_names(), n = 10)
-#>  [1] "2024 Potholes Reservoir"     "2025 Banks Lake"            
-#>  [3] "Baker summer sockeye 2022"   "Baker summer sockeye 2023"  
-#>  [5] "Cascade fall salmon 2021"    "Cascade fall salmon 2022"   
-#>  [7] "Cascade fall salmon 2023"    "Cascade fall salmon 2024"   
-#>  [9] "Cascade spring Chinook 2021" "Cascade spring Chinook 2022"
+} # }
 ```

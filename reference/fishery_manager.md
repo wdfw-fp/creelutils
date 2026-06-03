@@ -5,7 +5,7 @@ Simple wrapper to query the vw_fishery_manager table.
 ## Usage
 
 ``` r
-fishery_manager(conn, fishery_name = NULL)
+fishery_manager(conn = NULL, fishery_name = NULL)
 ```
 
 ## Arguments
@@ -13,7 +13,7 @@ fishery_manager(conn, fishery_name = NULL)
 - conn:
 
   A valid database connection from
-  [`establish_db_con()`](https://wdfw-fp.github.io/creelutils/reference/establish_db_con.md)
+  [`connect_creel_db()`](https://wdfw-fp.github.io/creelutils/reference/connect_creel_db.md)
 
 - fishery_name:
 

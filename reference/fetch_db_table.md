@@ -13,15 +13,15 @@ external marks', fate_name = 'Released'".
 ## Usage
 
 ``` r
-fetch_db_table(con, schema, table, filter = NULL, show_query = FALSE)
+fetch_db_table(conn = NULL, schema, table, filter = NULL, show_query = FALSE)
 ```
 
 ## Arguments
 
-- con:
+- conn:
 
   A valid connection to the WDFW PostgreSQL database. @seealso
-  [`establish_db_con()`](https://wdfw-fp.github.io/creelutils/reference/establish_db_con.md)
+  [`connect_creel_db()`](https://wdfw-fp.github.io/creelutils/reference/connect_creel_db.md)
 
 - schema:
 
@@ -49,7 +49,9 @@ Tibble of query results returned to R from Postgres database.
 ## See also
 
 Other internal_data:
-[`establish_db_con()`](https://wdfw-fp.github.io/creelutils/reference/establish_db_con.md)
+[`connect_creel_db()`](https://wdfw-fp.github.io/creelutils/reference/connect_creel_db.md),
+[`fishery_catchgroups()`](https://wdfw-fp.github.io/creelutils/reference/fishery_catchgroups.md),
+[`fishery_catchgroups_obs()`](https://wdfw-fp.github.io/creelutils/reference/fishery_catchgroups_obs.md)
 
 ## Examples
 

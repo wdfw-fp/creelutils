@@ -7,7 +7,7 @@ sources include USGS and Washington DOE for streamflow data and
 Washington’s open data portal (data.wa.gov) for creel data.
 
 - [`fetch_dwg()`](https://wdfw-fp.github.io/creelutils/reference/fetch_dwg.md)
-  : Download creel datasets from data.wa.gov
+  : Download creel datasets from data.wa.gov (or the internal database)
 - [`fetch_fishery_names()`](https://wdfw-fp.github.io/creelutils/reference/fetch_fishery_names.md)
   : List all available 'fishery name' values
 - [`search_fishery_name()`](https://wdfw-fp.github.io/creelutils/reference/search_fishery_name.md)
@@ -25,8 +25,10 @@ Washington’s open data portal (data.wa.gov) for creel data.
 These functions interact directly with the WDFW PostgreSQL creel
 database, which requires proper credentials and permissions.
 
-- [`establish_db_con()`](https://wdfw-fp.github.io/creelutils/reference/establish_db_con.md)
-  : Establish database connection
+- [`connect_creel_db()`](https://wdfw-fp.github.io/creelutils/reference/connect_creel_db.md)
+  : Connect to the WDFW freshwater creel database
+- [`fetch_data()`](https://wdfw-fp.github.io/creelutils/reference/fetch_data.md)
+  : Fetch raw creel datasets
 - [`fetch_db_table()`](https://wdfw-fp.github.io/creelutils/reference/fetch_db_table.md)
   : Query database tables
 - [`fishery_lut()`](https://wdfw-fp.github.io/creelutils/reference/fishery_lut.md)
@@ -35,10 +37,12 @@ database, which requires proper credentials and permissions.
   : Get 'fishery manager' table
 - [`fishery_catchgroups()`](https://wdfw-fp.github.io/creelutils/reference/fishery_catchgroups.md)
   : Get 'fishery_catch_groups' view
-- [`query_analysis_lut()`](https://wdfw-fp.github.io/creelutils/reference/query_analysis_lut.md)
-  : Get analysis lookup table
+- [`fishery_catchgroups_obs()`](https://wdfw-fp.github.io/creelutils/reference/fishery_catchgroups_obs.md)
+  : Get observed catch groups for a fishery
 - [`model_estimates()`](https://wdfw-fp.github.io/creelutils/reference/model_estimates.md)
   : Get model estimates
+- [`query_analysis_lut()`](https://wdfw-fp.github.io/creelutils/reference/query_analysis_lut.md)
+  : Get analysis lookup table
 
 ## BSS tools
 
@@ -83,16 +87,13 @@ effort model estimates to the creel database.
 - [`confirm_db_upload()`](https://wdfw-fp.github.io/creelutils/reference/confirm_db_upload.md)
   : Confirm database upload
 
-## Reporting
-
-These functions produce standardized reports for a given fishery.
-
-- [`render_progress_report()`](https://wdfw-fp.github.io/creelutils/reference/render_progress_report.md)
-  : Produce a creel progress report and summaries
-
 ## Tools
 
 Functions for working with creel datasets.
 
+- [`catchgroups_to_params()`](https://wdfw-fp.github.io/creelutils/reference/catchgroups_to_params.md)
+  : Format catch groups as YAML param strings
 - [`drop_section()`](https://wdfw-fp.github.io/creelutils/reference/drop_section.md)
   : Drop sections from creel survey data
+- [`plot_zipcodes()`](https://wdfw-fp.github.io/creelutils/reference/plot_zipcodes.md)
+  : Plot angler ZIP codes

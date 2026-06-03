@@ -5,10 +5,14 @@ Transform individual model outputs into a single object
 ## Usage
 
 ``` r
-transform_estimates(dwg, transformed_pe_data, transformed_bss_data)
+transform_estimates(params, dwg, transformed_pe_data, transformed_bss_data)
 ```
 
 ## Arguments
+
+- params:
+
+  list object containing fishery- and analysis- specific metadata
 
 - dwg:
 

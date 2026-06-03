@@ -5,7 +5,7 @@ Simple wrapper to query the fishery_lut table.
 ## Usage
 
 ``` r
-fishery_lut(conn)
+fishery_lut(conn = NULL)
 ```
 
 ## Arguments
@@ -13,7 +13,7 @@ fishery_lut(conn)
 - conn:
 
   A valid database connection from
-  [`establish_db_con()`](https://wdfw-fp.github.io/creelutils/reference/establish_db_con.md)
+  [`connect_creel_db()`](https://wdfw-fp.github.io/creelutils/reference/connect_creel_db.md)
 
 ## Value
 

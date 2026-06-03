@@ -24,6 +24,7 @@ Fishery Name and is the primary route for accessing a complete dataset
 from a fishery.
 
 ``` r
+
 library(creelutils)
 
 fishery_name <- "Skagit winter steelhead 2021"
@@ -31,19 +32,8 @@ dat <- fetch_dwg(fishery_name)
 
 #ll stands for latitude and longitude
 names(dat)
-#> [1] "effort"          "ll"              "interview"       "catch"          
-#> [5] "closures"        "fishery_manager"
 
 colnames(dat$effort)
-#>  [1] "creel_event_id"       "event_date"           "water_body"          
-#>  [4] "project_name"         "fishery_name"         "effort_event_id"     
-#>  [7] "location"             "location_id"          "tie_in_indicator"    
-#> [10] "count_sequence"       "effort_start_time"    "effort_end_time"     
-#> [13] "no_count_reason"      "comments"             "count_type"          
-#> [16] "count_quantity"       "location_type"        "survey_type"         
-#> [19] "location_season_name" "section_num"          "surveyor_num"        
-#> [22] "p_census_bank"        "p_census_boat"        "indirect_census_bank"
-#> [25] "direct_census_bank"
 ```
 
 **What if I don’t know the Fishery Name?**
@@ -54,12 +44,8 @@ which has no arguments, returns a list of all fishery names in the creel
 database.
 
 ``` r
+
 fetch_fishery_names() |> head(n = 10)
-#>  [1] "2024 Potholes Reservoir"     "2025 Banks Lake"            
-#>  [3] "Baker summer sockeye 2022"   "Baker summer sockeye 2023"  
-#>  [5] "Cascade fall salmon 2021"    "Cascade fall salmon 2022"   
-#>  [7] "Cascade fall salmon 2023"    "Cascade fall salmon 2024"   
-#>  [9] "Cascade spring Chinook 2021" "Cascade spring Chinook 2022"
 ```
 
 **What if I know part of the Fishery Name but not the specific syntax?**
@@ -70,24 +56,15 @@ can accept a vector of characters or numbers and returns the fishery
 names with those values.
 
 ``` r
+
 # by water body
 search_fishery_name("Humptulips") |> head(n = 5)
-#> [1] "Humptulips salmon 2019" "Humptulips salmon 2020" "Humptulips salmon 2021"
-#> [4] "Humptulips salmon 2022" "Humptulips salmon 2023"
 
 # by run / species
 search_fishery_name("winter steelhead") |> head(n = 5)
-#> [1] "Chehalis winter steelhead 2024-25"   "Chehalis winter steelhead 2025-26"  
-#> [3] "Clearwater winter steelhead 2024-25" "Hoh winter steelhead 2022-23"       
-#> [5] "Hoh winter steelhead 2023-24"
 
 # by year
 search_fishery_name("2025") |> head(n = 5)
-#> [1] "2025 Banks Lake"                     
-#> [2] "Chehalis salmon 2025"                
-#> [3] "Chehalis winter steelhead 2025-26"   
-#> [4] "Chum Broodstock Collection 2025"     
-#> [5] "Drano Lake salmon and steelhead 2025"
 ```
 
 ### Accessing internal data
@@ -106,5 +83,6 @@ credentials and setup on local computer. If this is your first time
 using this method, contact the package maintainer for assistance.
 
 ``` r
+
 # con <- establish_db_con()
 ```

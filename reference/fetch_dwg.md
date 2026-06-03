@@ -1,14 +1,14 @@
-# Download creel datasets from data.wa.gov
+# Download creel datasets from data.wa.gov (or the internal database)
 
-Download freshwater recreational fishery creel datasets from
-Washington's public data warehouse, data.wa.gov. When a valid
-'fishery_name' is provided several database views are downloaded (i.e.,
-effort, interview, catch, water bodies, closures, and a )
+Retrieves freshwater recreational fishery creel datasets. By default,
+downloads from the public data portal (data.wa.gov). If a database
+connection is supplied via `conn`, data is pulled from the WDFW
+PostgreSQL database instead.
 
 ## Usage
 
 ``` r
-fetch_dwg(fishery_name, print = FALSE)
+fetch_dwg(fishery_name, conn = NULL, print = FALSE)
 ```
 
 ## Arguments
@@ -18,6 +18,13 @@ fetch_dwg(fishery_name, print = FALSE)
   Identifier which represents the spatiotemporal configuration for a
   given dataset with associated fishery closures.
 
+- conn:
+
+  Optional database connection from
+  [`connect_creel_db()`](https://wdfw-fp.github.io/creelutils/reference/connect_creel_db.md).
+  When provided, data is sourced from the internal database rather than
+  data.wa.gov. Defaults to `NULL` (external).
+
 - print:
 
   Logical TRUE/FALSE that toggles whether a summary table prints in the
@@ -26,8 +33,8 @@ fetch_dwg(fishery_name, print = FALSE)
 
 ## Value
 
-dwg, a list object containing a dataframe for each database view
-downloaded (e.g., effort, interview, catch)
+A named list of tibbles: `$effort`, `$ll`, `$interview`, `$catch`,
+`$closures`, `$fishery_manager`.
 
 ## See also
 
@@ -41,6 +48,12 @@ Other public_data:
 
 ``` r
 if (FALSE) { # \dontrun{
+# External (default)
 dwg <- fetch_dwg("Skagit winter steelhead 2021")
+
+# Using an existing DB connection
+con <- connect_creel_db()
+dwg <- fetch_dwg("Skagit winter steelhead 2021", conn = con)
+DBI::dbDisconnect(con)
 } # }
 ```
