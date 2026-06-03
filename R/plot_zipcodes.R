@@ -13,8 +13,7 @@ utils::globalVariables(c("X", "Y", "Freq"))
 #' @param type character, map extent. Either `"wa"` (default) or `"us"`.
 #'   Case-insensitive.
 #'
-#' @importFrom ggplot2 geom_point aes theme element_text element_rect labs
-#'   scale_size_continuous scale_color_viridis_c scale_alpha_continuous
+#' @importFrom ggplot2 geom_point aes theme element_text element_rect labs scale_size_continuous scale_color_viridis_c scale_alpha_continuous
 #' @importFrom dplyr filter mutate rename select relocate arrange left_join
 #' @importFrom rlang .data
 #' @importFrom tidyr separate_longer_delim
