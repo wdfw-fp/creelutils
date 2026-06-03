@@ -1,6 +1,6 @@
 Package: creelutils
 Title: Utility Functions for Interacting with Freshwater Creel Data
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: c(
     person("Colt", "Holley", email = "colt.holley@dfw.wa.gov", role = c("aut", "cre"), comment = c(ORCID = "0000-0003-4172-4331")),
     person("Kale", "Bentley", role = "aut"),
@@ -21,18 +21,18 @@ Imports:
     tibble,
     purrr,
     readr,
+    httr,
     tidyr,
     glue,
     rstan,
-    odbc
+    ggplot2
 Suggests:
-    ggplot2,
     knitr,
     rmarkdown,
     gt,
-    quarto,
     DBI,
     RPostgres,
+    bit64,
     crayon,
     dbplyr,
     jsonlite,
@@ -46,8 +46,13 @@ Suggests:
     rprojroot,
     mockery,
     testthat
+    scales,
+    sf,
+    usmap,
+    zipcodeR,
+    keyring
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
 URL: https://wdfw-fp.github.io/creelutils
 BugReports: https://github.com/wdfw-fp/creelutils/issues
+Config/roxygen2/version: 8.0.0

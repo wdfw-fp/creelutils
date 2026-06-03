@@ -20,15 +20,15 @@ process_estimates_bss(params, analysis_lut, estimates_bss)
 Title
 }
 \seealso{
-Other ETL: 
-\code{\link{export_estimates}()},
-\code{\link{json_conversion}()},
-\code{\link{map_data_grade}()},
-\code{\link{prep_export}()},
-\code{\link{process_estimates_pe}()},
-\code{\link{transform_estimates}()},
-\code{\link{write_lut}()},
-\code{\link{write_stratum}()},
-\code{\link{write_total}()}
+Other ETL:
+\code{\link[=export_estimates]{export_estimates()}},
+\code{\link[=json_conversion]{json_conversion()}},
+\code{\link[=map_data_grade]{map_data_grade()}},
+\code{\link[=prep_export]{prep_export()}},
+\code{\link[=process_estimates_pe]{process_estimates_pe()}},
+\code{\link[=transform_estimates]{transform_estimates()}},
+\code{\link[=write_lut]{write_lut()}},
+\code{\link[=write_stratum]{write_stratum()}},
+\code{\link[=write_total]{write_total()}}
 }
 \concept{ETL}

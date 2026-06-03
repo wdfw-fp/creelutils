@@ -4,28 +4,28 @@
 \alias{establish_db_con}
 \title{Establish database connection}
 \usage{
-establish_db_con(
-  conn_type = c("odbc", "config"),
-  dsn = "creel_estimates",
-  config_path = "config.yml"
-)
+establish_db_con(...)
 }
 \arguments{
-\item{conn_type}{Character input denoting either "odbc" or "config" connection type.}
-
-\item{dsn}{Character string denoting the ODBC domain service name (DSN) to connect to.}
-
-\item{config_path}{File path location of the local 'config.yml' file.}
+\item{...}{Arguments passed to \code{\link[=connect_creel_db]{connect_creel_db()}}. \code{conn_type} and \code{dsn}
+are silently dropped with a warning if supplied.}
 }
 \value{
-A \code{DBI} connection to a PostgreSQL database management system. Recommend that this object be named "con".
+A \code{DBI} connection object. See \code{\link[=connect_creel_db]{connect_creel_db()}} for details.
 }
 \description{
-Establishes a connection to the WDFW PostgreSQL database. This process requires either a configured ODBC DSN or a local \code{config.yml} file.
+Compatibility wrapper for \code{\link[=connect_creel_db]{connect_creel_db()}}. Retained for backwards
+compatibility with scripts written prior to v0.2.0.
+
+The \code{conn_type} and \code{dsn} arguments are no longer supported. ODBC
+connections have been removed in favor of \code{RPostgres} + \code{keyring}.
+Calls passing \code{conn_type} will receive a warning and the argument will
+be ignored. New code should use \code{\link[=connect_creel_db]{connect_creel_db()}} directly.
 }
 \seealso{
 Other internal_data: 
 \code{\link{fetch_db_table}()},
 \code{\link{get_fishery_estimates}()}
+\code{\link[=connect_creel_db]{connect_creel_db()}}
 }
-\concept{internal_data}
+\keyword{internal}

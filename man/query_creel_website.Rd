@@ -34,10 +34,10 @@ dat <- query_creel_website(
 head(dat)
 }
 \seealso{
-Other public_data: 
-\code{\link{fetch_dwg}()},
-\code{\link{fetch_fishery_names}()},
-\code{\link{get_fishery_data}()},
-\code{\link{search_fishery_name}()}
+Other public_data:
+\code{\link[=fetch_dwg]{fetch_dwg()}},
+\code{\link[=fetch_fishery_names]{fetch_fishery_names()}},
+\code{\link[=get_fishery_data]{get_fishery_data()}},
+\code{\link[=search_fishery_name]{search_fishery_name()}}
 }
 \concept{public_data}

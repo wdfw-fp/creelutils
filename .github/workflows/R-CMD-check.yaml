@@ -1,13 +1,18 @@
-# Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
-# Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
+
+name: R CMD Check
+
 on:
   push:
     branches: [main, master]
   pull_request:
 
-name: R-CMD-check.yaml
-
 permissions: read-all
+
+# Cancel in-progress runs when a new push is received
+# Do no need multiple runs happening on a PR when small commits are added in quick succession
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   R-CMD-check:
@@ -21,13 +26,14 @@ jobs:
         config:
           - {os: macos-latest,   r: 'release'}
           - {os: windows-latest, r: 'release'}
-          - {os: ubuntu-latest,   r: 'devel', http-user-agent: 'release'}
+          # - {os: ubuntu-latest,   r: 'devel', http-user-agent: 'release'} # builds from source - takes 20-30 minutes
           - {os: ubuntu-latest,   r: 'release'}
           - {os: ubuntu-latest,   r: 'oldrel-1'}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - uses: actions/checkout@v4

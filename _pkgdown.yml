@@ -14,13 +14,21 @@ reference:
     - search_fishery_name
     - query_creel_website
     - get_fishery_data
+    - raw_catch
 
 - title: "Accessing internal data"
   desc: >
     These functions interact directly with the WDFW PostgreSQL creel database, which requires proper credentials and permissions.
   contents:
-    - establish_db_con
+    - connect_creel_db
+    - fetch_data
     - fetch_db_table
+    - fishery_lut
+    - fishery_manager
+    - fishery_catchgroups
+    - fishery_catchgroups_obs
+    - model_estimates
+    - query_analysis_lut
 
 - title: "BSS tools"
   desc: >
@@ -46,8 +54,10 @@ reference:
     - write_total
     - confirm_db_upload
 
-- title: "Reporting"
+- title: "Tools"
   desc: >
-    These functions produce standardized reports for a given fishery.
+    Functions for working with creel datasets.
   contents:
-    - render_progress_report
+    - catchgroups_to_params
+    - drop_section
+    - plot_zipcodes

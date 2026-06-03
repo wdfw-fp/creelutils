@@ -13,11 +13,13 @@ confirm_db_upload <- function(con, analysis_lut) {
   #query database for records that match the estimates that were just written
   verification_table <- fetch_db_table(con, "creel", "model_analysis_lut") |> dplyr::select("analysis_id", "analysis_name")
 
+  verification_table$analysis_id <- toupper(verification_table$analysis_id)
+
   if (analysis_lut$analysis_id %in% verification_table$analysis_id) {
 
-    DBI::dbDisconnect(con)
+    # DBI::dbDisconnect(con)
     cat(paste("\nData sucessfully exported.", "\u2713"))
-    cat("\nDisconnecting from database.")
+    # cat("\nDisconnecting from database.")
 
   } else {
     #what to do if analysis_id is not in analysis_lut (partial/failed export)
@@ -27,7 +29,7 @@ confirm_db_upload <- function(con, analysis_lut) {
 
     readr::write_csv(analysis_lut, file = paste0("FAILED_UPLOAD_LOG_","analysis_lut.csv"), append = TRUE)
 
-    DBI::dbDisconnect(con)
-    stop("\nDisconnecting from database.")
+    # DBI::dbDisconnect(con)
+    # stop("\nDisconnecting from database.")
   }
 }

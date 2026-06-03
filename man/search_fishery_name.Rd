@@ -16,14 +16,16 @@ Character vector of 'fishery_name' identifiers containing the partial value.
 Helps identify options for \code{fetch_dwg()}.
 }
 \examples{
+\dontrun{
 search_fishery_name("gamefish")
 search_fishery_name("Humptulips")
 }
+}
 \seealso{
-Other public_data: 
-\code{\link{fetch_dwg}()},
-\code{\link{fetch_fishery_names}()},
-\code{\link{get_fishery_data}()},
-\code{\link{query_creel_website}()}
+Other public_data:
+\code{\link[=fetch_dwg]{fetch_dwg()}},
+\code{\link[=fetch_fishery_names]{fetch_fishery_names()}},
+\code{\link[=get_fishery_data]{get_fishery_data()}},
+\code{\link[=query_creel_website]{query_creel_website()}}
 }
 \concept{public_data}
