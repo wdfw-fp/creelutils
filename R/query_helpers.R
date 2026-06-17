@@ -2,19 +2,54 @@
 #'
 #' @description Simple wrapper to query the fishery_lut table.
 #' @param conn A valid database connection from `connect_creel_db()`
+#' @param fishery_name placeholder - need to standardize argument definitions across functions
 #'
 #' @return Tibble of fishery names with year, start dates, end dates, and metadata
 #' @export
-fishery_lut <- function(conn = NULL) {
+fishery_lut <- function(
+    conn = NULL,
+    fishery_name = NULL
+  ) {
 
+  # Validate conn input
   # Establish lazy connection if conn not provided
   if (is.null(conn) || !DBI::dbIsValid(conn)) {
     conn <- connect_creel_db()
     on.exit(DBI::dbDisconnect(conn), add = TRUE)
   }
+  # Validate fishery_name input
+  if (!is.null(fishery_name) && !rlang::is_string(fishery_name)) {
+    cli::cli_abort("{.arg fishery_name} must be a single character string or `NULL`.")
+  }
 
-  fetch_db_table(conn, "creel", "fishery_lut")
+  # Apply fishery_name filter and query database
+  name_filter <- NULL
+  if (!is.null(fishery_name)) {
+    name_filter <- glue::glue("fishery_name == '{fishery_name}'")
+  }
 
+  result <- fetch_db_table(
+    conn = conn,
+    schema = "creel",
+    table = "fishery_lut",
+    filter = name_filter
+  )
+
+  # Evaluate query result
+  if (!is.null(fishery_name) && nrow(result) == 0L) {
+    cli::cli_abort(
+      c(
+        "{.val {fishery_name}} matched no rows in {.field creel.fishery_lut}.",
+        "i" = "Check spelling. See {.fn fetch_fishery_names} for valid names."
+      )
+    )
+  }
+
+  result <- result |>
+    dplyr::arrange(fishery_name) |>
+    dplyr::relocate("year", .after = "fishery_name")
+
+  return(result)
 }
 
 #' Get 'fishery manager' table
