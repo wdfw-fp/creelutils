@@ -4,10 +4,12 @@
 \alias{fishery_lut}
 \title{Get fishery lookup table}
 \usage{
-fishery_lut(conn = NULL)
+fishery_lut(conn = NULL, fishery_name = NULL)
 }
 \arguments{
 \item{conn}{A valid database connection from \code{connect_creel_db()}}
+
+\item{fishery_name}{placeholder - need to standardize argument definitions across functions}
 }
 \value{
 Tibble of fishery names with year, start dates, end dates, and metadata
