@@ -116,7 +116,7 @@ fishery_catchgroups <- function(
     table  = "vw_model_catch_group",
     filter = filter
     ) |>
-    dplyr::select(-combined_catch_group) |> #temporary, drop after view update
+    dplyr::select(-.data$combined_catch_group) |> #temporary, drop after view update
     dplyr::mutate(
       combined_catch_group = combine_catch_group(
         dplyr::pick(dplyr::everything()
