@@ -116,7 +116,14 @@ fishery_catchgroups <- function(
     table  = "vw_model_catch_group",
     filter = filter
     ) |>
-    dplyr::arrange(.data$combined_catch_group) |>
+    dplyr::select(-combined_catch_group) |> #temporary, drop after view update
+    dplyr::mutate(
+      combined_catch_group = combine_catch_group(
+        dplyr::pick(dplyr::everything()
+        )
+      )
+    ) |>
+    dplyr::arrange(.data$fishery_name, .data$species) |>
     dplyr::select(-c("fishery_id", "catch_group_id")) |>
     dplyr::relocate(
       .data$fishery_name, .data$combined_catch_group, .data$model_catch_group_id,
