@@ -1,134 +1,114 @@
 #' Prep export
 #'
+#' Prepares standardized model estimates for database export. Joins the
+#' catch group crosswalk (returned by `resolve_catch_groups()` in
+#' CreelEstimates) to attach `model_catch_group_id` to catch and CPUE
+#' estimate rows, joins angler type UUIDs on the stratum table, and drops
+#' local-only name/label columns to match the model_estimates_stratum and
+#' model_estimates_total schemas.
+#'
+#' Effort rows carry no catch group; their `model_catch_group_id` is NA and
+#' written as NULL (the column is nullable on both tables).
+#'
 #' @family ETL
-#' @param con ??
-#' @param creel_estimates ??
+#' @param conn a valid `DBI` connection. @seealso [establish_db_con()]
+#' @param creel_estimates list object containing standardized model
+#'   estimates returned by `transform_estimates()`.
+#' @param catch_group_lut catch group crosswalk for the fishery, returned by
+#'   `resolve_catch_groups()`. Must contain `combined_catch_group` and
+#'   `model_catch_group_id`.
 #'
-#' @return ??
+#' @return `creel_estimates` with `stratum` and `total` tables prepared for
+#'   `write_stratum()` and `write_total()`.
 #' @export
-#'
-prep_export <- function(con, creel_estimates) {
-  #query database tables necessary to get UUIDS
-  cat("\nFetching database uuids.")
-  project_lut <- fetch_db_table(con, "creel", "project_lut") |>
-    dplyr::select("project_name", "project_id")
-  fishery_lut <- fetch_db_table(con, "creel", "fishery_lut") |>
-    dplyr::select("fishery_name", "fishery_id")
-  species_lut <- fetch_db_table(con, "creel", "species_lut") |>
-    dplyr::select("species_name", "species_id")
-  life_stage_lut <- fetch_db_table(con, "creel", "life_stage_lut") |>
-    dplyr::select("life_stage_name", "life_stage_id")
-  fin_mark_lut <- fetch_db_table(con, "creel", "fin_mark_lut") |>
-    dplyr::select("fin_mark_code", "fin_mark_id")
-  fate_lut <- fetch_db_table(con, "creel", "fate_lut") |>
-    dplyr::select("fate_name", "fate_id")
-  angler_type_lut <- fetch_db_table(con, "creel", "angler_type_lut") |>
+prep_export <- function(
+    conn,
+    creel_estimates,
+    catch_group_lut
+  ) {
+
+  # Validate the crosswalk -------------------------------------------------
+  required_cols <- c("combined_catch_group", "model_catch_group_id")
+  missing_cols <- setdiff(required_cols, names(catch_group_lut))
+  if (length(missing_cols) > 0) {
+    cli::cli_abort(
+      "catch_group_lut is missing required column{?s}: {.field {missing_cols}}."
+    )
+  }
+
+  # Duplicate labels would silently inflate estimate rows on join
+  dup_labels <- catch_group_lut$combined_catch_group[
+    duplicated(catch_group_lut$combined_catch_group)
+  ]
+  if (length(dup_labels) > 0) {
+    cli::cli_abort(c(
+      "Duplicate combined_catch_group label{?s} in catch_group_lut: {.val {unique(dup_labels)}}.",
+      "x" = "Joining would inflate estimate rows."
+    ))
+  }
+
+  cg_crosswalk <- catch_group_lut |> dplyr::select("combined_catch_group", "model_catch_group_id")
+
+  # Fetch angler type UUIDs (stratum only) ---------------------------------
+  angler_type_lut <- fetch_db_table(conn = conn, "creel", "angler_type_lut") |>
     dplyr::select("angler_type_code", "angler_type_id")
-  crc_area_lut <- fetch_db_table(con, "creel", "crc_area_lut") |>
-    dplyr::select("catch_area_code", "crc_area_id")
 
-  #parse out catch group column into component fields to match with database format and use of UUIDs
-
-  ##total UUIDs ----------------------------------------------------------------------------------------------
-  creel_estimates$total <- creel_estimates$total |>
-    tidyr::separate(
-      col = .data$est_cg,
-      into = c(
-        "species_name",
-        "life_stage_name",
-        "fin_mark_code",
-        "fate_name"
-      ),
-      sep = "_"
-    )
-
-  #join UUIDs to appropriate fields
-  creel_estimates$total <- creel_estimates$total |> dplyr::left_join(project_lut, by = "project_name")
-  creel_estimates$total <- creel_estimates$total |> dplyr::left_join(fishery_lut, by = "fishery_name")
-  creel_estimates$total <- creel_estimates$total |> dplyr::left_join(species_lut, by = "species_name")
-  creel_estimates$total <- creel_estimates$total |> dplyr::left_join(life_stage_lut, by = "life_stage_name")
-  creel_estimates$total <- creel_estimates$total |> dplyr::left_join(fin_mark_lut, by = "fin_mark_code")
-  creel_estimates$total <- creel_estimates$total |> dplyr::left_join(fate_lut, by = "fate_name")
-
-  #reformat, remove common name fields in favor of UUID fields
-  creel_estimates$total <- creel_estimates$total |>
-    dplyr::select(
-      -c(
-        "project_name",
-        "fishery_name",
-        "species_name",
-        "life_stage_name",
-        "fin_mark_code",
-        "fate_name"
+  # Helper: join crosswalk and validate resolution --------------------------
+  # Invariant: every non-NA est_cg (catch and CPUE rows) must resolve to a
+  # model_catch_group_id; effort rows have NA est_cg and remain NA.
+  join_catch_groups <- function(df, table_name) {
+    df <- df |>
+      dplyr::left_join(
+        cg_crosswalk,
+        by = c("est_cg" = "combined_catch_group"),
+        relationship = "many-to-one"
       )
-    ) |>
-    dplyr::relocate(c("project_id", "fishery_id")) |>
-    dplyr::relocate(c("species_id", "life_stage_id", "fin_mark_id", "fate_id"),
-                    .after = "model_type")
 
-  ##stratum UUIDS --------------------------------------------------------------------------------------------
-  creel_estimates$stratum <- creel_estimates$stratum |>
-    tidyr::separate(
-      col = .data$est_cg,
-      into = c(
-        "species_name",
-        "life_stage_name",
-        "fin_mark_code",
-        "fate_name"
-      ),
-      sep = "_"
-    )
+    unresolved <- df |>
+      dplyr::filter(!is.na(.data$est_cg), is.na(.data$model_catch_group_id)) |>
+      dplyr::distinct(.data$est_cg)
 
-  #join UUIDs to appropriate fields
-  creel_estimates$stratum <- creel_estimates$stratum |>
-    dplyr::left_join(project_lut, by = "project_name")
-  creel_estimates$stratum <- creel_estimates$stratum |>
-    dplyr::left_join(fishery_lut, by = "fishery_name")
-  creel_estimates$stratum <- creel_estimates$stratum |>
-    dplyr::left_join(species_lut, by = "species_name")
-  creel_estimates$stratum <- creel_estimates$stratum |>
-    dplyr::left_join(life_stage_lut, by = "life_stage_name")
-  creel_estimates$stratum <- creel_estimates$stratum |>
-    dplyr::left_join(fin_mark_lut, by = "fin_mark_code")
-  creel_estimates$stratum <- creel_estimates$stratum |>
-    dplyr::left_join(fate_lut, by = "fate_name")
-  creel_estimates$stratum <- creel_estimates$stratum |>
-    dplyr::left_join(angler_type_lut, by = c("angler_final" = "angler_type_code"))
-  creel_estimates$stratum <- creel_estimates$stratum |>
-    dplyr::left_join(crc_area_lut, by = "catch_area_code")
+    if (nrow(unresolved) > 0) {
+      cli::cli_abort(c(
+        "Unresolved catch group label{?s} in {.val {table_name}} estimates: {.val {unresolved$est_cg}}.",
+        "x" = "No matching combined_catch_group in catch_group_lut.",
+        "i" = "Estimate labels and the resolve_catch_groups() crosswalk are out of sync."
+      ))
+    }
 
-  #reformat, remove common name fields in favor of UUID fields
+    df
+  }
+
+  ##total --------------------------------------------------------------------
+  creel_estimates$total <- creel_estimates$total |>
+    join_catch_groups("total") |>
+    dplyr::select(-"est_cg", -"project_name", -"fishery_name") |>
+    dplyr::relocate("analysis_id", "model_catch_group_id")
+
+  ## stratum ----------------------------------------------------------------
   creel_estimates$stratum <- creel_estimates$stratum |>
+    join_catch_groups("stratum") |>
+    dplyr::left_join(angler_type_lut,
+                     by = c("angler_final" = "angler_type_code")) |>
     dplyr::select(
       -c(
+        "est_cg",
         "project_name",
         "fishery_name",
-        "species_name",
-        "life_stage_name",
-        "fin_mark_code",
-        "fate_name",
         "angler_final",
         "catch_area_code",
         "catch_area_description"
       )
     ) |>
-    dplyr::relocate(c("project_id", "fishery_id")) |>
-    dplyr::relocate(
-      c(
-        "species_id",
-        "life_stage_id",
-        "fin_mark_id",
-        "fate_id",
-        "angler_type_id"
-      ),
-      .after = "model_type"
-    )
+    dplyr::relocate("analysis_id", "model_catch_group_id")
 
   #reformat NaN estimate values in stratum scale to 0 values
   creel_estimates$stratum <- creel_estimates$stratum |>
-    dplyr::mutate(estimate_value = dplyr::case_when(is.nan(.data$estimate_value) ~ 0,
-                                                    TRUE ~ .data$estimate_value))
+    dplyr::mutate(
+      estimate_value = dplyr::case_when(
+        is.nan(.data$estimate_value) ~ 0,
+        TRUE ~ .data$estimate_value
+    ))
 
   return(creel_estimates)
-
 }
