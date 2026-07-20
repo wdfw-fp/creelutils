@@ -4,10 +4,10 @@
 \alias{write_lut}
 \title{Write look-up table}
 \usage{
-write_lut(con, analysis_lut, max_retries = 5)
+write_lut(conn, analysis_lut, max_retries = 5)
 }
 \arguments{
-\item{con}{a valid \code{DBI} connection. @seealso \code{\link[=establish_db_con]{establish_db_con()}}}
+\item{conn}{a valid \code{DBI} connection. @seealso \code{\link[=establish_db_con]{establish_db_con()}}}
 
 \item{analysis_lut}{lookup table created during the model estimation process which stores a session-specific analysis_id key and metadata about the analysis.}
 
@@ -19,6 +19,7 @@ Write look-up table
 \seealso{
 Other ETL:
 \code{\link[=export_estimates]{export_estimates()}},
+\code{\link[=finalize_analysis_lut]{finalize_analysis_lut()}},
 \code{\link[=json_conversion]{json_conversion()}},
 \code{\link[=map_data_grade]{map_data_grade()}},
 \code{\link[=prep_export]{prep_export()}},

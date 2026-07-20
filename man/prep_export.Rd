@@ -4,22 +4,38 @@
 \alias{prep_export}
 \title{Prep export}
 \usage{
-prep_export(con, creel_estimates)
+prep_export(conn, creel_estimates, catch_group_lut)
 }
 \arguments{
-\item{con}{??}
+\item{conn}{a valid \code{DBI} connection. @seealso \code{\link[=establish_db_con]{establish_db_con()}}}
 
-\item{creel_estimates}{??}
+\item{creel_estimates}{list object containing standardized model
+estimates returned by \code{transform_estimates()}.}
+
+\item{catch_group_lut}{catch group crosswalk for the fishery, returned by
+\code{resolve_catch_groups()}. Must contain \code{combined_catch_group} and
+\code{model_catch_group_id}.}
 }
 \value{
-??
+\code{creel_estimates} with \code{stratum} and \code{total} tables prepared for
+\code{write_stratum()} and \code{write_total()}.
 }
 \description{
-Prep export
+Prepares standardized model estimates for database export. Joins the
+catch group crosswalk (returned by \code{resolve_catch_groups()} in
+CreelEstimates) to attach \code{model_catch_group_id} to catch and CPUE
+estimate rows, joins angler type UUIDs on the stratum table, and drops
+local-only name/label columns to match the model_estimates_stratum and
+model_estimates_total schemas.
+}
+\details{
+Effort rows carry no catch group; their \code{model_catch_group_id} is NA and
+written as NULL (the column is nullable on both tables).
 }
 \seealso{
 Other ETL:
 \code{\link[=export_estimates]{export_estimates()}},
+\code{\link[=finalize_analysis_lut]{finalize_analysis_lut()}},
 \code{\link[=json_conversion]{json_conversion()}},
 \code{\link[=map_data_grade]{map_data_grade()}},
 \code{\link[=process_estimates_bss]{process_estimates_bss()}},

@@ -4,10 +4,18 @@
 \alias{export_estimates}
 \title{Export creel model estimates}
 \usage{
-export_estimates(params, analysis_lut, creel_estimates, conn = NULL)
+export_estimates(
+  resolved_params,
+  est_catch_groups,
+  analysis_lut,
+  creel_estimates,
+  conn = NULL
+)
 }
 \arguments{
-\item{params}{User-input parameters defined during the model estimation process.}
+\item{resolved_params}{User-input parameters defined during the model estimation process.}
+
+\item{est_catch_groups}{Output of \code{resolve_catch_groups()}.}
 
 \item{analysis_lut}{Lookup table created during the model estimation process which stores a session-specific analysis_id key and metadata about the analysis.}
 
@@ -23,6 +31,7 @@ Primary control function of the export, transform, and load (ETL) process. Takes
 }
 \seealso{
 Other ETL:
+\code{\link[=finalize_analysis_lut]{finalize_analysis_lut()}},
 \code{\link[=json_conversion]{json_conversion()}},
 \code{\link[=map_data_grade]{map_data_grade()}},
 \code{\link[=prep_export]{prep_export()}},

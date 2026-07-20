@@ -4,10 +4,10 @@
 \alias{write_total}
 \title{Write Total}
 \usage{
-write_total(con, creel_estimates_db)
+write_total(conn, creel_estimates_db)
 }
 \arguments{
-\item{con}{a valid DBI connection. @seealso \code{\link[=establish_db_con]{establish_db_con()}}}
+\item{conn}{a valid DBI connection. @seealso \code{\link[=establish_db_con]{establish_db_con()}}}
 
 \item{creel_estimates_db}{a list object containing the standardized model outputs that have been processed by \code{prep_export()} to join certain fields with database lookup tables prior to exportation.}
 }
@@ -17,6 +17,7 @@ Write Total
 \seealso{
 Other ETL:
 \code{\link[=export_estimates]{export_estimates()}},
+\code{\link[=finalize_analysis_lut]{finalize_analysis_lut()}},
 \code{\link[=json_conversion]{json_conversion()}},
 \code{\link[=map_data_grade]{map_data_grade()}},
 \code{\link[=prep_export]{prep_export()}},

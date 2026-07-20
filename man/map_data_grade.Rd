@@ -22,6 +22,7 @@ Map datagrade ??
 \seealso{
 Other ETL:
 \code{\link[=export_estimates]{export_estimates()}},
+\code{\link[=finalize_analysis_lut]{finalize_analysis_lut()}},
 \code{\link[=json_conversion]{json_conversion()}},
 \code{\link[=prep_export]{prep_export()}},
 \code{\link[=process_estimates_bss]{process_estimates_bss()}},

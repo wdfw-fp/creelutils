@@ -53,6 +53,7 @@ reference:
     - write_stratum
     - write_total
     - confirm_db_upload
+    - finalize_analysis_lut
 
 - title: "Tools"
   desc: >

@@ -4,10 +4,10 @@
 \alias{confirm_db_upload}
 \title{Confirm database upload}
 \usage{
-confirm_db_upload(con, analysis_lut)
+confirm_db_upload(conn, analysis_lut)
 }
 \arguments{
-\item{con}{Connection to WDFW PostgreSQL database made with DBI-compliant RPostgres package. 'con' created by establish_db_con.R function.}
+\item{conn}{Connection to WDFW PostgreSQL database made with DBI-compliant RPostgres package. 'con' created by establish_db_con.R function.}
 
 \item{analysis_lut}{Data frame containing session-specific analysis_id and associated metadata created by generate_analysis_lut.R}
 }

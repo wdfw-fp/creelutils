@@ -28,6 +28,7 @@ json_conversion(type = "r_session")
 \seealso{
 Other ETL:
 \code{\link[=export_estimates]{export_estimates()}},
+\code{\link[=finalize_analysis_lut]{finalize_analysis_lut()}},
 \code{\link[=map_data_grade]{map_data_grade()}},
 \code{\link[=prep_export]{prep_export()}},
 \code{\link[=process_estimates_bss]{process_estimates_bss()}},
