@@ -90,16 +90,7 @@ prep_export <- function(
     join_catch_groups("stratum") |>
     dplyr::left_join(angler_type_lut,
                      by = c("angler_final" = "angler_type_code")) |>
-    dplyr::select(
-      -c(
-        "est_cg",
-        "project_name",
-        "fishery_name",
-        "angler_final",
-        "catch_area_code",
-        "catch_area_description"
-      )
-    ) |>
+    dplyr::select(-c("est_cg", "project_name", "fishery_name", "angler_final")) |>
     dplyr::relocate("analysis_id", "model_catch_group_id")
 
   #reformat NaN estimate values in stratum scale to 0 values
