@@ -41,13 +41,19 @@ finalize_analysis_lut <- function(analysis_lut, resolved_params, conn = NULL) {
   # are omitted and default to NULL on the database side)
   analysis_lut <- json_conversion(type = "r_session", params = resolved_params, analysis_lut)
 
-  # validate and add data grade
+  # data_grade: normalize casing and validate against the allowed set
   if (is.null(resolved_params$data_grade)) {
     cli::cli_abort("resolved_params$data_grade is NULL; data_grade is required for model_analysis_lut.")
   }
-
-  analysis_lut <- analysis_lut |>
-    dplyr::mutate(data_grade = resolved_params$data_grade)
+  data_grade <- stringr::str_to_title(resolved_params$data_grade)
+  allowed_grades <- c("Provisional", "Approved")
+  if (!data_grade %in% allowed_grades) {
+    cli::cli_abort(c(
+      "Invalid data_grade {.val {resolved_params$data_grade}}.",
+      "i" = "Must be one of {.val {allowed_grades}} (case-insensitive)."
+    ))
+  }
+  analysis_lut <- analysis_lut |> dplyr::mutate(data_grade = data_grade)
 
   if (!"comment_txt" %in% names(analysis_lut)) {
     analysis_lut <- analysis_lut |>
