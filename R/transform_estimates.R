@@ -67,9 +67,13 @@ transform_estimates <- function(
         ),
         # Estimate type --------------------------------------------------------------------------
         estimate_type = dplyr::case_when(
-          # point estimate — collapse across model_type and grain (table denotes stratum vs total)
-          # PE est / PE est_sum / BSS posterior mean
-          .data$estimate_type %in% c("est", "est_sum", "mean") ~ "estimate",
+          # PE total catch, align across stratum and total tables
+          .data$estimate_category == "catch" &
+            .data$estimate_type %in% c("est", "est_sum") ~ "total_catch",
+
+          # PE total effort, align across stratum and total tables
+          .data$estimate_category == "effort" &
+            .data$estimate_type %in% c("est", "est_sum") ~ "total_effort",
 
           # PE per-day component moments (pre-expansion; estimate = daily_mean * days_open)
           .data$estimate_type %in% c("catch_est_mean", "ang_hrs_mean") ~ "daily_mean",
@@ -79,8 +83,9 @@ transform_estimates <- function(
           .data$estimate_type %in% c("n_obs", "totalobs") ~ "number_observations",
           .data$estimate_type %in% c("N_days_open", "totaldaysopen") ~ "days_open",
 
-          # BSS dispersion
-          .data$estimate_type == "sd"      ~ "standard_deviation",
+          # BSS posterior quantities
+          .data$estimate_type == "mean" ~ "mean", # pass through as is
+          .data$estimate_type == "sd" ~ "standard_deviation",
           .data$estimate_type == "se_mean" ~ "standard_error",
 
           # BSS posterior quantiles
@@ -92,20 +97,45 @@ transform_estimates <- function(
 
           # diagnostics
           .data$estimate_type == "Rhat" ~ "r_hat",
-          .data$estimate_type == "n_eff" ~ "n_eff",
-          .data$estimate_type == "n_div" ~ "n_div",
+          .data$estimate_type == "n_eff" ~ "n_eff", # pass through as is
+          .data$estimate_type == "n_div" ~ "n_div", # pass through as is
           .data$estimate_type == "df" ~ "degrees_freedom",
           TRUE ~ .data$estimate_type
         )
       )
     )
 
-  # Reduce estimate types sent to total table, stratum retains all
-  # drop days_open, number_observations, r_hat, n_eff, and n_div
-  creel_estimates$total <- creel_estimates$total |>
-    dplyr::filter(.data$estimate_type %in% c(
-      "estimate", "quantile_2_5", "quantile_25", "quantile_50", "quantile_75", "quantile_97_5"
+  # Master list of valid standardized estimate_type values
+  # If any future estimate types are introduced upstream, triggers warning below
+  valid_types <- c(
+    "total_catch", "total_effort", "daily_mean", "daily_variance",
+    "number_observations", "days_open", "mean", "standard_deviation",
+    "standard_error", "quantile_2_5", "quantile_25", "quantile_50",
+    "quantile_75", "quantile_97_5", "r_hat", "n_eff", "n_div", "degrees_freedom"
+  )
+
+  # Warn on anything that fell through TRUE ~ estimate_type
+  unexpected <- creel_estimates |>
+    purrr::map(~ setdiff(unique(.x$estimate_type), valid_types)) |>
+    unlist(use.names = FALSE) |>
+    unique()
+
+  if (length(unexpected) > 0) {
+    cli::cli_warn(c(
+      "!" = "Unstandardized {.field estimate_type} value{?s} passed through: {.val {unexpected}}.",
+      "i" = "Add a mapping in {.fn transform_estimates} or update {.var valid_types}."
     ))
+  }
+
+  # Diagnostics only at the total level
+  # We don't look at stratum-scale HMC effective sample size or CV, for example
+  # Written per section x period x day_type x angler_type, leading to thousands of rows we never inspect
+  stratum_reject <- c("n_eff", "r_hat", "n_div", "standard_error", "standard_deviation")
+
+  creel_estimates$stratum <- creel_estimates$stratum |>
+    dplyr::filter(!.data$estimate_type %in% stratum_reject)
+
+  # total table retains all types; the reporting view filters the estimate_types displayed
 
   cli::cli_alert_success("Transformed output object {.val creel_estimates} created.")
 
