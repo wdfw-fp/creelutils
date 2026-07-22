@@ -63,3 +63,4 @@ reference:
     - drop_section
     - plot_zipcodes
     - combine_catch_group
+    - update_analysis_comment

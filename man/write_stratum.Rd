@@ -24,6 +24,7 @@ Other ETL:
 \code{\link[=process_estimates_bss]{process_estimates_bss()}},
 \code{\link[=process_estimates_pe]{process_estimates_pe()}},
 \code{\link[=transform_estimates]{transform_estimates()}},
+\code{\link[=update_analysis_comment]{update_analysis_comment()}},
 \code{\link[=write_lut]{write_lut()}},
 \code{\link[=write_total]{write_total()}}
 }
