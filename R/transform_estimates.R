@@ -99,6 +99,14 @@ transform_estimates <- function(
         )
       )
     )
+
+  # Reduce estimate types sent to total table, stratum retains all
+  # drop days_open, number_observations, r_hat, n_eff, and n_div
+  creel_estimates$total <- creel_estimates$total |>
+    dplyr::filter(.data$estimate_type %in% c(
+      "estimate", "quantile_2_5", "quantile_25", "quantile_50", "quantile_75", "quantile_97_5"
+    ))
+
   cli::cli_alert_success("Transformed output object {.val creel_estimates} created.")
 
   return(creel_estimates)
