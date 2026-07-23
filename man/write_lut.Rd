@@ -2,32 +2,15 @@
 % Please edit documentation in R/write_db_tables.R
 \name{write_lut}
 \alias{write_lut}
-\title{Write look-up table}
+\title{Write metadata to analysis lookup table}
 \usage{
-write_lut(conn, analysis_lut, max_retries = 5)
+write_lut(conn, analysis_lut)
 }
 \arguments{
-\item{conn}{a valid \code{DBI} connection. @seealso \code{\link[=establish_db_con]{establish_db_con()}}}
+\item{conn}{database connection}
 
-\item{analysis_lut}{lookup table created during the model estimation process which stores a session-specific analysis_id key and metadata about the analysis.}
-
-\item{max_retries}{maximum number of times to try to write; numeric, defaults to 5.}
+\item{analysis_lut}{analysis lookup table}
 }
 \description{
-Write look-up table
+Write metadata to analysis lookup table
 }
-\seealso{
-Other ETL:
-\code{\link[=export_estimates]{export_estimates()}},
-\code{\link[=finalize_analysis_lut]{finalize_analysis_lut()}},
-\code{\link[=json_conversion]{json_conversion()}},
-\code{\link[=map_data_grade]{map_data_grade()}},
-\code{\link[=prep_export]{prep_export()}},
-\code{\link[=process_estimates_bss]{process_estimates_bss()}},
-\code{\link[=process_estimates_pe]{process_estimates_pe()}},
-\code{\link[=transform_estimates]{transform_estimates()}},
-\code{\link[=update_analysis_comment]{update_analysis_comment()}},
-\code{\link[=write_stratum]{write_stratum()}},
-\code{\link[=write_total]{write_total()}}
-}
-\concept{ETL}

@@ -9,7 +9,7 @@ export_estimates(
   est_catch_groups,
   analysis_lut,
   creel_estimates,
-  conn = NULL
+  conn
 )
 }
 \arguments{
@@ -21,10 +21,10 @@ export_estimates(
 
 \item{creel_estimates}{List object containing model estimates in a standardized format. Typically passed from 'transform_estimates' function.}
 
-\item{conn}{Database connection object. If NULL (default), a new connection will be established.}
+\item{conn}{Connection to the creel database.}
 }
 \value{
-??
+Invisibly, NULL. Called for side effects.
 }
 \description{
 Primary control function of the export, transform, and load (ETL) process. Takes standardized model outputs and user-input parameters to export the model estimates appropriately.
@@ -38,9 +38,6 @@ Other ETL:
 \code{\link[=process_estimates_bss]{process_estimates_bss()}},
 \code{\link[=process_estimates_pe]{process_estimates_pe()}},
 \code{\link[=transform_estimates]{transform_estimates()}},
-\code{\link[=update_analysis_comment]{update_analysis_comment()}},
-\code{\link[=write_lut]{write_lut()}},
-\code{\link[=write_stratum]{write_stratum()}},
-\code{\link[=write_total]{write_total()}}
+\code{\link[=update_analysis_comment]{update_analysis_comment()}}
 }
 \concept{ETL}

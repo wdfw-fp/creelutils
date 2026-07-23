@@ -2,18 +2,18 @@
 % Please edit documentation in R/confirm_db_upload.R
 \name{confirm_db_upload}
 \alias{confirm_db_upload}
-\title{Confirm database upload}
+\title{Confirm an analysis_id exists in the database}
 \usage{
-confirm_db_upload(conn, analysis_lut)
+confirm_db_upload(conn, analysis_id)
 }
 \arguments{
-\item{conn}{Connection to WDFW PostgreSQL database made with DBI-compliant RPostgres package. 'con' created by establish_db_con.R function.}
+\item{conn}{An open DBI connection to the creel database.}
 
-\item{analysis_lut}{Data frame containing session-specific analysis_id and associated metadata created by generate_analysis_lut.R}
+\item{analysis_id}{character; session-specific analysis_id created by \code{generate_analysis_lut()}}
 }
 \value{
-nothing returned.
+Invisibly, TRUE if the analysis_id was found, otherwise FALSE.
 }
 \description{
-Confirms upload of model estimates by querying model_analysis_lut for session analysis_id.
+Confirm an analysis_id exists in the database
 }

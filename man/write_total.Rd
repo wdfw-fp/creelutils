@@ -2,30 +2,15 @@
 % Please edit documentation in R/write_db_tables.R
 \name{write_total}
 \alias{write_total}
-\title{Write Total}
+\title{Write estimates to total estimates table}
 \usage{
-write_total(conn, creel_estimates_db)
+write_total(conn, total)
 }
 \arguments{
-\item{conn}{a valid DBI connection. @seealso \code{\link[=establish_db_con]{establish_db_con()}}}
+\item{conn}{database connection}
 
-\item{creel_estimates_db}{a list object containing the standardized model outputs that have been processed by \code{prep_export()} to join certain fields with database lookup tables prior to exportation.}
+\item{total}{summarized season-total estimates}
 }
 \description{
-Write Total
+Write estimates to total estimates table
 }
-\seealso{
-Other ETL:
-\code{\link[=export_estimates]{export_estimates()}},
-\code{\link[=finalize_analysis_lut]{finalize_analysis_lut()}},
-\code{\link[=json_conversion]{json_conversion()}},
-\code{\link[=map_data_grade]{map_data_grade()}},
-\code{\link[=prep_export]{prep_export()}},
-\code{\link[=process_estimates_bss]{process_estimates_bss()}},
-\code{\link[=process_estimates_pe]{process_estimates_pe()}},
-\code{\link[=transform_estimates]{transform_estimates()}},
-\code{\link[=update_analysis_comment]{update_analysis_comment()}},
-\code{\link[=write_lut]{write_lut()}},
-\code{\link[=write_stratum]{write_stratum()}}
-}
-\concept{ETL}
