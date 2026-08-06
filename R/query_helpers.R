@@ -162,6 +162,16 @@ fishery_catchgroups <- function(
     conn = conn, fishery_name = fishery_name,
     tables = c("interview", "catch"), data_source = "internal"
   )
+
+  n_cat <- NROW(obs$catch)
+
+  if (n_cat == 0L) {
+    cli::cli_abort(
+      "Cannot apply {.arg observed_only = TRUE} for {.emph {fishery_name}}. Zero catch records found.",
+      class = "creelutils_no_observed_catch"
+    )
+  }
+
   obs_atomic <- obs$catch |>
     dplyr::semi_join(obs$interview, by = "interview_id") |>
     dplyr::distinct(.data$species, .data$life_stage, .data$fin_mark, .data$fate)
