@@ -129,6 +129,13 @@ fishery_catchgroups <- function(
       .data$species, .data$life_stage, .data$fin_mark, .data$fate
     )
 
+  if (nrow(result) == 0L) {
+    cli::cli_abort(c(
+      "x" = "Zero rows returned for {.arg {fishery_name}}.",
+      "i" = "Verify that catch groups have been defined."
+    ))
+  }
+
   # Restrict to catch groups with observed catch (presence only)
   if (observed_only) {
     if (is.null(fishery_name)) {
