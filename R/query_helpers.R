@@ -11,12 +11,9 @@ fishery_lut <- function(
     fishery_name = NULL
   ) {
 
-  # Validate conn input
-  # Establish lazy connection if conn not provided
-  if (is.null(conn) || !DBI::dbIsValid(conn)) {
-    conn <- connect_creel_db()
-    on.exit(DBI::dbDisconnect(conn), add = TRUE)
-  }
+  # Validate connection; lazily open if NULL, fail if supplied `conn` is invalid
+  conn <- .resolve_conn(conn)
+
   # Validate fishery_name input
   if (!is.null(fishery_name) && !rlang::is_string(fishery_name)) {
     cli::cli_abort("{.arg fishery_name} must be a single character string or `NULL`.")
@@ -64,11 +61,8 @@ fishery_manager <- function(
     fishery_name = NULL
   ) {
 
-  # Establish lazy connection if conn not provided
-  if (is.null(conn) || !DBI::dbIsValid(conn)) {
-    conn <- connect_creel_db()
-    on.exit(DBI::dbDisconnect(conn), add = TRUE)
-  }
+  # Validate connection; lazily open if NULL, fail if supplied `conn` is invalid
+  conn <- .resolve_conn(conn)
 
   filter <- NULL
   if (!is.null(fishery_name)) {
@@ -99,11 +93,8 @@ fishery_catchgroups <- function(
     observed_only = FALSE
   ) {
 
-  # Establish lazy connection if conn not provided
-  if (is.null(conn) || !DBI::dbIsValid(conn)) {
-    conn <- connect_creel_db()
-    on.exit(DBI::dbDisconnect(conn), add = TRUE)
-  }
+  # Validate connection; lazily open if NULL, fail if supplied `conn` is invalid
+  conn <- .resolve_conn(conn)
 
   filter <- NULL
   if (!is.null(fishery_name)) {
@@ -217,11 +208,8 @@ fishery_catchgroups <- function(
 #' @export
 fishery_catchgroups_obs <- function(conn = NULL, data, include_zero = FALSE) {
 
-  # Establish lazy connection if conn not provided
-  if (is.null(conn) || !DBI::dbIsValid(conn)) {
-    conn <- connect_creel_db()
-    on.exit(DBI::dbDisconnect(conn), add = TRUE)
-  }
+  # Validate connection; lazily open if NULL, fail if supplied `conn` is invalid
+  conn <- .resolve_conn(conn)
 
   fishery_name <- unique(data$fishery_manager$fishery_name)
 
@@ -296,11 +284,8 @@ query_analysis_lut <- function(
     fishery_name = NULL
   ) {
 
-  # Establish lazy connection if conn not provided
-  if (is.null(conn) || !DBI::dbIsValid(conn)) {
-    conn <- connect_creel_db()
-    on.exit(DBI::dbDisconnect(conn), add = TRUE)
-  }
+  # Validate connection; lazily open if NULL, fail if supplied `conn` is invalid
+  conn <- .resolve_conn(conn)
 
   filter <- NULL
   if (!is.null(analysis_id)) {
@@ -335,11 +320,8 @@ model_estimates <- function(
     ...
   ) {
 
-  # Establish lazy connection if conn not provided
-  if (is.null(conn) || !DBI::dbIsValid(conn)) {
-    conn <- connect_creel_db()
-    on.exit(DBI::dbDisconnect(conn), add = TRUE)
-  }
+  # Validate connection; lazily open if NULL, fail if supplied `conn` is invalid
+  conn <- .resolve_conn(conn)
 
   scale <- match.arg(scale)
   table <- glue::glue("model_estimates_{scale}")

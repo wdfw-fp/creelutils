@@ -9,8 +9,8 @@
 #'
 #' @param conn A valid database connection from [connect_creel_db()]. When
 #'   `data_source = "internal"` and `conn = NULL` (default), a connection is
-#'   opened automatically via [connect_creel_db()] and closed on exit. Ignored
-#'   entirely when `data_source = "external"`.
+#'   opened automatically via [connect_creel_db()] and closed on exit. An
+#'   invalid `conn` supplied errors. Ignored when `data_source = "external"`.
 #' @param fishery_name Character string. The exact fishery name to filter on.
 #' @param tables Character vector of data components to retrieve. Defaults to
 #'   all eight: `"effort"`, `"ll"`, `"interview"`, `"catch"`, `"closures"`,
@@ -103,16 +103,11 @@ fetch_data <- function(
 #' @noRd
 .fetch_data_internal <- function(conn, fishery_name, tables) {
 
-  # Lazy connection: open internally if none supplied, close on exit
-
+  # Validate connection; lazily open if NULL, fail if supplied `conn` is invalid
   if (is.null(conn)) {
-    conn <- connect_creel_db()
-    on.exit(DBI::dbDisconnect(conn), add = TRUE)
+    cli::cli_abort("{.arg conn} is required.", class = "creelutils_invalid_conn")
   }
-
-  if (!DBI::dbIsValid(conn)) {
-    cli::cli_abort("Database connection is not valid or has been closed. Reconnect with {.fn connect_creel_db}.")
-  }
+  conn <- .resolve_conn(conn)
 
   # View mapping
   view_map <- c(

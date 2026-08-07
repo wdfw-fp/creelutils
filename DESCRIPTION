@@ -25,7 +25,8 @@ Imports:
     tidyr,
     glue,
     rstan,
-    ggplot2
+    ggplot2,
+    withr
 Suggests:
     knitr,
     rmarkdown,

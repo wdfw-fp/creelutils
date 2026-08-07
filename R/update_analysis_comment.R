@@ -18,9 +18,8 @@
 #' }
 update_analysis_comment <- function(conn, analysis_id, comment) {
 
-  if (is.null(conn) || !DBI::dbIsValid(conn)) {
-    cli::cli_abort("{.arg conn} is not a valid, open database connection.")
-  }
+  # Validate connection; lazily open if NULL, fail if supplied `conn` is invalid
+  conn <- .resolve_conn(conn)
 
   # Confirm the target exists and capture existing comment
   current <- fetch_db_table(

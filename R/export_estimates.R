@@ -26,9 +26,8 @@ export_estimates <- function(resolved_params, est_catch_groups, analysis_lut, cr
   # Export to database ---------------------------------------------------------------------------
   if(export == "database") {
 
-    if (is.null(conn) || !DBI::dbIsValid(conn)) {
-      cli::cli_abort("{.arg conn} is not a valid, open database connection.")
-    }
+    # Validate connection; lazily open if NULL, fail if supplied `conn` is invalid
+    conn <- .resolve_conn(conn)
 
     if (!export_tables %in% export_tables_types) {
       cli::cli_abort("Invalid {.field params$export_tables} entered. Valid export table types: {export_tables_types}")
