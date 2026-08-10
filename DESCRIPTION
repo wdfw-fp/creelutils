@@ -26,7 +26,8 @@ Imports:
     glue,
     rstan,
     ggplot2,
-    withr
+    withr,
+    methods
 Suggests:
     knitr,
     rmarkdown,
