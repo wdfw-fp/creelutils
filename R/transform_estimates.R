@@ -127,15 +127,25 @@ transform_estimates <- function(
     ))
   }
 
-  # Diagnostics only at the total level
-  # We don't look at stratum-scale HMC effective sample size or CV, for example
-  # Written per section x period x day_type x angler_type, leading to thousands of rows we never inspect
-  stratum_reject <- c("n_eff", "r_hat", "n_div", "standard_error", "standard_deviation")
+  # Deny list of columns to reject from stratum table
+  stratum_reject <- c(
+    # Diagnostics only at the total level
+    # We don't look at stratum-scale HMC effective sample size or CV, for example
+    # Written per section x period x day_type x angler_type, leading to thousands of rows we never inspect
+    "n_eff", "r_hat", "n_div", "standard_error", "standard_deviation",
+    # TEMPORARILY filter out days_open and number_observations - save for future summary/metadata table
+    "days_open", "number_observations"
+  )
 
   creel_estimates$stratum <- creel_estimates$stratum |>
     dplyr::filter(!.data$estimate_type %in% stratum_reject)
 
-  # total table retains all types; the reporting view filters the estimate_types displayed
+  # Deny list of columns to reject from total table
+  # TEMPORARILY filter out days_open and number_observations - save for future summary/metadata table
+  total_reject <- c("days_open", "number_observations")
+
+  creel_estimates$total <- creel_estimates$total |>
+    dplyr::filter(!.data$estimate_type %in% total_reject)
 
   cli::cli_alert_success("Transformed output object {.val creel_estimates} created.")
 
