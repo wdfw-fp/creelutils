@@ -6,7 +6,7 @@
 #'
 #' @return ??
 #' @export
-process_estimates_pe <- function(analysis_lut, estimates_pe, params) {
+process_estimates_pe <- function(analysis_lut, estimates_pe, params, days) {
 
   transformed_pe_data <- list(
     pe_effort = data.frame(),
@@ -132,15 +132,20 @@ process_estimates_pe <- function(analysis_lut, estimates_pe, params) {
     dplyr::relocate("estimate_category", .after = "model_type")
 
   # Catch
-  #calculate days open and days surveyed
-  totaldaysopen_totaldayssurveyed <-transformed_pe_data$pe_summarized_catch |>
-    dplyr::distinct(.data$period, .data$day_type, .data$est_cg, .data$n_obs, .data$N_days_open) |>
+  # calculate number of open days, factoring in fishery window and closures by day per section using dwg$days object
+  open_days <- days |>
+    dplyr::filter(dplyr::between(.data$event_date,
+                                 as.Date(params$est_date_start),
+                                 as.Date(params$est_date_end))) |>
+    dplyr::mutate(fishery_open = dplyr::if_any(dplyr::starts_with("open_section_"),
+                                               ~ .x %in% TRUE)) |>
+    dplyr::summarise(n = sum(.data$fishery_open, na.rm = TRUE)) |>
+    dplyr::pull(.data$n)
+
+  totaldaysopen_totaldayssurveyed <- transformed_pe_data$pe_summarized_catch |>
     dplyr::group_by(.data$est_cg) |>
-    dplyr::summarise(
-      totaldaysopen = sum(.data$N_days_open),
-      totalobs = sum(.data$n_obs),
-      .groups = 'drop'
-    )
+    dplyr::summarise(totalobs = sum(.data$n_obs), .groups = "drop") |> # renamed to number_observations in transform_estimates()
+    dplyr::mutate(totaldaysopen = open_days) # renamed to days_open in transform_estimates()
 
   #catch transformation
   transformed_pe_data$pe_summarized_catch <- transformed_pe_data$pe_summarized_catch |>
