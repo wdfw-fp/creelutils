@@ -4,7 +4,7 @@
 \alias{process_estimates_pe}
 \title{Title}
 \usage{
-process_estimates_pe(analysis_lut, estimates_pe, params)
+process_estimates_pe(analysis_lut, estimates_pe, params, days)
 }
 \arguments{
 \item{analysis_lut}{??}
@@ -12,6 +12,8 @@ process_estimates_pe(analysis_lut, estimates_pe, params)
 \item{estimates_pe}{??}
 
 \item{params}{??}
+
+\item{days}{output of CreelEstimates prep_days().}
 }
 \value{
 ??

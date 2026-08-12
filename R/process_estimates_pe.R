@@ -3,7 +3,7 @@
 #' @param analysis_lut ??
 #' @param estimates_pe ??
 #' @param params ??
-#'
+#' @param days output of CreelEstimates prep_days().
 #' @return ??
 #' @export
 process_estimates_pe <- function(analysis_lut, estimates_pe, params, days) {

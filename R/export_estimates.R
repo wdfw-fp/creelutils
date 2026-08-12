@@ -86,6 +86,9 @@ export_estimates <- function(resolved_params, est_catch_groups, analysis_lut, cr
           }
         })
       }
+    # Successful write transaction notification
+    cli::cli_alert_success("Export successful. Creel estimates and analysis metadata.")
+    cli::cli_alert_info("analysis_id: {.strong {analysis_lut$analysis_id}}")
     }
   # Export locally ------------------------------------------------------------------------------
   } else if (export == "local") {
