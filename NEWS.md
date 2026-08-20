@@ -1,3 +1,9 @@
+# creelutils 0.2.1
+
+*Released 2026-08-20*
+
+* Add instructions to `fetch_data()` for setting up optional Socrata API token for <https://data.wa.gov> to prevent occasional throttling.
+
 # creelutils 0.2.0
 
 *Released 2026-06-02*
