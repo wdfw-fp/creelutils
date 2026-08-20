@@ -73,6 +73,40 @@ connection is required or referenced. The `model_catch_group` view is
 not yet published to data.wa.gov; requesting it returns `NULL` with an
 informative message.
 
+### (Optional) Socrata SODA API Token Setup
+
+<https://www.data.wa.gov/> can occasionally throttle data requests. This
+rate limitation is intermittent and may cause `fetch_data` to fail. Each
+user may register for an app token that will prevent this from
+occurring. It only takes a couple of minutes.
+
+Step 1: Register for an app token
+
+- Create a free account at data.wa.gov —\> click Sign In -\> Sign Up in
+  the top right corner
+
+- Once logged in, navigate to your profile -\> Developer Settings -\>
+  Create New App Token
+
+- Fill in Application Name (e.g., CreelEstimates) and Description. All
+  other fields can be left blank
+
+- Click Save and copy the App Token value (not the Secret Token)
+
+Step 2: Store the token in your R environment
+
+- Open your .Renviron file: `usethis::edit_r_environ()`
+
+- Add the following line, then save and close the file:
+  `SOCRATA_APP_TOKEN=your_token_here`
+
+- Restart R, then confirm the token is accessible:
+  `Sys.getenv("SOCRATA_APP_TOKEN")`
+
+  - Should return your token, not ""
+
+WARNING: `Renviron` is stored locally and is not tracked by git.
+
 ## Examples
 
 ``` r

@@ -1,9 +1,9 @@
 pandoc: 3.8.3
-pkgdown: 2.2.0
+pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   creelutils: creelutils.html
-last_built: 2026-06-03T14:33Z
+last_built: 2026-08-20T17:48Z
 urls:
   reference: https://wdfw-fp.github.io/creelutils/reference
   article: https://wdfw-fp.github.io/creelutils/articles

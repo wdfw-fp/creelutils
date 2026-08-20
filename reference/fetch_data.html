@@ -14,7 +14,7 @@ consistent structure regardless of the source.'><meta property="og:image" conten
     <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
     <img src="https://wdfw.widen.net/content/rodpw2fbqj/png/wdfw_logo_stacked_fullcolor.png?w=300" alt="Logo" height="50" style="padding-right: 20px;"><a class="navbar-brand me-2" href="../index.html">creelutils</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,7 +36,7 @@ consistent structure regardless of the source.'><meta property="og:image" conten
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Fetch raw creel datasets</h1>
-      <small class="dont-index">Source: <a href="https://github.com/wdfw-fp/creelutils/blob/v0.2.0/R/fetch_data.R" class="external-link"><code>R/fetch_data.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/wdfw-fp/creelutils/blob/v0.2.1/R/fetch_data.R" class="external-link"><code>R/fetch_data.R</code></a></small>
       <div class="d-none name"><code>fetch_data.Rd</code></div>
     </div>
 
@@ -118,6 +118,25 @@ yet published to data.wa.gov; requesting it returns <code>NULL</code> with an
 informative message.</p>
 </div>
 
+<div class="section">
+<h3 id="-optional-socrata-soda-api-token-setup">(Optional) Socrata SODA API Token Setup<a class="anchor" aria-label="anchor" href="#-optional-socrata-soda-api-token-setup"></a></h3>
+
+
+<p><a href="https://www.data.wa.gov/" class="external-link">https://www.data.wa.gov/</a> can occasionally throttle data requests.
+This rate limitation is intermittent and may cause <code>fetch_data</code> to fail.
+Each user may register for an app token that will prevent this from occurring.
+It only takes a couple of minutes.</p>
+<p>Step 1: Register for an app token</p><ul><li><p>Create a free account at data.wa.gov —&gt; click Sign In -&gt; Sign Up in the top right corner</p></li>
+<li><p>Once logged in, navigate to your profile -&gt; Developer Settings -&gt; Create New App Token</p></li>
+<li><p>Fill in Application Name (e.g., CreelEstimates) and Description. All other fields can be left blank</p></li>
+<li><p>Click Save and copy the App Token value (not the Secret Token)</p></li>
+</ul><p>Step 2: Store the token in your R environment</p><ul><li><p>Open your .Renviron file: <code>usethis::edit_r_environ()</code></p></li>
+<li><p>Add the following line, then save and close the file: <code>SOCRATA_APP_TOKEN=your_token_here</code></p></li>
+<li><p>Restart R, then confirm the token is accessible: <code>Sys.getenv("SOCRATA_APP_TOKEN")</code></p><ul><li><p>Should return your token, not ""</p></li>
+</ul></li>
+</ul><p>WARNING: <code>Renviron</code> is stored locally and is not tracked by git.</p>
+</div>
+
     </div>
 
     <div class="section level2">
@@ -147,7 +166,7 @@ informative message.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>
