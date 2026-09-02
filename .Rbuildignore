@@ -9,3 +9,4 @@
 ^config\.yml$
 ^\.positai$
 ^\.claude$
+^tests/wip_

@@ -22,13 +22,12 @@ Map datagrade ??
 \seealso{
 Other ETL:
 \code{\link[=export_estimates]{export_estimates()}},
+\code{\link[=finalize_analysis_lut]{finalize_analysis_lut()}},
 \code{\link[=json_conversion]{json_conversion()}},
 \code{\link[=prep_export]{prep_export()}},
 \code{\link[=process_estimates_bss]{process_estimates_bss()}},
 \code{\link[=process_estimates_pe]{process_estimates_pe()}},
 \code{\link[=transform_estimates]{transform_estimates()}},
-\code{\link[=write_lut]{write_lut()}},
-\code{\link[=write_stratum]{write_stratum()}},
-\code{\link[=write_total]{write_total()}}
+\code{\link[=update_analysis_comment]{update_analysis_comment()}}
 }
 \concept{ETL}

@@ -103,21 +103,33 @@ process_estimates_bss <- function(params,
     dplyr::relocate("analysis_id", "project_name", "fishery_name", "min_event_date",
                     "max_event_date", "model_type", "est_cg")
 
+  # BSS produces a per-catch-group effort estimate; retain only the first
+  # catch group's estimate as the fishery effort estimate and null est_cg so
+  # BSS effort rows match PE effort rows (model_catch_group_id is NULL for
+  # all effort rows on the database side)
+  first_catch_group <- catch_groups[1]
+
   #divide bss into catch and effort tables to match PE
   transformed_bss_data$bss_stratum_catch <- transformed_bss_data$bss_stratum  |>
     dplyr::filter(.data$estimate %in% c("C_daily","CPUE_daily"))
 
   transformed_bss_data$bss_stratum_effort <- transformed_bss_data$bss_stratum  |>
-    dplyr::filter(.data$estimate %in% "E_daily")
+    dplyr::filter(
+      .data$estimate %in% "E_daily",
+      .data$est_cg == first_catch_group
+    ) |>
+    dplyr::mutate(est_cg = NA_character_)
 
 
   transformed_bss_data$bss_summarized_catch <- transformed_bss_data$bss_summarized  |>
     dplyr::filter(.data$estimate %in% "C_sum")
 
   transformed_bss_data$bss_summarized_effort <- transformed_bss_data$bss_summarized  |>
-    dplyr::filter(.data$estimate %in% "E_sum")
-
-  # assign("transformed_bss_data", transformed_bss_data, envir = .GlobalEnv)
+    dplyr::filter(
+      .data$estimate %in% "E_sum",
+      .data$est_cg == first_catch_group
+    ) |>
+    dplyr::mutate(est_cg = NA_character_)
 
   #Get PE and BSS dataframes to match before binding rows
 

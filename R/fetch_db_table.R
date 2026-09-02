@@ -36,18 +36,8 @@
 
 fetch_db_table <- function(conn = NULL, schema, table, filter = NULL, show_query = FALSE) {
 
-  if (!is.null(conn) && !inherits(conn, "DBIConnection")) {
-    cli::cli_abort(c(
-      "{.arg conn} must be a {.cls DBIConnection} object or {.code NULL}.",
-      "i" = "Got an object of class {.cls {class(conn)}}.",
-      "i" = "Did you forget to name {.arg schema} and {.arg table}?"
-    ))
-  }
-  # Establish lazy connection if conn not provided
-  if (is.null(conn) || !DBI::dbIsValid(conn)) {
-    conn <- connect_creel_db()
-    on.exit(DBI::dbDisconnect(conn), add = TRUE)
-  }
+  # Validate connection; lazily open if NULL, fail if supplied `conn` is invalid
+  conn <- .resolve_conn(conn)
 
   # validate inputs
   if (missing(schema) || missing(table) || !nzchar(schema) || !nzchar(table)) {

@@ -15,8 +15,8 @@ fetch_data(
 \arguments{
 \item{conn}{A valid database connection from \code{\link[=connect_creel_db]{connect_creel_db()}}. When
 \code{data_source = "internal"} and \code{conn = NULL} (default), a connection is
-opened automatically via \code{\link[=connect_creel_db]{connect_creel_db()}} and closed on exit. Ignored
-entirely when \code{data_source = "external"}.}
+opened automatically via \code{\link[=connect_creel_db]{connect_creel_db()}} and closed on exit. An
+invalid \code{conn} supplied errors. Ignored when \code{data_source = "external"}.}
 
 \item{fishery_name}{Character string. The exact fishery name to filter on.}
 

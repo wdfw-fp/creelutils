@@ -11,12 +11,9 @@ fishery_lut <- function(
     fishery_name = NULL
   ) {
 
-  # Validate conn input
-  # Establish lazy connection if conn not provided
-  if (is.null(conn) || !DBI::dbIsValid(conn)) {
-    conn <- connect_creel_db()
-    on.exit(DBI::dbDisconnect(conn), add = TRUE)
-  }
+  # Validate connection; lazily open if NULL, fail if supplied `conn` is invalid
+  conn <- .resolve_conn(conn)
+
   # Validate fishery_name input
   if (!is.null(fishery_name) && !rlang::is_string(fishery_name)) {
     cli::cli_abort("{.arg fishery_name} must be a single character string or `NULL`.")
@@ -64,11 +61,8 @@ fishery_manager <- function(
     fishery_name = NULL
   ) {
 
-  # Establish lazy connection if conn not provided
-  if (is.null(conn) || !DBI::dbIsValid(conn)) {
-    conn <- connect_creel_db()
-    on.exit(DBI::dbDisconnect(conn), add = TRUE)
-  }
+  # Validate connection; lazily open if NULL, fail if supplied `conn` is invalid
+  conn <- .resolve_conn(conn)
 
   filter <- NULL
   if (!is.null(fishery_name)) {
@@ -88,20 +82,19 @@ fishery_manager <- function(
 #' @family internal_data
 #' @param conn A valid database connection from `connect_creel_db()`
 #' @param fishery_name Optional character string for pattern matching in analysis_name
-#' @param print Logical. If `TRUE`, prints all rows to the console. Default `FALSE`.
+#' @param observed_only Logical. If `TRUE`, return only catch with at least
+#'   one observed fish in the fishery's interview data. Existence check only,
+#'   no counts are returned. Default `FALSE`.
 #' @return Tibble of catch groups of interest for a given fishery.
 #' @export
 fishery_catchgroups <- function(
     conn = NULL,
     fishery_name = NULL,
-    print = FALSE
+    observed_only = FALSE
   ) {
 
-  # Establish lazy connection if conn not provided
-  if (is.null(conn) || !DBI::dbIsValid(conn)) {
-    conn <- connect_creel_db()
-    on.exit(DBI::dbDisconnect(conn), add = TRUE)
-  }
+  # Validate connection; lazily open if NULL, fail if supplied `conn` is invalid
+  conn <- .resolve_conn(conn)
 
   filter <- NULL
   if (!is.null(fishery_name)) {
@@ -113,32 +106,80 @@ fishery_catchgroups <- function(
     schema = "creel",
     table  = "vw_model_catch_group",
     filter = filter
-  ) |>
-    dplyr::select(-dplyr::contains("_id")) |>
-    dplyr::relocate(
-      .data$fishery_name,
-      .data$species,
-      .data$life_stage,
-      .data$fin_mark,
-      .data$fate
     ) |>
     dplyr::mutate(
-      # apparently the db lut for life stage uses "Unknown" but fin mark lut uses "UNK", aligning to "UNK"
-      life_stage = stringr::str_replace(.data$life_stage, "Unknown", "UNK"),
-
-      catch_group = paste( # create catch_group combined field
-        .data$species,
-        .data$life_stage,
-        .data$fin_mark,
-        .data$fate,
-        sep = "_"
+      combined_catch_group = combine_catch_group(
+        dplyr::pick(dplyr::everything()
+        )
       )
     ) |>
-    dplyr::arrange(.data$catch_group)
+    dplyr::arrange(.data$fishery_name, .data$species) |>
+    dplyr::select(-c("fishery_id", "catch_group_id")) |>
+    dplyr::relocate(
+      .data$fishery_name, .data$combined_catch_group, .data$model_catch_group_id,
+      .data$species, .data$life_stage, .data$fin_mark, .data$fate
+    )
 
-  if (print) {print(result, n = Inf)}
+  if (nrow(result) == 0L) {
+    cli::cli_abort(c(
+      "x" = "Zero rows returned for {.arg {fishery_name}}.",
+      "i" = "Verify that catch groups have been defined."
+    ))
+  }
 
-  invisible(result)
+  # Restrict to catch groups with observed catch (presence only)
+  if (observed_only) {
+    if (is.null(fishery_name)) {
+      cli::cli_abort("{.arg observed_only = TRUE} requires a {.arg fishery_name}.")
+    }
+    observed_ids <- .observed_catch_group_ids(conn, fishery_name)
+    result <- dplyr::filter(result, .data$model_catch_group_id %in% observed_ids)
+  }
+
+  return(result)
+}
+
+#' @keywords internal
+.observed_catch_group_ids <- function(conn, fishery_name) {
+  # decompose catch groups into atomic components
+  components <- fetch_db_table(
+    conn, schema = "creel", table = "vw_fishery_catch_group",
+    filter = glue::glue("fishery_name == '{fishery_name}'")
+  ) |>
+    dplyr::inner_join(
+      fetch_db_table(conn, schema = "creel", table = "model_catch_group"),
+      by = "fishery_catch_group_id"
+    ) |>
+    dplyr::distinct(
+      .data$model_catch_group_id,
+      .data$species, .data$life_stage, .data$fin_mark, .data$fate
+    )
+
+  # base catch groups from interview raw catch data
+  obs <- fetch_data(
+    conn = conn, fishery_name = fishery_name,
+    tables = c("interview", "catch"), data_source = "internal"
+  )
+
+  n_cat <- NROW(obs$catch)
+
+  if (n_cat == 0L) {
+    cli::cli_abort(
+      "Cannot apply {.arg observed_only = TRUE} for {.emph {fishery_name}}. Zero catch records found.",
+      class = "creelutils_no_observed_catch"
+    )
+  }
+
+  obs_atomic <- obs$catch |>
+    dplyr::semi_join(obs$interview, by = "interview_id") |>
+    dplyr::distinct(.data$species, .data$life_stage, .data$fin_mark, .data$fate)
+
+  # ids present in catch data (at least 1 fish)
+  components |>
+    dplyr::semi_join(obs_atomic,
+      by = c("species", "life_stage", "fin_mark", "fate")) |>
+    dplyr::distinct(.data$model_catch_group_id) |>
+    dplyr::pull(.data$model_catch_group_id)
 }
 
 #' Get observed catch groups for a fishery
@@ -167,11 +208,8 @@ fishery_catchgroups <- function(
 #' @export
 fishery_catchgroups_obs <- function(conn = NULL, data, include_zero = FALSE) {
 
-  # Establish lazy connection if conn not provided
-  if (is.null(conn) || !DBI::dbIsValid(conn)) {
-    conn <- connect_creel_db()
-    on.exit(DBI::dbDisconnect(conn), add = TRUE)
-  }
+  # Validate connection; lazily open if NULL, fail if supplied `conn` is invalid
+  conn <- .resolve_conn(conn)
 
   fishery_name <- unique(data$fishery_manager$fishery_name)
 
@@ -246,11 +284,8 @@ query_analysis_lut <- function(
     fishery_name = NULL
   ) {
 
-  # Establish lazy connection if conn not provided
-  if (is.null(conn) || !DBI::dbIsValid(conn)) {
-    conn <- connect_creel_db()
-    on.exit(DBI::dbDisconnect(conn), add = TRUE)
-  }
+  # Validate connection; lazily open if NULL, fail if supplied `conn` is invalid
+  conn <- .resolve_conn(conn)
 
   filter <- NULL
   if (!is.null(analysis_id)) {
@@ -285,11 +320,8 @@ model_estimates <- function(
     ...
   ) {
 
-  # Establish lazy connection if conn not provided
-  if (is.null(conn) || !DBI::dbIsValid(conn)) {
-    conn <- connect_creel_db()
-    on.exit(DBI::dbDisconnect(conn), add = TRUE)
-  }
+  # Validate connection; lazily open if NULL, fail if supplied `conn` is invalid
+  conn <- .resolve_conn(conn)
 
   scale <- match.arg(scale)
   table <- glue::glue("model_estimates_{scale}")
