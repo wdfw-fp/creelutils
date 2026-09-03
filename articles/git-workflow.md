@@ -1,0 +1,628 @@
+# Git Workflow & Conventions
+
+Version control is most useful when the history is readable. When branch
+names and commit messages follow a shared pattern, you can scan open
+pull requests (PRs) and read `git log` to understand not just *what*
+changed but *why*. The benefits of development conventions compound over
+time. A year-old PR called `fix code` with commits `updated function`
+and `forgot to add doc` tells you less than one with a clear name and
+descriptive commits.
+
+This document has three parts:
+
+- Sections 1–3 are the **conventions** (branch names, commit messages)
+
+- Sections 4–8 are for **routine git usage** (cheat sheet for routine
+  tasks)
+
+- Sections 9–14 cover **releases and continuous integration (CI)**
+  (documentation and reasoning around release workflow)
+
+First-time Git, RStudio, and credential setup is not covered here.
+Follow [Happy Git and GitHub for the useR](https://happygitwithr.com).
+The conventions below were informed by [Conventional
+Commits](https://www.conventionalcommits.org/en/v1.0.0/) and [Semantic
+Versioning](https://semver.org).
+
+## Conventions
+
+### 1. Why we standardize
+
+The conventions here are lightweight by design. The objective is to
+provide a framework to help a future collaborator, or your future self,
+rather than to enforce a rigid rule set. Consistency is what keeps the
+history legible and the release process smooth.
+
+Two parts of the workflow exist specifically to protect end users and
+the documentation site. First, `R CMD check` runs on every PR and a
+release is tagged only after `devtools::check()` and
+[`pkgdown::build_site()`](https://pkgdown.r-lib.org/reference/build_site.html)
+are clean. Git “tags” are a method of pinpointing to a specific commit
+in a repository’s history. These are commonly used at version increments
+or other important milestones. A failed check can break the pkgdown site
+at build time, so catching it before the tag keeps a bad build off the
+published site. Our convention is that the pkgdown site deploys only on
+a version tag (`v*`), never on an ordinary push to the main branch. This
+makes the site reflect the current tagged release rather than work that
+is in progress but on the main.
+
+When deciding whether a task requires a new branch or deciding what
+constitutes a commit, I use the following basic guidelines. A new branch
+should be considered when there is a distinct objective to accomplish.
+Branches may contain one or many commits. If a new idea or goal has a
+clear distinction from other ongoing work, it should probably be its own
+branch. This keeps each PR focused to a specific proposed change and
+makes review easier. If you are finding PRs to be bloated and confusing
+with too many things moving at once, parsing your tasks into additional
+branches may help. However, if you’re finding that the process of
+creating branches and opening a PR for review on small changes is
+creating an unnecessary amount of overhead procedure relative to the
+work being done, then defining branches a little more broadly may help.
+Commits should be considered a single atomic change to the code. This
+might be a single letter typo fix in documentation, or it could be the
+initial commit on a brand new 50-line function. When considering how
+many changes to include in a single commit I find it helpful to think
+about what it would be like to undo changes if I had to. If your commits
+represent a bunch of changes at once across multiple files, reverting
+your actions to undo a step might revert some parts you actually wanted
+to keep. By thinking of commits as a single unit of change, when strung
+together they can tell a clear story of how the code evolved over time.
+
+### 2. Branch names
+
+Branches should use a `prefix/short-description` pattern in lowercase
+kebab-case (spaces become hyphens). The name should say what the work
+aims to do without opening it.
+
+`fix/bug` is too vague; `fix/db-connection-drop` is useful.
+
+| Prefix | Use | Example |
+|----|----|----|
+| `feature/` | New functions, new capabilities | `feature/add-plot-zipcodes-fn` |
+| `fix/` | Bug corrections | `fix/match-arg-order-catch-est` |
+| `refactor/` | Internal restructuring, no behavior change | `refactor/tidy-etl-functions` |
+| `docs/` | Roxygen, README, vignettes | `docs/update-vignette-user-guide` |
+| `chore/` | Dependencies, CI config, version bumps, NEWS | `chore/bump-v1.2.0` |
+
+#### Reusing branch names
+
+Branch names can be reused once a branch is merged and deleted; Git only
+enforces uniqueness among branches that currently exist. If you fix a
+different `db-connection-drop` problem six months later, the name is
+free again. The PR record on GitHub preserves the history, so there is
+no need to append `-v2` or otherwise contort branch names to avoid reuse
+(e.g., fix/db-connection-drop-again).
+
+### 3. Commit messages
+
+Commits use a `type: short description` format in present-tense
+imperative mood. This grammatical convention for writing sounds as if
+you are giving a command to an implied second person. It describes what
+the commit does rather than what you did.
+
+| Type        | Use                                                   |
+|-------------|-------------------------------------------------------|
+| `chore:`    | Bump versions, update dependencies                    |
+| `ci:`       | Continuous integration updates (R-CMD-check, pkgdown) |
+| `docs:`     | Documentation changes only                            |
+| `feat:`     | Adds new user-facing functionality                    |
+| `fix:`      | Corrects a bug                                        |
+| `perf:`     | Performance improvement                               |
+| `refactor:` | Code change with no behavioral change to outputs      |
+| `test:`     | Unit tests for new features, fixes, or refactoring    |
+
+A quick check that a message is in the imperative mood is to complete
+this sentence:
+
+> “If applied, this commit will \[*your message*\]”
+>
+> “If applied, this commit will \[improve messaging to users with `cli`
+> fns rather than `base`\]”
+>
+> “If applied, this commit will \[reduce redundant db queries in ETL\]”
+
+    refactor: improve messaging to users with `cli` fns rather than `base`
+    perf: reduce redundant db queries in ETL
+
+The commit type and the branch prefix are not redundant; they work at
+different scopes. A branch describes the whole body of work, a commit
+describes one atomic change within it. A single `feature/` branch will
+often hold `feat:`, `docs:`, `test:`, and sometimes `fix:` commits:
+
+    main/
+    ├── feature/add-daily-catch-fn
+        ├── feat: draft `daily_catch()` fn
+        ├── feat: add `catch_group` arg to `daily_catch()` fn
+        ├── docs: create roxygen for `daily_catch()`
+        ├── fix: correct typo in input validation for `daily_catch()`
+        ├── test: add unit test for `daily_catch()`
+    ├── chore/bump-v1.2.0
+        ├── docs: update vignette with `daily_catch()` example
+        ├── chore: bump version to 1.2.0, update NEWS
+
+For commits that need more context, add a body after a blank line:
+
+    example: commit header on first line
+
+    More detailed explanation goes here in sentence form.
+    Commit messages can continue across multiple lines.
+
+#### The “50/72 Rule”
+
+It is recommended to keep git commit messages to 50 characters and wrap
+body lines at 72 characters. Fifty characters can feel very limiting;
+however, this encourages smaller commits and thoughtful descriptions.
+GitHub’s website trims commit messages longer than 72 characters to an
+ellipse (…), which makes long commit messages more difficult to
+understand at a glance.
+
+## Routine git usage
+
+### 4. Starting work
+
+Begin every branch from an up-to-date `main`, and commit in logical
+units as you go rather than dumping everything at the end.
+
+``` bash
+# Sync main before branching
+git checkout main
+git pull
+
+# Create and switch to the new branch
+git checkout -b feature/effort-plot-overlay
+
+# Stage and commit logical units as you work
+git add R/effort_plot.R man/effort_plot.Rd
+git commit -m "feat: add effort plot overlay function"
+
+git add tests/testthat/test-effort-plot.R
+git commit -m "test: add unit tests for effort_plot()"
+
+# First push sets the upstream; later pushes are just `git push`
+git push -u origin feature/effort-plot-overlay
+```
+
+#### When finished with branch
+
+Open a PR on GitHub that includes a description of the changes.
+`R-CMD-check` runs automatically; address any failures with additional
+commits, and tag someone to review the code. A code reviewer may approve
+the changes or request additional work before merging the branch into
+the main. Once the GitHub Action workflow checks are all green and the
+PR approved, the branch can be merged. Delete the branch after merging.
+This frees up the branch name and the branch list stays up-to-date about
+what is in progress. The history is stored in the commits, issues, and
+PRs, not in the branch name.
+
+### 5. Stashing & restoring
+
+If you have uncommited work on a branch and need to pull updates or
+switch branches without carrying over the changes files, you can either
+commit with a work in progress prefix “WIP:” or
+[stash](https://git-scm.com/docs/git-stash) away the uncommitted
+changes. This saves your local modifications away and resets the working
+directory to match the `HEAD` commit, keeping your RStudio Git pane
+clean and isolating work to their branches.
+
+``` bash
+# Stash tracked changes
+git stash push -m "wip: half-done effort overlay"
+
+# Untracked files are NOT stashed unless you ask
+git stash push -u -m "wip: includes new untracked files"
+
+# See what is stashed
+git stash list
+
+# If reapplying stash may conflicts with recent changes, use apply to keep on the stack
+git stash apply
+
+# Reapply the most recent stash and remove it from the stack
+# pop is a shortcut for apply + drop
+git stash pop
+
+# If you have multiple stashes and need to work with specific ones in the stack, see the linked stash documentation above for more detailed options
+```
+
+### 6. Updating branch with changes from main
+
+#### Merging
+
+The standard method of updating a branch with changes on the main is
+through a merge commit, where the changes in main are committed into the
+feature (G). When this feature is finally added into main a second merge
+commit (H) is created. This can avoid issues with conflicting changes
+but makes the git history a little less clear when scanning back through
+the repo’s evolution over time. When collaborating with others on a
+feature, use merge commits over rebasing.
+
+Before merge commit.
+
+    A---B---C---D             main
+         \
+          E---F               feature
+
+Merge main into feature.
+
+    A---B---C---D             main
+         \       \
+          E---F---G           feature
+
+After merging feature back into main.
+
+    A---B---C---D------H     main
+         \       \    /
+          E---F---G---       feature (can now be deleted)
+
+#### Rebasing
+
+An alternative to updating a feature from main using merge commits is to
+perform a rebase. This is valuable because it produces a more readable
+history; using one merge commit instead of two and feature commits that
+don’t cross with main’s. However, depending on the scale of the changes
+on main that have occurred since the feature branch was created, it can
+be a delicate operation.
+
+Rebasing a feature branch replays your commits on top of an updated base
+commit. The most common use case is to bring a feature branch up to date
+with `main` before a PR if the main branch has progressed since the
+feature branch was created. In the example below, a new branch is
+created at commit B with two commits (E and F) are made then pushed.
+Before opening a PR to merge the branched changes back, two commits (C
+and D) are added to main. A rebase literally *changes where a branch was
+based from*. E’ and F’ represent the rebased branch commits E and F, now
+branching from commit D rather than B. They are functionally equal to E
+and F, except with new commit hashes. When this branch is added into
+main through a GitHub PR a merge commit (G) is created.
+
+Before `git rebase origin/main`
+
+    A---B---C---D             main
+         \
+          E---F               feature
+
+After `git rebase origin/main`
+
+    A---B---C---D             main
+                 \
+                  E'---F'     feature
+
+After merging rebased feature. The feature branch is deleted after its
+changes are merged into main.
+
+    A---B---C---D ------G     main
+                 \      /
+                  E'---F'     feature
+
+##### Rule of thumb
+
+Rebase your own un-pushed local work freely and only rebase remote
+branches that only you have worked on. Do not use rebase if others are
+working on the same branch. Instead, a merge commit from the main into
+the branch, as described above, is the safer choice versus rebasing when
+a branch is shared.
+
+``` bash
+# Update your branch onto the latest main
+git checkout feature/effort-plot-overlay
+git fetch origin
+git rebase origin/main
+```
+
+When a conflict halts the rebase, Git pauses on the offending commit.
+The editing loop is always the same: fix -\> stage -\> continue.
+
+``` bash
+# 1. Edit the conflicted files to resolve the markers (<<<<<<<, =======, >>>>>>>)
+
+# 2. Stage each resolved file (do not commit after staging, --continue in step 3 does that)
+git add R/effort_plot.R
+
+# 3. Continue the rebase
+git rebase --continue
+
+# Skip the current commit (rarely what you want)
+git rebase --skip
+
+# Bail out entirely and return to the pre-rebase state
+git rebase --abort
+```
+
+After a successful rebase your local branch has diverged from the
+remote, so a normal push is rejected. See *Force-pushing safely* below.
+
+`--abort` is a safety net. It restores the branch exactly as it was
+before you started rebasing. When in doubt, abort and reassess rather
+than fighting conflicts in the rebase.
+
+With `rerere` enabled (see *Config & aliases*), Git records how you
+resolved each conflict and replays that resolution automatically the
+next time the same conflict appears. Conflicts can happen often if
+repeatedly rebasing on a long-lived branch.
+
+### 7. Force-pushing safely
+
+After a rebase or an `--amend`, your local branch has rewritten history
+that no longer matches the remote, so a normal `git push` is rejected
+(e.g., your branch now started on commit D not B like originally, see
+example in *Rebasing* section above). A plain `--force` would overwrite
+whatever is on the remote, including a teammate’s push you have not
+seen. `--force-with-lease` is the safe version. It refuses to push if
+the remote has moved since your last fetch, so you can only overwrite
+history you have actually seen.
+
+``` bash
+# Safe force-push: only overwrites if the remote is where you last saw it
+git push --force-with-lease
+
+# Plain --force overwrites the remote unconditionally (avoid)
+# git push --force
+```
+
+If `--force-with-lease` is rejected, something has been pushed to the
+remote since your last fetch. Stop, `git fetch`, look at what changed,
+and reconcile before trying again. That rejection is the feature doing
+its job.
+
+### 8. Undo recipes
+
+Sometimes mistakes happen and you need to undo something. Don’t panic.
+This is why Git is so powerful!
+
+Staged changes can be restored, unpushed commits can be amended or the
+tree reset, and pushed commits can be reverted (which adds its own
+commit).
+
+The key distinction: `revert` is safe on shared history because it adds
+a *new* commit that undoes a previous one, nothing is rewritten. `reset`
+and `--amend` *rewrite* history and belong on local or unshared work
+only.
+
+``` bash
+# Amend the most recent commit (message and/or newly staged changes)
+git commit --amend -m "feat: corrected message"
+
+# Unstage a file but keep your edits
+git restore --staged R/effort_plot.R
+
+# Discard uncommitted edits to a file (cannot be undone, be sure)
+git restore R/effort_plot.R
+
+# Move HEAD back one commit, KEEP the changes staged
+git reset --soft HEAD~1
+
+# ...KEEP the changes but unstage them (default)
+git reset --mixed HEAD~1
+
+# ...DISCARD the commit and all its changes (destructive!)
+git reset --hard HEAD~1
+
+# Undo an already-pushed / shared commit by adding a new one
+git revert <commit-sha>
+```
+
+On a shared branch, including anything already merged to `main`, reach
+for `revert` not `reset`. Reverting the SHA of a bad commit or merge is
+the calm, non-destructive fix.
+
+## Version releases and CI
+
+### 9. Versioning & NEWS
+
+Bump the version with `usethis::use_version()` in R; it edits
+`DESCRIPTION` and prompts for the increment. Bumps always happen in a
+`chore/bump-v*` branch, never inside a feature or fix branch and not on
+the main. Versioning is a deliberate act that labels a coherent set of
+work.
+
+| Increment | Bump to | When                            |
+|-----------|---------|---------------------------------|
+| patch     | `0.2.1` | Bug fix, hotfix                 |
+| minor     | `0.3.0` | New functions, behavior changes |
+| major     | `1.0.0` | Breaking API changes            |
+
+    usethis::use_version("minor")
+
+`NEWS.md` gets one entry per version, written when performing the bump,
+summarizing every PR merged since the last release. Write for users, not
+developers. Describe behavior that changed, not files that were touched.
+Put breaking changes first and label them clearly. PR numbers in the
+same repo can be tagged with a pound symbol followed by the number
+(#PR), PRs in another repo can be tagged (repo-name#PR).
+
+Example NEWS release with basic sections. Sections should only be
+included when a change falls in that category.
+
+``` bash
+# mypackage
+
+*Released: <manually entered date>*
+
+## **Breaking Changes**
+
+* Description and related PR (#20)
+
+  * Intended bullet with another PR (#21)
+
+## New features
+
+## Minor improvements and bug fixes
+
+## Deprecation
+
+## Documentation improvements
+```
+
+### 10. Release checklist
+
+The process of releasing a new version of a package should be performed
+by the primary package maintainer.
+
+Run from an up-to-date `main`, in a dedicated `chore/bump-v#.#.#` branch
+named after new version.
+
+1.  Sync local main: `git checkout main && git pull`
+2.  Create the bump branch: `git checkout -b chore/bump-v#.#.#`
+3.  In `NEWS.md`, set the top header to the development form as the new
+    first line (no blank line above it, moving past versions down)
+    `# mypackage (development version)`. Leave an empty line between
+    every entry except wrapped lines of text.
+4.  Add an italicized released date line directly under that header:
+    `*Released YYYY-MM-DD*`.
+5.  Add list of curated bullets and `(#PR)` PR tags, using formatting
+    described in the `Versioning & NEWS` section.
+6.  Preview the rendered output:
+    [`pkgdown::build_news()`](https://pkgdown.r-lib.org/reference/build_news.html).
+7.  Bump version: `usethis::use_version()` (“major”, “minor”, or
+    “patch”). It rewrites the `# mypackage (development version)` header
+    to the appropriate next step, edits `DESCRIPTION`, and commits both
+    (answer the prompt to complete). Leave
+    `usethis::use_version(push = FALSE)` (default).
+8.  If any roxygen or `NAMESPACE` changed this cycle, run
+    `devtools::document()`.
+9.  Run `devtools::check()` and confirm it is clean.
+10. Preview the full site:
+    [`pkgdown::build_site()`](https://pkgdown.r-lib.org/reference/build_site.html).
+    This catches some `pkgdown` issues that `devtools::check()` does not
+    evaluate (rendered vignettes, functions missing from index, broken
+    crosslinks, etc).
+11. Resolve anything `check()` or `build_site()` flagged, and commit the
+    fixes.
+12. Unless the fixes were trivial, rerun `check()` and `build_site()` to
+    confirm clean output.
+13. Push the branch: `git push -u origin chore/bump-v#.#.#`.
+14. Open a PR, review, verify checks pass, and merge into `main` (squash
+    the `chore/` branch’s commits).
+15. Re-sync local main so it has the merged commit:
+    `git checkout main && git pull`.
+16. Tag the release **from `main`**:
+    `git tag -a v#.#.# -m "creelutils #.#.#"`.
+17. Push the tag: `git push origin v#.#.#`. This fires the \`pkgdown
+    deploy workflow.
+18. Verify: the Actions run is green, and that the changelog and links
+    render on the published site.
+
+### 11. Hotfix workflow
+
+A hotfix corrects a critical problem in already-released code. Branch
+from the release *tag*, not from `main`, so unreleased work on `main` is
+not pulled into the fix.
+
+``` bash
+# Branch from the specific release tag, not main
+git checkout -b hotfix/matcharg-order v0.2.0
+
+# Make the fix, then bump the patch version in R: usethis::use_version("patch")
+git add R/my_function.R
+git commit -m "fix: correct match.arg choices order in my_function()"
+
+git add DESCRIPTION NEWS.md
+git commit -m "chore: bump version to 0.2.1 for hotfix"
+
+git push -u origin hotfix/matcharg-order
+```
+
+Open a PR into `main` and merge it, so the fix is captured in `main`’s
+history and not just on the tag. Then tag from `main`:
+
+``` bash
+git checkout main
+git pull
+git tag -a v0.2.1 -m "creelutils 0.2.1"
+git push origin v0.2.1
+```
+
+If `main` has diverged a lot from the released tag, cherry-pick the fix
+commit onto `main` instead of merging the whole branch, to avoid
+dragging in unintended changes.
+
+### 12. GitHub Actions
+
+`creelutils` uses two workflows with different triggers.
+
+| Workflow | Triggers on | Why |
+|----|----|----|
+| `R-CMD-check` | every push and PR | Catch breakage before merge; cheap, high value |
+| `pkgdown` | `v*` tags + `workflow_dispatch` | Rebuild the site once per release; manual override available |
+
+`R-CMD-check` runs constantly because it is cheap insurance, while
+`pkgdown` runs only on a release tag so the published site cannot be
+broken by in-progress work and updates to `main` between releases. The
+trigger block in `pkgdown.yaml`:
+
+``` yaml
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+```
+
+`workflow_dispatch` lets you rebuild the site manually from the GitHub
+Actions tab without cutting a release.
+
+### 13. Config & aliases
+
+One-time configuration options that smooth the workflow. Core Git,
+RStudio, and credential setup for first-time users or after fresh
+installation is covered by [Happy Git with
+R](https://happygitwithr.com), specifically the “Connect Git, GitHub,
+RStudio” sections (9-13).
+
+#### Record conflict resolutions and replay them automatically
+
+The `rerere` Git functionality stands for “reuse recorded resolution”,
+which remembers how you solved previous conflicts so that they
+reapplied. This pairs well with rebasing on long-lived branches, where
+if you attempt to resolve conflicts over time then the final merge
+should be easier.
+
+    git config --global rerere.enabled true
+
+#### Prune deleted remote-tracking branches automatically on every fetch
+
+Over time as the remote changes and branches are merged into `main` with
+PRs, Git retains the remote history of those deleted branches on your
+clone of the repository. This setting will prune those branches that no
+longer exist on the remote, which keeps your RStudio Git branch menu
+clear of past remote-tracking branches that have been integrated.
+
+    git config --global fetch.prune true
+
+#### Prune local branches whose upstream is gone
+
+Rstudio’s Git branch pane can also become cluttered with local branches
+that have been merged and deleted on the remote. There is not a built-in
+function for this, but we can define an *alias* in Git’s config file
+that can then be called in the terminal.
+
+    # In ~/.gitconfig
+    [alias]
+        prune-local = "!git fetch --prune && git branch -vv | grep ': gone]' | awk '{print $1}' | xargs git branch -d"
+
+Run it with `git prune-local`. It uses a POSIX shell
+(`grep`/`awk`/`xargs`), so on Windows run it from **Git Bash**, not
+PowerShell or `cmd`. `git branch -d` only deletes fully-merged branches,
+so it will not throw away unmerged work.
+
+### 14. Quick reference
+
+**Always**
+
+- Pull `main` before branching
+- One logical change per PR
+- Conventional commit messages
+- Commit in logical units as you go, not all at the end
+- Delete branches after merge
+- Bump the version in a `chore/` branch after PRs land on `main`
+- Tag only after the bump PR merges
+
+**Never**
+
+- Commit directly to `main`
+- Use vague branch names (`fix/bug`)
+- Branch a hotfix from `main` (branch from the release tag instead)
+- Bump the version inside a feature or fix branch
+- Skip `NEWS.md` on a minor or major bump
+- Push a tag before the bump PR merges to `main`
+- `git push --force` (use `--force-with-lease`)

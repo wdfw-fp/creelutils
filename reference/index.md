@@ -79,13 +79,15 @@ effort model estimates to the creel database.
 - [`export_estimates()`](https://wdfw-fp.github.io/creelutils/reference/export_estimates.md)
   : Export creel model estimates
 - [`write_lut()`](https://wdfw-fp.github.io/creelutils/reference/write_lut.md)
-  : Write look-up table
+  : Write metadata to analysis lookup table
 - [`write_stratum()`](https://wdfw-fp.github.io/creelutils/reference/write_stratum.md)
-  : Write stratum
+  : Write estimates to stratum estimates table
 - [`write_total()`](https://wdfw-fp.github.io/creelutils/reference/write_total.md)
-  : Write Total
+  : Write estimates to total estimates table
 - [`confirm_db_upload()`](https://wdfw-fp.github.io/creelutils/reference/confirm_db_upload.md)
-  : Confirm database upload
+  : Confirm an analysis_id exists in the database
+- [`finalize_analysis_lut()`](https://wdfw-fp.github.io/creelutils/reference/finalize_analysis_lut.md)
+  : Finalize the analysis look-up table for export
 
 ## Tools
 
@@ -97,3 +99,7 @@ Functions for working with creel datasets.
   : Drop sections from creel survey data
 - [`plot_zipcodes()`](https://wdfw-fp.github.io/creelutils/reference/plot_zipcodes.md)
   : Plot angler ZIP codes
+- [`combine_catch_group()`](https://wdfw-fp.github.io/creelutils/reference/combine_catch_group.md)
+  : Combine catch group components
+- [`update_analysis_comment()`](https://wdfw-fp.github.io/creelutils/reference/update_analysis_comment.md)
+  : Update the comment on an existing analysis record

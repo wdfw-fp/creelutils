@@ -1,5 +1,95 @@
 # Changelog
 
+## creelutils 0.3.0
+
+*Released 2026-09-03*
+
+Large update to how catch groups are queried in from the database and
+how model estimates are uploaded back the creel database.
+
+### New features
+
+- ETL now allows estimates of “combined” catch groups to be uploaded to
+  the creel database (e.g., Coho_Adult\|Jack_AD\|UM_Kept). Previously,
+  CreelEstimates could process them but the database model estimates
+  tables and the ETL were incompatible. See
+  [\#35](https://github.com/wdfw-fp/creelutils/issues/35) and companion
+  update at
+  [CreelEstimates#83](https://github.com/dfw-wa/CreelEstimates/pull/83).
+
+- Updated
+  [`fishery_catchgroups()`](https://wdfw-fp.github.io/creelutils/reference/fishery_catchgroups.md)
+  queries model catch group lookup table and can internally filter to
+  only catch groups with observed catch. The new argument
+  ‘observed_only’ (default FALSE) leverages an internal helper
+  `.observed_catch_group_ids()` rather than in a separate step
+  ([\#35](https://github.com/wdfw-fp/creelutils/issues/35)).
+
+  - The now defunct
+    [`fishery_catchgroups_obs()`](https://wdfw-fp.github.io/creelutils/reference/fishery_catchgroups_obs.md)
+    is set to be removed in a future update.
+
+- New
+  [`combine_catch_group()`](https://wdfw-fp.github.io/creelutils/reference/combine_catch_group.md)
+  streamlines converting catch group component fields(i.e., species,
+  life stage, fin mark, fate) into the concatenated form separated by
+  underscores (e.g., Coho_Adult_AD_Kept)
+  ([\#35](https://github.com/wdfw-fp/creelutils/issues/35)).
+
+- Updated
+  [`transform_estimates()`](https://wdfw-fp.github.io/creelutils/reference/transform_estimates.md)
+  to further standardize naming conventions used across PE and BSS model
+  types for the fields ‘estimate_category’ and ‘estimate_type’. Several
+  ‘estimate_type’ categories were dropped from the stratum and total
+  tables. Those removed from the total table distracted from primary
+  intent of being a high-level catch/effort summary. Those removed from
+  the stratum table included BSS model convergence diagnostics that were
+  only ever evaluated at the total level, leading to thousands of rows
+  per analysis_id that were never looked at. The volume of rows for BSS
+  stratum estimates has subsequently decreased by ~30-40%
+  ([\#35](https://github.com/wdfw-fp/creelutils/issues/35)).
+
+- New
+  [`finalize_analysis_lut()`](https://wdfw-fp.github.io/creelutils/reference/finalize_analysis_lut.md)
+  consolidates several steps that were occurring within
+  [`export_estimates()`](https://wdfw-fp.github.io/creelutils/reference/export_estimates.md)
+  into a single process that extends from the analysis session-specific
+  metadata created by CreelEstimates’ `generate_analysis_lut()`. Several
+  additional metadata columns were also added to the ‘analysis_lut’
+  ([\#35](https://github.com/wdfw-fp/creelutils/issues/35)).
+
+### Minor improvements and bug fixes
+
+- [`export_estimates()`](https://wdfw-fp.github.io/creelutils/reference/export_estimates.md)
+  now calls `write_lut`, `write_stratum`, and `write_total` with
+  [`DBI::dbWithTransaction()`](https://dbi.r-dbi.org/reference/dbWithTransaction.html).
+  This ensures that all rows are successfully appended to the database
+  tables as a batch. If expected row counts differ or the database
+  connection drops during the transaction, all three tables are rolled
+  back as a unit.
+
+- New internal function
+  [`.resolve_conn()`](https://wdfw-fp.github.io/creelutils/reference/dot-resolve_conn.md)
+  streamlines how lazy data connections are opened and how stale
+  connections passed into a querying function are handled. Previously
+  [`fetch_db_table()`](https://wdfw-fp.github.io/creelutils/reference/fetch_db_table.md)
+  and its wrappers independently validated connections from
+  [`connect_creel_db()`](https://wdfw-fp.github.io/creelutils/reference/connect_creel_db.md)
+  ([\#35](https://github.com/wdfw-fp/creelutils/issues/35)).
+
+  - A stale or closed connection provided to an argument will now
+    produce an informative error rather than opening a connection to
+    ‘prod’ by default. This prevents a bug where a connection to ‘test’
+    could silently change to a connection to ‘prod’ that produced
+    confusing results.
+
+### Documentation enhancements
+
+- Add “Git Workflow & Conventions” article
+  ([\#39](https://github.com/wdfw-fp/creelutils/issues/39)). This
+  describes basic coding conventions we have adopted, shows examples of
+  routine usage, and covers version releases and continuous integration.
+
 ## creelutils 0.2.1
 
 *Released 2026-08-20*
@@ -7,7 +97,13 @@
 - Add instructions to
   [`fetch_data()`](https://wdfw-fp.github.io/creelutils/reference/fetch_data.md)
   for setting up optional Socrata API token for <https://data.wa.gov> to
-  prevent occasional throttling.
+  prevent occasional throttling
+  ([\#38](https://github.com/wdfw-fp/creelutils/issues/38)).
+
+- [`fishery_lut()`](https://wdfw-fp.github.io/creelutils/reference/fishery_lut.md)
+  helper function now has a ‘fishery_name’ argument for filtering to a
+  specific fishery rather than returning the full table
+  ([\#34](https://github.com/wdfw-fp/creelutils/issues/34))
 
 ## creelutils 0.2.0
 

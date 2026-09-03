@@ -1,32 +1,30 @@
-# Transform individual model outputs into a single object
+# Update the comment on an existing analysis record
 
-Transform individual model outputs into a single object
+Update the comment on an existing analysis record
 
 ## Usage
 
 ``` r
-transform_estimates(params, transformed_pe_data, transformed_bss_data)
+update_analysis_comment(conn, analysis_id, comment)
 ```
 
 ## Arguments
 
-- params:
+- conn:
 
-  list object containing fishery- and analysis- specific metadata
+  An open DBI connection to the creel database.
 
-- transformed_pe_data:
+- analysis_id:
 
-  standardized outputs from the PE model, returned by
-  `process_pe_estimates()`
+  UUID of the analysis row to update.
 
-- transformed_bss_data:
+- comment:
 
-  standardized outputs from the BSS model, returned by
-  `process_bss_estimates()`
+  New comment text.
 
 ## Value
 
-list object containing standardized model estimates
+Invisibly, the number of rows updated (1 on success).
 
 ## See also
 
@@ -38,4 +36,16 @@ Other ETL:
 [`prep_export()`](https://wdfw-fp.github.io/creelutils/reference/prep_export.md),
 [`process_estimates_bss()`](https://wdfw-fp.github.io/creelutils/reference/process_estimates_bss.md),
 [`process_estimates_pe()`](https://wdfw-fp.github.io/creelutils/reference/process_estimates_pe.md),
-[`update_analysis_comment()`](https://wdfw-fp.github.io/creelutils/reference/update_analysis_comment.md)
+[`transform_estimates()`](https://wdfw-fp.github.io/creelutils/reference/transform_estimates.md)
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+update_analysis_comment(
+  con,
+  analysis_id = "d609a0e4-653c-4225-b6e3-24c9b236f882",
+  comment = "Re-upload after filtering outlier interview in section 3 on the 12th"
+)
+} # }
+```

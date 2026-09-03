@@ -1,26 +1,24 @@
-# Confirm database upload
+# Confirm an analysis_id exists in the database
 
-Confirms upload of model estimates by querying model_analysis_lut for
-session analysis_id.
+Confirm an analysis_id exists in the database
 
 ## Usage
 
 ``` r
-confirm_db_upload(con, analysis_lut)
+confirm_db_upload(conn, analysis_id)
 ```
 
 ## Arguments
 
-- con:
+- conn:
 
-  Connection to WDFW PostgreSQL database made with DBI-compliant
-  RPostgres package. 'con' created by establish_db_con.R function.
+  An open DBI connection to the creel database.
 
-- analysis_lut:
+- analysis_id:
 
-  Data frame containing session-specific analysis_id and associated
-  metadata created by generate_analysis_lut.R
+  character; session-specific analysis_id created by
+  `generate_analysis_lut()`
 
 ## Value
 
-nothing returned.
+Invisibly, TRUE if the analysis_id was found, otherwise FALSE.

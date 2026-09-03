@@ -27,7 +27,8 @@ fetch_data(
   When `data_source = "internal"` and `conn = NULL` (default), a
   connection is opened automatically via
   [`connect_creel_db()`](https://wdfw-fp.github.io/creelutils/reference/connect_creel_db.md)
-  and closed on exit. Ignored entirely when `data_source = "external"`.
+  and closed on exit. An invalid `conn` supplied errors. Ignored when
+  `data_source = "external"`.
 
 - fishery_name:
 

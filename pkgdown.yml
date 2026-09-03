@@ -3,7 +3,8 @@ pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   creelutils: creelutils.html
-last_built: 2026-08-20T17:48Z
+  articles/git-workflow: git-workflow.html
+last_built: 2026-09-03T22:42Z
 urls:
   reference: https://wdfw-fp.github.io/creelutils/reference
   article: https://wdfw-fp.github.io/creelutils/articles

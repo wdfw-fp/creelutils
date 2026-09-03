@@ -6,7 +6,7 @@
     <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
     <img src="https://wdfw.widen.net/content/rodpw2fbqj/png/wdfw_logo_stacked_fullcolor.png?w=300" alt="Logo" height="50" style="padding-right: 20px;"><a class="navbar-brand me-2" href="../index.html">creelutils</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -16,6 +16,10 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/creelutils.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/git-workflow.html">Git Workflow &amp; Conventions</a></li>
+  </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -28,13 +32,42 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/wdfw-fp/creelutils/blob/v0.2.1/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/wdfw-fp/creelutils/blob/v0.3.0/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.0" id="creelutils-030">creelutils 0.3.0<a class="anchor" aria-label="anchor" href="#creelutils-030"></a></h2>
+<p><em>Released 2026-09-03</em></p>
+<p>Large update to how catch groups are queried in from the database and how model estimates are uploaded back the creel database.</p>
+<div class="section level3">
+<h3 id="new-features-0-3-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-3-0"></a></h3>
+<ul><li><p>ETL now allows estimates of “combined” catch groups to be uploaded to the creel database (e.g., Coho_Adult|Jack_AD|UM_Kept). Previously, CreelEstimates could process them but the database model estimates tables and the ETL were incompatible. See <a href="https://github.com/wdfw-fp/creelutils/issues/35" class="external-link">#35</a> and companion update at <a href="https://github.com/dfw-wa/CreelEstimates/pull/83" class="external-link">CreelEstimates#83</a>.</p></li>
+<li>
+<p>Updated <code><a href="../reference/fishery_catchgroups.html">fishery_catchgroups()</a></code> queries model catch group lookup table and can internally filter to only catch groups with observed catch. The new argument ‘observed_only’ (default FALSE) leverages an internal helper <code>.observed_catch_group_ids()</code> rather than in a separate step (<a href="https://github.com/wdfw-fp/creelutils/issues/35" class="external-link">#35</a>).</p>
+<ul><li>The now defunct <code><a href="../reference/fishery_catchgroups_obs.html">fishery_catchgroups_obs()</a></code> is set to be removed in a future update.</li>
+</ul></li>
+<li><p>New <code><a href="../reference/combine_catch_group.html">combine_catch_group()</a></code> streamlines converting catch group component fields(i.e., species, life stage, fin mark, fate) into the concatenated form separated by underscores (e.g., Coho_Adult_AD_Kept) (<a href="https://github.com/wdfw-fp/creelutils/issues/35" class="external-link">#35</a>).</p></li>
+<li><p>Updated <code><a href="../reference/transform_estimates.html">transform_estimates()</a></code> to further standardize naming conventions used across PE and BSS model types for the fields ‘estimate_category’ and ‘estimate_type’. Several ‘estimate_type’ categories were dropped from the stratum and total tables. Those removed from the total table distracted from primary intent of being a high-level catch/effort summary. Those removed from the stratum table included BSS model convergence diagnostics that were only ever evaluated at the total level, leading to thousands of rows per analysis_id that were never looked at. The volume of rows for BSS stratum estimates has subsequently decreased by ~30-40% (<a href="https://github.com/wdfw-fp/creelutils/issues/35" class="external-link">#35</a>).</p></li>
+<li><p>New <code><a href="../reference/finalize_analysis_lut.html">finalize_analysis_lut()</a></code> consolidates several steps that were occurring within <code><a href="../reference/export_estimates.html">export_estimates()</a></code> into a single process that extends from the analysis session-specific metadata created by CreelEstimates’ <code>generate_analysis_lut()</code>. Several additional metadata columns were also added to the ‘analysis_lut’ (<a href="https://github.com/wdfw-fp/creelutils/issues/35" class="external-link">#35</a>).</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="minor-improvements-and-bug-fixes-0-3-0">Minor improvements and bug fixes<a class="anchor" aria-label="anchor" href="#minor-improvements-and-bug-fixes-0-3-0"></a></h3>
+<ul><li><p><code><a href="../reference/export_estimates.html">export_estimates()</a></code> now calls <code>write_lut</code>, <code>write_stratum</code>, and <code>write_total</code> with <code><a href="https://dbi.r-dbi.org/reference/dbWithTransaction.html" class="external-link">DBI::dbWithTransaction()</a></code>. This ensures that all rows are successfully appended to the database tables as a batch. If expected row counts differ or the database connection drops during the transaction, all three tables are rolled back as a unit.</p></li>
+<li>
+<p>New internal function <code><a href="../reference/dot-resolve_conn.html">.resolve_conn()</a></code> streamlines how lazy data connections are opened and how stale connections passed into a querying function are handled. Previously <code><a href="../reference/fetch_db_table.html">fetch_db_table()</a></code> and its wrappers independently validated connections from <code><a href="../reference/connect_creel_db.html">connect_creel_db()</a></code> (<a href="https://github.com/wdfw-fp/creelutils/issues/35" class="external-link">#35</a>).</p>
+<ul><li>A stale or closed connection provided to an argument will now produce an informative error rather than opening a connection to ‘prod’ by default. This prevents a bug where a connection to ‘test’ could silently change to a connection to ‘prod’ that produced confusing results.</li>
+</ul></li>
+</ul></div>
+<div class="section level3">
+<h3 id="documentation-enhancements-0-3-0">Documentation enhancements<a class="anchor" aria-label="anchor" href="#documentation-enhancements-0-3-0"></a></h3>
+<ul><li>Add “Git Workflow &amp; Conventions” article (<a href="https://github.com/wdfw-fp/creelutils/issues/39" class="external-link">#39</a>). This describes basic coding conventions we have adopted, shows examples of routine usage, and covers version releases and continuous integration.</li>
+</ul></div>
+</div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.1" id="creelutils-021">creelutils 0.2.1<a class="anchor" aria-label="anchor" href="#creelutils-021"></a></h2>
 <p><em>Released 2026-08-20</em></p>
-<ul><li>Add instructions to <code><a href="../reference/fetch_data.html">fetch_data()</a></code> for setting up optional Socrata API token for <a href="https://data.wa.gov" class="external-link uri">https://data.wa.gov</a> to prevent occasional throttling.</li>
+<ul><li><p>Add instructions to <code><a href="../reference/fetch_data.html">fetch_data()</a></code> for setting up optional Socrata API token for <a href="https://data.wa.gov" class="external-link uri">https://data.wa.gov</a> to prevent occasional throttling (<a href="https://github.com/wdfw-fp/creelutils/issues/38" class="external-link">#38</a>).</p></li>
+<li><p><code><a href="../reference/fishery_lut.html">fishery_lut()</a></code> helper function now has a ‘fishery_name’ argument for filtering to a specific fishery rather than returning the full table (<a href="https://github.com/wdfw-fp/creelutils/issues/34" class="external-link">#34</a>)</p></li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.0" id="creelutils-020">creelutils 0.2.0<a class="anchor" aria-label="anchor" href="#creelutils-020"></a></h2>

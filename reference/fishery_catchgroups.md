@@ -5,7 +5,7 @@ Simple wrapper to query the vw_fishery_manager table.
 ## Usage
 
 ``` r
-fishery_catchgroups(conn = NULL, fishery_name = NULL, print = FALSE)
+fishery_catchgroups(conn = NULL, fishery_name = NULL, observed_only = FALSE)
 ```
 
 ## Arguments
@@ -19,9 +19,11 @@ fishery_catchgroups(conn = NULL, fishery_name = NULL, print = FALSE)
 
   Optional character string for pattern matching in analysis_name
 
-- print:
+- observed_only:
 
-  Logical. If `TRUE`, prints all rows to the console. Default `FALSE`.
+  Logical. If `TRUE`, return only catch with at least one observed fish
+  in the fishery's interview data. Existence check only, no counts are
+  returned. Default `FALSE`.
 
 ## Value
 
