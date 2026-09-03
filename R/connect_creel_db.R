@@ -166,3 +166,51 @@ connect_creel_db <- function(
     " " = "{.run keyring::key_set(service = \"creel_estimates\", username = \"{username}\")}"
   ))
 }
+
+#' Resolve a database connection argument
+#'
+#' @description
+#' Centralizes connection handling for functions taking a `conn` argument.
+#' `NULL` opens a lazy connection that is closed when the calling function
+#' exits. An invalid (closed or stale) connection is a loud error, never a
+#' silent reconnect. Prior to v0.3.0, a silent reconnect defaulted as
+#' `connect_creel_db(db_env = "prod")` and could reroute a stale `test`
+#'  connection inadvertently to `prod`.
+#'
+#' @param conn A DBI connection, or `NULL` to open one lazily.
+#' @param arg Name of the argument being resolved, for error messages.
+#' @param call Caller environment; also where the lazy connection's
+#'   disconnect handler is registered.
+#' @return A valid DBI connection.
+#' @keywords internal
+.resolve_conn <- function(conn = NULL, arg = "conn", call = parent.frame()) {
+
+  # When conn is NULL, open a lazy connection that closes after use
+  if (is.null(conn)) {
+    conn <- connect_creel_db()
+    withr::defer(DBI::dbDisconnect(conn), envir = call)
+    return(conn)
+  }
+
+  # Validate conn input as DBI object
+  if (!methods::is(conn, "DBIConnection")) {
+    cli::cli_abort(
+      c("{.arg {arg}} must be a DBI connection or {.code NULL}.",
+        "x" = "Got {.cls {class(conn)[1]}}."),
+      class = "creelutils_invalid_conn", call = call
+    )
+  }
+
+  # Abort when conn input is invalid
+  if (!DBI::dbIsValid(conn)) {
+    cli::cli_abort(
+      c("{.arg {arg}} is not a valid database connection.",
+        "x" = "The connection is closed or has gone stale.",
+        "i" = "Reconnect with {.fn connect_creel_db} and pass the new connection.",
+        "i" = "Connections drop when VPN/Network state changes or after long idle periods."),
+      class = "creelutils_invalid_conn", call = call
+    )
+  }
+
+  conn
+}

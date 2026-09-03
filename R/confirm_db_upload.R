@@ -1,35 +1,23 @@
-#' Confirm database upload
+#' Confirm an analysis_id exists in the database
 #'
-#'Confirms upload of model estimates by querying model_analysis_lut for session analysis_id.
+#' @param conn An open DBI connection to the creel database.
+#' @param analysis_id character; session-specific analysis_id created by `generate_analysis_lut()`
 #'
-#' @param con Connection to WDFW PostgreSQL database made with DBI-compliant RPostgres package. 'con' created by establish_db_con.R function.
-#' @param analysis_lut Data frame containing session-specific analysis_id and associated metadata created by generate_analysis_lut.R
-#'
-#' @return nothing returned.
+#' @return Invisibly, TRUE if the analysis_id was found, otherwise FALSE.
 #' @export
-#'
-confirm_db_upload <- function(con, analysis_lut) {
+confirm_db_upload <- function(conn, analysis_id) {
 
-  #query database for records that match the estimates that were just written
-  verification_table <- fetch_db_table(con, "creel", "model_analysis_lut") |> dplyr::select("analysis_id", "analysis_name")
+  id <- fetch_db_table(
+    conn = conn, schema =  "creel", table = "model_analysis_lut",
+    filter = glue::glue("analysis_id == '{analysis_id}'")
+  )
 
-  verification_table$analysis_id <- toupper(verification_table$analysis_id)
-
-  if (analysis_lut$analysis_id %in% verification_table$analysis_id) {
-
-    # DBI::dbDisconnect(con)
-    cat(paste("\nData sucessfully exported.", "\u2713"))
-    # cat("\nDisconnecting from database.")
-
+  if (nrow(id) > 0) {
+    cli::cli_alert_success("Confirmed {.field analysis_id} in {.field model_analysis_lut}.")
   } else {
-    #what to do if analysis_id is not in analysis_lut (partial/failed export)
-    message("\nUnable to confirm upload by checking database for session analysis_id.")
-
-    message(paste("\nWriting",crayon::red$bgYellow("FAILED_UPLOAD_LOG_analysis_lut.csv") , "to CreelEstimates folder so that analysis_id for partial data upload can be investigated."))
-
-    readr::write_csv(analysis_lut, file = paste0("FAILED_UPLOAD_LOG_","analysis_lut.csv"), append = TRUE)
-
-    # DBI::dbDisconnect(con)
-    # stop("\nDisconnecting from database.")
+    cli::cli_alert_danger("Unable to confirm that {.val {analysis_id}} is in {.field model_analysis_lut}")
+    cli::cli_warn("Manual review required. Tables to inspect:
+                  {.field model_analysis_lut}, {.field model_estimates_total}, and {.field model_estimates_stratum}")
   }
+  return(invisible(nrow(id) > 0))
 }

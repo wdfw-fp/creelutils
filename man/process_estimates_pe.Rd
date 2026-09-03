@@ -4,7 +4,7 @@
 \alias{process_estimates_pe}
 \title{Title}
 \usage{
-process_estimates_pe(analysis_lut, estimates_pe, params)
+process_estimates_pe(analysis_lut, estimates_pe, params, days)
 }
 \arguments{
 \item{analysis_lut}{??}
@@ -12,6 +12,8 @@ process_estimates_pe(analysis_lut, estimates_pe, params)
 \item{estimates_pe}{??}
 
 \item{params}{??}
+
+\item{days}{output of CreelEstimates prep_days().}
 }
 \value{
 ??
@@ -22,13 +24,12 @@ Title
 \seealso{
 Other ETL:
 \code{\link[=export_estimates]{export_estimates()}},
+\code{\link[=finalize_analysis_lut]{finalize_analysis_lut()}},
 \code{\link[=json_conversion]{json_conversion()}},
 \code{\link[=map_data_grade]{map_data_grade()}},
 \code{\link[=prep_export]{prep_export()}},
 \code{\link[=process_estimates_bss]{process_estimates_bss()}},
 \code{\link[=transform_estimates]{transform_estimates()}},
-\code{\link[=write_lut]{write_lut()}},
-\code{\link[=write_stratum]{write_stratum()}},
-\code{\link[=write_total]{write_total()}}
+\code{\link[=update_analysis_comment]{update_analysis_comment()}}
 }
 \concept{ETL}

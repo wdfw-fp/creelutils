@@ -10,3 +10,4 @@
 ^\.positai$
 ^\.claude$
 ^vignettes/articles$
+^tests/wip_

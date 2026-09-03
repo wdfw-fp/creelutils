@@ -4,14 +4,16 @@
 \alias{fishery_catchgroups}
 \title{Get 'fishery_catch_groups' view}
 \usage{
-fishery_catchgroups(conn = NULL, fishery_name = NULL, print = FALSE)
+fishery_catchgroups(conn = NULL, fishery_name = NULL, observed_only = FALSE)
 }
 \arguments{
 \item{conn}{A valid database connection from \code{connect_creel_db()}}
 
 \item{fishery_name}{Optional character string for pattern matching in analysis_name}
 
-\item{print}{Logical. If \code{TRUE}, prints all rows to the console. Default \code{FALSE}.}
+\item{observed_only}{Logical. If \code{TRUE}, return only catch with at least
+one observed fish in the fishery's interview data. Existence check only,
+no counts are returned. Default \code{FALSE}.}
 }
 \value{
 Tibble of catch groups of interest for a given fishery.
