@@ -34,7 +34,9 @@ First-time Git, RStudio, and credential setup is not covered here. Follow [Happy
 
 The conventions here are lightweight by design. The objective is to provide a framework to help a future collaborator, or your future self, rather than to enforce a rigid rule set. Consistency is what keeps the history legible and the release process smooth.
 
-Two parts of the workflow exist specifically to protect end users and the documentation site. First, `R CMD check` runs on every PR and a release is tagged only after `devtools::check()` and `pkgdown::build_site()` are clean. A failed check can break the pkgdown site at build time, so catching it before the tag keeps a bad build off the published site. Second, the pkgdown site deploys only on a version tag (`v*`), never on an ordinary push. This makes the site reflect the current release rather than work that is in progress.
+Two parts of the workflow exist specifically to protect end users and the documentation site. First, `R CMD check` runs on every PR and a release is tagged only after `devtools::check()` and `pkgdown::build_site()` are clean. Git "tags" are a method of pinpointing to a specific commit in a repository's history. These are commonly used at version increments or other important milestones. A failed check can break the pkgdown site at build time, so catching it before the tag keeps a bad build off the published site. Our convention is that the pkgdown site deploys only on a version tag (`v*`), never on an ordinary push to the main branch. This makes the site reflect the current tagged release rather than work that is in progress but on the main.
+
+When deciding whether a task requires a new branch or deciding what constitutes a commit, I use the following basic guidelines. A new branch should be considered when there is a distinct objective to accomplish. Branches may contain one or many commits. If a new idea or goal has a clear distinction from other ongoing work, it should probably be its own branch. This keeps each PR focused to a specific proposed change and makes review easier. If you are finding PRs to be bloated and confusing with too many things moving at once, parsing your tasks into additional branches may help. However, if you're finding that the process of creating branches and opening a PR for review on small changes is creating an unnecessary amount of overhead procedure relative to the work being done, then defining branches a little more broadly may help. Commits should be considered a single atomic change to the code. This might be a single letter typo fix in documentation, or it could be the initial commit on a brand new 50-line function. When considering how many changes to include in a single commit I find it helpful to think about what it would be like to undo changes if I had to. If your commits represent a bunch of changes at once across multiple files, reverting your actions to undo a step might revert some parts you actually wanted to keep. By thinking of commits as a single unit of change, when strung together they can tell a clear story of how the code evolved over time.
 
 ## 2. Branch names
 
@@ -141,7 +143,7 @@ Open a PR on GitHub that includes a description of the changes. `R-CMD-check` ru
 
 ## 5. Stashing & restoring
 
-If you have uncommited work on a branch and need to pull updates or switch branches without carrying over the changes files, you can either commit with a work in progress prefix "WIP:" or [stash](https://git-scm.com/docs/git-stash) away the uncommitted changes. This saves your local modifications away and refets the working directory to match the `HEAD` commit, keeping your RStudio Git pane clean and isolating work to their branches.
+If you have uncommited work on a branch and need to pull updates or switch branches without carrying over the changes files, you can either commit with a work in progress prefix "WIP:" or [stash](https://git-scm.com/docs/git-stash) away the uncommitted changes. This saves your local modifications away and resets the working directory to match the `HEAD` commit, keeping your RStudio Git pane clean and isolating work to their branches.
 
 ```bash
 # Stash tracked changes
@@ -164,20 +166,69 @@ git stash pop
 
 ```
 
-## 6. Rebasing & resolving conflicts
+## 6. Updating branch with changes from main
 
-Rebasing replays your commits on top of an updated base, producing a linear history. Use it to bring a feature branch up to date with `main` before a PR, or to tidy local commits. For example, if you create a branch and commit some changes
+### Merging
 
-```
-Before `git rebase main`        After `git rebase main`
+The standard method of updating a branch with changes on the main is through a merge commit, where the changes in main are committed into the feature (G). When this feature is finally added into main a second merge commit (H) is created. This can avoid issues with conflicting changes but makes the git history a little less clear when scanning back through the repo's evolution over time. When collaborating with others on a feature, use merge commits over rebasing.
 
-A---B---C---D    main           A---B---C---D        main
-     \                                       \
-      E---F      feature                      E'--F'  feature
+Before merge commit.   
 
 ```
+A---B---C---D             main
+     \
+      E---F               feature
+```
 
-Rule of thumb: rebase your own un-pushed (or only-yours) work freely; do not rebase shared history that others have based work on. Instead, merging the main into the branch is the safer choice versus rebasing when a branch is shared.
+Merge main into feature.
+
+```
+A---B---C---D             main
+     \       \
+      E---F---G           feature
+```
+
+After merging feature back into main.
+
+```
+A---B---C---D------H     main
+     \       \    /
+      E---F---G---       feature (can now be deleted)
+```
+
+### Rebasing
+
+An alternative to updating a feature from main using merge commits is to perform a rebase. This is valuable because it produces a more readable history; using one merge commit instead of two and feature commits that don't cross with main's. However, depending on the scale of the changes on main that have occurred since the feature branch was created, it can be a delicate operation.
+
+Rebasing a feature branch replays your commits on top of an updated base commit. The most common use case is to bring a feature branch up to date with `main` before a PR if the main branch has progressed since the feature branch was created. In the example below, a new branch is created at commit B with two commits (E and F) are made then pushed. Before opening a PR to merge the branched changes back, two commits (C and D) are added to main. A rebase literally *changes where a branch was based from*. E' and F' represent the rebased branch commits E and F, now branching from commit D rather than B. They are functionally equal to E and F, except with new commit hashes. When this branch is added into main through a GitHub PR a merge commit (G) is created.
+
+Before `git rebase origin/main`
+
+```
+A---B---C---D             main
+     \
+      E---F               feature
+```
+
+After `git rebase origin/main`
+
+```
+A---B---C---D             main
+             \
+              E'---F'     feature
+```
+
+After merging rebased feature. The feature branch is deleted after its changes are merged into main.
+
+```
+A---B---C---D ------G     main
+             \      /
+              E'---F'     feature
+```
+
+#### Rule of thumb
+
+Rebase your own un-pushed local work freely and only rebase remote branches that only you have worked on. Do not use rebase if others are working on the same branch. Instead, a merge commit from the main into the branch, as described above, is the safer choice versus rebasing when a branch is shared.
 
 ```bash
 # Update your branch onto the latest main
@@ -186,12 +237,12 @@ git fetch origin
 git rebase origin/main
 ```
 
-When a conflict halts the rebase, Git pauses on the offending commit. The loop is always the same --> fix, stage, continue:
+When a conflict halts the rebase, Git pauses on the offending commit. The editing loop is always the same: fix -> stage -> continue.
 
 ```bash
-# 1. Edit the conflicted files to resolve the markers (<<<<, ====, >>>>)
+# 1. Edit the conflicted files to resolve the markers (<<<<<<<, =======, >>>>>>>)
 
-# 2. Stage each resolved file
+# 2. Stage each resolved file (do not commit after staging, --continue in step 3 does that)
 git add R/effort_plot.R
 
 # 3. Continue the rebase
@@ -204,15 +255,15 @@ git rebase --skip
 git rebase --abort
 ```
 
-After a rebase is successful your local repo will be ahead of the remote, so a push is required to completed the process.
+After a successful rebase your local branch has diverged from the remote, so a normal push is rejected. See *Force-pushing safely* below.
 
 `--abort` is a safety net. It restores the branch exactly as it was before you started rebasing. When in doubt, abort and reassess rather than fighting conflicts in the rebase.
 
-With `rerere` enabled (see *Config & aliases*), Git records how you resolved each conflict and replays that resolution automatically the next time the same conflict appears — which happens often if repeatedly rebasing on a long-lived branch.
+With `rerere` enabled (see *Config & aliases*), Git records how you resolved each conflict and replays that resolution automatically the next time the same conflict appears. Conflicts can happen often if repeatedly rebasing on a long-lived branch.
 
 ## 7. Force-pushing safely
 
-After a rebase or a `--amend`, your local branch has rewritten history (your branch started on commit D not B like originally) that no longer matches the remote, so a normal `git push` is rejected. A plain `--force` would overwrite whatever is on the remote, including a teammate's push you have not seen. `--force-with-lease` is the safe version: it refuses to push if the remote has moved since your last fetch, so you can only overwrite history you have actually seen.
+After a rebase or an `--amend`, your local branch has rewritten history that no longer matches the remote, so a normal `git push` is rejected (e.g., your branch now started on commit D not B like originally, see example in *Rebasing* section above). A plain `--force` would overwrite whatever is on the remote, including a teammate's push you have not seen. `--force-with-lease` is the safe version. It refuses to push if the remote has moved since your last fetch, so you can only overwrite history you have actually seen.
 
 ```bash
 # Safe force-push: only overwrites if the remote is where you last saw it
@@ -239,7 +290,7 @@ git commit --amend -m "feat: corrected message"
 # Unstage a file but keep your edits
 git restore --staged R/effort_plot.R
 
-# Discard uncommitted edits to a file (cannot be undone — be sure)
+# Discard uncommitted edits to a file (cannot be undone, be sure)
 git restore R/effort_plot.R
 
 # Move HEAD back one commit, KEEP the changes staged
